@@ -6,6 +6,7 @@ from openpyxl.utils import get_column_letter, column_index_from_string
 from openpyxl.styles import Font, Border, PatternFill, Side
 from .cell_utils import parse_cell_range
 
+
 def copy_sheet(filename: str, source_sheet: str, target_sheet: str) -> dict[str, Any]:
     try:
         wb = load_workbook(filename)
@@ -21,6 +22,7 @@ def copy_sheet(filename: str, source_sheet: str, target_sheet: str) -> dict[str,
     except Exception as e:
         return {"error": str(e)}
 
+
 def delete_sheet(filename: str, sheet_name: str) -> dict[str, Any]:
     try:
         wb = load_workbook(filename)
@@ -33,6 +35,7 @@ def delete_sheet(filename: str, sheet_name: str) -> dict[str, Any]:
         return {"message": f"Sheet '{sheet_name}' deleted"}
     except Exception as e:
         return {"error": str(e)}
+
 
 def rename_sheet(filename: str, old_name: str, new_name: str) -> dict[str, Any]:
     try:
@@ -48,8 +51,12 @@ def rename_sheet(filename: str, old_name: str, new_name: str) -> dict[str, Any]:
     except Exception as e:
         return {"error": str(e)}
 
-def format_range_string(start_row: int, start_col: int, end_row: int, end_col: int) -> str:
+
+def format_range_string(
+    start_row: int, start_col: int, end_row: int, end_col: int
+) -> str:
     return f"{get_column_letter(start_col)}{start_row}:{get_column_letter(end_col)}{end_row}"
+
 
 def copy_range(
     source_ws: Worksheet,
@@ -59,12 +66,12 @@ def copy_range(
 ) -> None:
     """Copy range from source worksheet to target worksheet."""
     # Parse source range
-    if ':' in source_range:
-        source_start, source_end = source_range.split(':')
+    if ":" in source_range:
+        source_start, source_end = source_range.split(":")
     else:
         source_start = source_range
         source_end = None
-        
+
     src_start_row, src_start_col, src_end_row, src_end_col = parse_cell_range(
         source_start, source_end
     )
@@ -81,53 +88,64 @@ def copy_range(
     for i, row in enumerate(range(src_start_row, src_end_row + 1)):
         for j, col in enumerate(range(src_start_col, src_end_col + 1)):
             source_cell = source_ws.cell(row=row, column=col)
-            target_cell = target_ws.cell(row=tgt_start_row + i, column=tgt_start_col + j)
+            target_cell = target_ws.cell(
+                row=tgt_start_row + i, column=tgt_start_col + j
+            )
 
             target_cell.value = source_cell.value
 
             try:
                 # Copy font
                 font_kwargs = {}
-                if hasattr(source_cell.font, 'name'):
-                    font_kwargs['name'] = source_cell.font.name
-                if hasattr(source_cell.font, 'size'):
-                    font_kwargs['size'] = source_cell.font.size
-                if hasattr(source_cell.font, 'bold'):
-                    font_kwargs['bold'] = source_cell.font.bold
-                if hasattr(source_cell.font, 'italic'):
-                    font_kwargs['italic'] = source_cell.font.italic
-                if hasattr(source_cell.font, 'color'):
+                if hasattr(source_cell.font, "name"):
+                    font_kwargs["name"] = source_cell.font.name
+                if hasattr(source_cell.font, "size"):
+                    font_kwargs["size"] = source_cell.font.size
+                if hasattr(source_cell.font, "bold"):
+                    font_kwargs["bold"] = source_cell.font.bold
+                if hasattr(source_cell.font, "italic"):
+                    font_kwargs["italic"] = source_cell.font.italic
+                if hasattr(source_cell.font, "color"):
                     font_color = None
                     if source_cell.font.color:
                         font_color = source_cell.font.color.rgb
-                    font_kwargs['color'] = font_color
+                    font_kwargs["color"] = font_color
                 target_cell.font = Font(**font_kwargs)
 
                 # Copy border
                 new_border = Border()
-                for side in ['left', 'right', 'top', 'bottom']:
+                for side in ["left", "right", "top", "bottom"]:
                     source_side = getattr(source_cell.border, side)
                     if source_side and source_side.style:
-                        side_color = source_side.color.rgb if source_side.color else None
-                        setattr(new_border, side, Side(
-                            style=source_side.style,
-                            color=side_color
-                        ))
+                        side_color = (
+                            source_side.color.rgb if source_side.color else None
+                        )
+                        setattr(
+                            new_border,
+                            side,
+                            Side(style=source_side.style, color=side_color),
+                        )
                 target_cell.border = new_border
 
                 # Copy fill
-                if hasattr(source_cell, 'fill'):
-                    fill_kwargs = {'patternType': source_cell.fill.patternType}
-                    if hasattr(source_cell.fill, 'fgColor') and source_cell.fill.fgColor:
+                if hasattr(source_cell, "fill"):
+                    fill_kwargs = {"patternType": source_cell.fill.patternType}
+                    if (
+                        hasattr(source_cell.fill, "fgColor")
+                        and source_cell.fill.fgColor
+                    ):
                         fg_color = None
-                        if hasattr(source_cell.fill.fgColor, 'rgb'):
+                        if hasattr(source_cell.fill.fgColor, "rgb"):
                             fg_color = source_cell.fill.fgColor.rgb
-                        fill_kwargs['fgColor'] = fg_color
-                    if hasattr(source_cell.fill, 'bgColor') and source_cell.fill.bgColor:
+                        fill_kwargs["fgColor"] = fg_color
+                    if (
+                        hasattr(source_cell.fill, "bgColor")
+                        and source_cell.fill.bgColor
+                    ):
                         bg_color = None
-                        if hasattr(source_cell.fill.bgColor, 'rgb'):
+                        if hasattr(source_cell.fill.bgColor, "rgb"):
                             bg_color = source_cell.fill.bgColor.rgb
-                        fill_kwargs['bgColor'] = bg_color
+                        fill_kwargs["bgColor"] = bg_color
                     target_cell.fill = PatternFill(**fill_kwargs)
 
                 # Copy number format and alignment
@@ -139,7 +157,10 @@ def copy_range(
             except Exception:
                 continue
 
-def delete_range(worksheet: Worksheet, start_cell: str, end_cell: str | None = None) -> None:
+
+def delete_range(
+    worksheet: Worksheet, start_cell: str, end_cell: str | None = None
+) -> None:
     """Delete contents and formatting of a range."""
     start_row, start_col, end_row, end_col = parse_cell_range(start_cell, end_cell)
 
@@ -157,7 +178,10 @@ def delete_range(worksheet: Worksheet, start_cell: str, end_cell: str | None = N
             cell.number_format = "General"
             cell.alignment = None
 
-def merge_range(filename: str, sheet_name: str, start_cell: str, end_cell: str) -> dict[str, Any]:
+
+def merge_range(
+    filename: str, sheet_name: str, start_cell: str, end_cell: str
+) -> dict[str, Any]:
     """Merge a range of cells."""
     try:
         wb = load_workbook(filename)
@@ -174,7 +198,10 @@ def merge_range(filename: str, sheet_name: str, start_cell: str, end_cell: str) 
     except Exception as e:
         return {"error": str(e)}
 
-def unmerge_range(filename: str, sheet_name: str, start_cell: str, end_cell: str) -> dict[str, Any]:
+
+def unmerge_range(
+    filename: str, sheet_name: str, start_cell: str, end_cell: str
+) -> dict[str, Any]:
     """Unmerge a range of cells."""
     try:
         wb = load_workbook(filename)
@@ -187,7 +214,9 @@ def unmerge_range(filename: str, sheet_name: str, start_cell: str, end_cell: str
         range_string = format_range_string(start_row, start_col, end_row, end_col)
         merged_ranges = worksheet.merged_cells.ranges
         target_range = range_string.upper()
-        if not any(str(merged_range).upper() == target_range for merged_range in merged_ranges):
+        if not any(
+            str(merged_range).upper() == target_range for merged_range in merged_ranges
+        ):
             return {"error": f"Range '{range_string}' is not merged"}
         worksheet.unmerge_cells(range_string)
         wb.save(filename)
@@ -195,13 +224,14 @@ def unmerge_range(filename: str, sheet_name: str, start_cell: str, end_cell: str
     except Exception as e:
         return {"error": str(e)}
 
+
 def copy_range_operation(
     filename: str,
     sheet_name: str,
     source_start: str,
     source_end: str,
     target_start: str,
-    target_sheet: str = None
+    target_sheet: str = None,
 ) -> dict:
     """Copy a range of cells to another location."""
     try:
@@ -211,12 +241,16 @@ def copy_range_operation(
         source_ws = wb[sheet_name]
         target_ws = wb[target_sheet] if target_sheet else source_ws
         try:
-            start_row, start_col, end_row, end_col = parse_cell_range(source_start, source_end)
+            start_row, start_col, end_row, end_col = parse_cell_range(
+                source_start, source_end
+            )
         except ValueError as e:
             return {"error": f"Invalid source range: {str(e)}"}
         try:
-            target_row = int(''.join(filter(str.isdigit, target_start)))
-            target_col = column_index_from_string(''.join(filter(str.isalpha, target_start)))
+            target_row = int("".join(filter(str.isdigit, target_start)))
+            target_col = column_index_from_string(
+                "".join(filter(str.isalpha, target_start))
+            )
         except ValueError as e:
             return {"error": f"Invalid target cell: {str(e)}"}
         row_offset = target_row - start_row
@@ -233,12 +267,13 @@ def copy_range_operation(
     except Exception as e:
         return {"error": f"Failed to copy range: {str(e)}"}
 
+
 def delete_range_operation(
     filename: str,
     sheet_name: str,
     start_cell: str,
     end_cell: str | None = None,
-    shift_direction: str = "up"
+    shift_direction: str = "up",
 ) -> dict[str, Any]:
     try:
         wb = load_workbook(filename)
@@ -246,19 +281,25 @@ def delete_range_operation(
             return {"error": f"Sheet '{sheet_name}' not found"}
         worksheet = wb[sheet_name]
         try:
-            start_row, start_col, end_row, end_col = parse_cell_range(start_cell, end_cell)
+            start_row, start_col, end_row, end_col = parse_cell_range(
+                start_cell, end_cell
+            )
             if end_row and end_row > worksheet.max_row:
-                return {"error": f"End row {end_row} out of bounds (1-{worksheet.max_row})"}
+                return {
+                    "error": f"End row {end_row} out of bounds (1-{worksheet.max_row})"
+                }
             if end_col and end_col > worksheet.max_column:
-                return {"error": f"End column {end_col} out of bounds (1-{worksheet.max_column})"}
+                return {
+                    "error": f"End column {end_col} out of bounds (1-{worksheet.max_column})"
+                }
         except ValueError as e:
             return {"error": f"Invalid range: {str(e)}"}
         if shift_direction not in ["up", "left"]:
-            return {"error": f"Invalid shift direction: {shift_direction}. Must be 'up' or 'left'"}
+            return {
+                "error": f"Invalid shift direction: {shift_direction}. Must be 'up' or 'left'"
+            }
         range_string = format_range_string(
-            start_row, start_col,
-            end_row or start_row,
-            end_col or start_col
+            start_row, start_col, end_row or start_row, end_col or start_col
         )
         delete_range(worksheet, start_cell, end_cell)
         if shift_direction == "up":

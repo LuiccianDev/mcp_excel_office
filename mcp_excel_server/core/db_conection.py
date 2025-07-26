@@ -20,7 +20,10 @@ def fetch_data_from_db(connection_string: str, query: str) -> dict:
     except Exception as e:
         return {"error": str(e)}
 
-def insert_data_to_excel(filename: str, sheet_name: str, columns: list, rows: list) -> dict:
+
+def insert_data_to_excel(
+    filename: str, sheet_name: str, columns: list, rows: list
+) -> dict:
     try:
         wb = load_workbook(filename)
         ws = wb[sheet_name]
@@ -36,6 +39,7 @@ def insert_data_to_excel(filename: str, sheet_name: str, columns: list, rows: li
     except Exception as e:
         return {"error": str(e)}
 
+
 def validate_sql_query(query: str) -> bool:
     """
     Basic validation to prevent SQL injection in SELECT queries.
@@ -43,8 +47,13 @@ def validate_sql_query(query: str) -> bool:
     """
     # Only allow SELECT queries, no semicolons, no comments, no dangerous keywords
     allowed = re.match(r"^\s*SELECT\s+.+\s+FROM\s+\w+", query, re.IGNORECASE)
-    forbidden = re.search(r"(;|--|\bDROP\b|\bDELETE\b|\bINSERT\b|\bUPDATE\b|\bALTER\b|\bTRUNCATE\b)", query, re.IGNORECASE)
+    forbidden = re.search(
+        r"(;|--|\bDROP\b|\bDELETE\b|\bINSERT\b|\bUPDATE\b|\bALTER\b|\bTRUNCATE\b)",
+        query,
+        re.IGNORECASE,
+    )
     return bool(allowed) and not forbidden
+
 
 def clean_data(rows: list, columns: list) -> list:
     """
@@ -63,7 +72,10 @@ def clean_data(rows: list, columns: list) -> list:
         cleaned.append(tuple(cleaned_row))
     return cleaned
 
-def insert_calculated_data_to_db(connection_string: str, table: str, columns: list, rows: list) -> dict:
+
+def insert_calculated_data_to_db(
+    connection_string: str, table: str, columns: list, rows: list
+) -> dict:
     """
     Insert calculated/cleaned data into the database.
     """
@@ -71,8 +83,8 @@ def insert_calculated_data_to_db(connection_string: str, table: str, columns: li
         conn = psycopg2.connect(connection_string)
         cur = conn.cursor()
         # Build parameterized query
-        col_names = ','.join([f'"{col}"' for col in columns])
-        placeholders = ','.join(['%s'] * len(columns))
+        col_names = ",".join([f'"{col}"' for col in columns])
+        placeholders = ",".join(["%s"] * len(columns))
         query = f'INSERT INTO "{table}" ({col_names}) VALUES ({placeholders})'
         for row in rows:
             cur.execute(query, row)

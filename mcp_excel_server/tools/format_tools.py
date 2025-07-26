@@ -1,4 +1,3 @@
-
 from typing import List, Optional, Dict, Any
 from mcp_excel_server.utils.file_utils import ensure_xlsx_extension
 
@@ -18,8 +17,9 @@ from mcp_excel_server.utils.sheet_utils import (
     unmerge_range,
 )
 from mcp_excel_server.utils.validation_utils import (
-    validate_range_in_sheet_operation as validate_range_impl
+    validate_range_in_sheet_operation as validate_range_impl,
 )
+
 
 async def format_range(
     filename: str,
@@ -39,7 +39,7 @@ async def format_range(
     wrap_text: bool = False,
     merge_cells: bool = False,
     protection: Dict[str, Any] = None,
-    conditional_format: Dict[str, Any] = None
+    conditional_format: Dict[str, Any] = None,
 ) -> str:
     """Apply formatting to a range of cells.
     Args:
@@ -61,13 +61,13 @@ async def format_range(
         merge_cells: Whether to merge the specified range of cells
         protection: Cell protection options (e.g., {"locked": True})
         conditional_format: Conditional formatting rules
-    
+
     """
-    
+
     filename = ensure_xlsx_extension(filename)
     try:
         from mcp_excel_server.core.formatting import format_range as format_range_func
-        
+
         result = format_range_func(
             filename=filename,
             sheet_name=sheet_name,
@@ -86,7 +86,7 @@ async def format_range(
             wrap_text=wrap_text,
             merge_cells=merge_cells,
             protection=protection,
-            conditional_format=conditional_format
+            conditional_format=conditional_format,
         )
         return "Range formatted successfully"
     except (ValidationError, FormattingError) as e:
@@ -94,11 +94,8 @@ async def format_range(
     except Exception as e:
         return f"Failed to format range: {str(e)}"
 
-async def copy_worksheet(
-    filename: str,
-    source_sheet: str,
-    target_sheet: str
-) -> str:
+
+async def copy_worksheet(filename: str, source_sheet: str, target_sheet: str) -> str:
     """Copy worksheet within workbook.
     Args:
         filename: Path to the Excel file
@@ -115,17 +112,14 @@ async def copy_worksheet(
     except Exception as e:
         return f"Failed to copy worksheet: {str(e)}"
 
-async def delete_worksheet(
-    filename: str,
-    sheet_name: str
-) -> str:
+
+async def delete_worksheet(filename: str, sheet_name: str) -> str:
     """Delete worksheet from workbook.
     Args:
         filename: Path to the Excel file
         sheet_name: Name of the worksheet to delete
     """
     filename = ensure_xlsx_extension(filename)
-    
 
     try:
         result = delete_sheet(filename, sheet_name)
@@ -135,11 +129,8 @@ async def delete_worksheet(
     except Exception as e:
         return f"Failed to delete worksheet: {str(e)}"
 
-async def rename_worksheet(
-    filename: str,
-    old_name: str,
-    new_name: str
-) -> str:
+
+async def rename_worksheet(filename: str, old_name: str, new_name: str) -> str:
     """Rename worksheet in workbook.
     Args:
         filename: Path to the Excel file
@@ -147,10 +138,9 @@ async def rename_worksheet(
         new_name: New name for the worksheet
     """
     filename = ensure_xlsx_extension(filename)
-    
 
     try:
-        
+
         result = rename_sheet(filename, old_name, new_name)
         return result["message"]
     except (ValidationError, SheetError) as e:
@@ -158,10 +148,8 @@ async def rename_worksheet(
     except Exception as e:
         return f"Failed to rename worksheet: {str(e)}"
 
-async def get_workbook_metadata(
-    filename: str,
-    include_ranges: bool = False
-) -> str:
+
+async def get_workbook_metadata(filename: str, include_ranges: bool = False) -> str:
     """Get metadata about workbook including sheets, ranges, etc.
     Args:
         filename: Path to the Excel file
@@ -177,7 +165,10 @@ async def get_workbook_metadata(
     except Exception as e:
         return f"Failed to get workbook metadata: {str(e)}"
 
-async def merge_cells(filename: str, sheet_name: str, start_cell: str, end_cell: str) -> str:
+
+async def merge_cells(
+    filename: str, sheet_name: str, start_cell: str, end_cell: str
+) -> str:
     """Merge a range of cells.
 
     Args:
@@ -196,7 +187,10 @@ async def merge_cells(filename: str, sheet_name: str, start_cell: str, end_cell:
     except Exception as e:
         return f"Failed to merge cells: {str(e)}"
 
-async def unmerge_cells(filename: str, sheet_name: str, start_cell: str, end_cell: str) -> str:
+
+async def unmerge_cells(
+    filename: str, sheet_name: str, start_cell: str, end_cell: str
+) -> str:
     """Unmerge a range of cells.
     Args:
         filename: Path to the Excel file
@@ -205,9 +199,9 @@ async def unmerge_cells(filename: str, sheet_name: str, start_cell: str, end_cel
         end_cell: Ending cell reference (e.g., "B2")
     """
     filename = ensure_xlsx_extension(filename)
-    
+
     try:
-        
+
         result = unmerge_range(filename, sheet_name, start_cell, end_cell)
         return result["message"]
     except (ValidationError, SheetError) as e:
@@ -215,13 +209,14 @@ async def unmerge_cells(filename: str, sheet_name: str, start_cell: str, end_cel
     except Exception as e:
         return f"Failed to unmerge cells: {str(e)}"
 
+
 async def copy_range(
     filename: str,
     sheet_name: str,
     source_start: str,
     source_end: str,
     target_start: str,
-    target_sheet: str = None
+    target_sheet: str = None,
 ) -> str:
     """Copy a range of cells to another location.
     Args:
@@ -233,17 +228,13 @@ async def copy_range(
         target_sheet: Optional name of the target worksheet
     """
     filename = ensure_xlsx_extension(filename)
-    
+
     try:
-        
+
         from mcp_excel_server.utils.sheet_utils import copy_range_operation
+
         result = copy_range_operation(
-            filename,
-            sheet_name,
-            source_start,
-            source_end,
-            target_start,
-            target_sheet
+            filename, sheet_name, source_start, source_end, target_start, target_sheet
         )
         return result["message"]
     except (ValidationError, SheetError) as e:
@@ -251,15 +242,16 @@ async def copy_range(
     except Exception as e:
         return f"Failed to copy range: {str(e)}"
 
+
 async def delete_range(
     filename: str,
     sheet_name: str,
     start_cell: str,
     end_cell: str,
-    shift_direction: str = "up"
+    shift_direction: str = "up",
 ) -> str:
     """Delete a range of cells and shift remaining cells.
-    
+
     Args:
         filename: Path to the Excel file
         sheet_name: Name of the worksheet
@@ -268,16 +260,13 @@ async def delete_range(
         shift_direction: Direction to shift cells ("up" or "left")
     """
     filename = ensure_xlsx_extension(filename)
-    
+
     try:
-        
+
         from mcp_excel_server.utils.sheet_utils import delete_range_operation
+
         result = delete_range_operation(
-            filename,
-            sheet_name,
-            start_cell,
-            end_cell,
-            shift_direction
+            filename, sheet_name, start_cell, end_cell, shift_direction
         )
         return result["message"]
     except (ValidationError, SheetError) as e:
@@ -285,11 +274,9 @@ async def delete_range(
     except Exception as e:
         return f"Failed to delete range: {str(e)}"
 
+
 async def validate_excel_range(
-    filename: str,
-    sheet_name: str,
-    start_cell: str,
-    end_cell: str = None
+    filename: str, sheet_name: str, start_cell: str, end_cell: str = None
 ) -> str:
     """Validate if a range exists and is properly formatted.
     Args:
@@ -301,7 +288,7 @@ async def validate_excel_range(
     filename = ensure_xlsx_extension(filename)
 
     try:
-        
+
         range_str = start_cell if not end_cell else f"{start_cell}:{end_cell}"
         result = validate_range_impl(filename, sheet_name, range_str)
         return result["message"]

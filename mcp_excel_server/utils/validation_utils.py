@@ -6,11 +6,9 @@ from openpyxl.worksheet.worksheet import Worksheet
 from .cell_utils import parse_cell_range, validate_cell_reference
 from ..exceptions.exceptions import ValidationError
 
+
 def validate_formula_in_cell_operation(
-    filepath: str,
-    sheet_name: str,
-    cell: str,
-    formula: str
+    filepath: str, sheet_name: str, cell: str, formula: str
 ) -> dict[str, Any]:
     # Validaciones rápidas
     if not validate_cell_reference(cell):
@@ -24,11 +22,13 @@ def validate_formula_in_cell_operation(
         if not is_valid:
             return {"error": f"Invalid formula syntax: {message}"}
         # Validar referencias de celda en la fórmula
-        cell_refs = re.findall(r'[A-Z]+[0-9]+(?::[A-Z]+[0-9]+)?', formula)
+        cell_refs = re.findall(r"[A-Z]+[0-9]+(?::[A-Z]+[0-9]+)?", formula)
         for ref in cell_refs:
-            if ':' in ref:
-                start, end = ref.split(':')
-                if not (validate_cell_reference(start) and validate_cell_reference(end)):
+            if ":" in ref:
+                start, end = ref.split(":")
+                if not (
+                    validate_cell_reference(start) and validate_cell_reference(end)
+                ):
                     return {"error": f"Invalid cell range reference in formula: {ref}"}
             else:
                 if not validate_cell_reference(ref):
@@ -37,8 +37,8 @@ def validate_formula_in_cell_operation(
         sheet = wb[sheet_name]
         cell_obj = sheet[cell]
         current_formula = cell_obj.value
-        if isinstance(current_formula, str) and current_formula.startswith('='):
-            if formula.startswith('='):
+        if isinstance(current_formula, str) and current_formula.startswith("="):
+            if formula.startswith("="):
                 if current_formula != formula:
                     return {
                         "message": "Formula is valid but doesn't match cell content",
@@ -46,7 +46,7 @@ def validate_formula_in_cell_operation(
                         "matches": False,
                         "cell": cell,
                         "provided_formula": formula,
-                        "current_formula": current_formula
+                        "current_formula": current_formula,
                     }
             else:
                 if current_formula != f"={formula}":
@@ -56,7 +56,7 @@ def validate_formula_in_cell_operation(
                         "matches": False,
                         "cell": cell,
                         "provided_formula": formula,
-                        "current_formula": current_formula
+                        "current_formula": current_formula,
                     }
                 else:
                     return {
@@ -64,7 +64,7 @@ def validate_formula_in_cell_operation(
                         "valid": True,
                         "matches": True,
                         "cell": cell,
-                        "formula": formula
+                        "formula": formula,
                     }
         else:
             return {
@@ -73,10 +73,11 @@ def validate_formula_in_cell_operation(
                 "matches": False,
                 "cell": cell,
                 "provided_formula": formula,
-                "current_content": str(current_formula) if current_formula else ""
+                "current_content": str(current_formula) if current_formula else "",
             }
     except Exception as e:
         return {"error": str(e)}
+
 
 def validate_range_in_sheet_operation(
     filepath: str,
@@ -96,7 +97,9 @@ def validate_range_in_sheet_operation(
         data_max_row = worksheet.max_row
         data_max_col = worksheet.max_column
         try:
-            start_row, start_col, end_row, end_col = parse_cell_range(start_cell, end_cell)
+            start_row, start_col, end_row, end_col = parse_cell_range(
+                start_cell, end_cell
+            )
         except ValueError as e:
             return {"error": f"Invalid range: {str(e)}"}
         if end_row is None:
@@ -110,7 +113,7 @@ def validate_range_in_sheet_operation(
             return {"error": message}
         range_str = f"{start_cell}" if end_cell is None else f"{start_cell}:{end_cell}"
         data_range_str = f"A1:{get_column_letter(data_max_col)}{data_max_row}"
-        extends_beyond_data = (end_row > data_max_row or end_col > data_max_col)
+        extends_beyond_data = end_row > data_max_row or end_col > data_max_col
         return {
             "message": (
                 f"Range '{range_str}' is valid. "
@@ -123,11 +126,12 @@ def validate_range_in_sheet_operation(
             "data_dimensions": {
                 "max_row": data_max_row,
                 "max_col": data_max_col,
-                "max_col_letter": get_column_letter(data_max_col)
-            }
+                "max_col_letter": get_column_letter(data_max_col),
+            },
         }
     except Exception as e:
         return {"error": str(e)}
+
 
 def validate_formula(formula: str) -> tuple[bool, str]:
     if not formula.startswith("="):
@@ -150,6 +154,7 @@ def validate_formula(formula: str) -> tuple[bool, str]:
         if func in unsafe_funcs:
             return False, f"Unsafe function: {func}"
     return True, "Formula is valid"
+
 
 def validate_range_bounds(
     worksheet: Worksheet,

@@ -1,6 +1,5 @@
 from typing import List, Dict, Any
 from mcp_excel_server.utils.file_utils import (
-
     check_file_writeable,
     ensure_xlsx_extension,
 )
@@ -15,18 +14,18 @@ async def read_data_from_excel(
     sheet_name: str,
     start_cell: str = "A1",
     end_cell: str = None,
-    preview_only: bool = False
+    preview_only: bool = False,
 ) -> str:
     """
     Read data from Excel worksheet.
-    
+
     Args:
         filename: Path to the workbook file
         sheet_name: Name of the worksheet to read data from
         start_cell: Cell reference where to start reading data (default is "A1")
         end_cell: Cell reference where to stop reading data (default is None, which means read until the end)
         preview_only: If True, only preview the data without loading the entire range
-    
+
     returns:
         str: Data read from the specified range in the worksheet
     """
@@ -36,7 +35,10 @@ async def read_data_from_excel(
         return f"Error: {error_message}"
     try:
         from mcp_excel_server.core.data import read_excel_range
-        result = read_excel_range(filename, sheet_name, start_cell, end_cell, preview_only)
+
+        result = read_excel_range(
+            filename, sheet_name, start_cell, end_cell, preview_only
+        )
         if isinstance(result, dict) and "error" in result:
             return f"Error: {result['error']}"
         if not result:
@@ -48,6 +50,7 @@ async def read_data_from_excel(
         return data_str
     except Exception as e:
         return f"Error: Failed to read data: {str(e)}"
+
 
 async def write_data_to_excel(
     filename: str,
@@ -72,6 +75,7 @@ async def write_data_to_excel(
         return f"Error: {error_message}"
     try:
         from mcp_excel_server.core.data import write_data
+
         result = write_data(filename, sheet_name, data, start_cell)
         if isinstance(result, dict) and "error" in result:
             return f"Error: {result['error']}"

@@ -10,3 +10,23 @@ dependencies = [
     "psycopg2>=2.9.10",
     "typer>=0.16.0",
 ]
+
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+# Directorios o archivos a excluir
+(
+  __pycache__
+  | \.git
+  | \.venv
+  | build
+  | dist
+)
+'''

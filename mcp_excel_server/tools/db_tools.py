@@ -8,11 +8,9 @@ from mcp_excel_server.core.db_conection import (
 
 from mcp_excel_server.utils.file_utils import ensure_xlsx_extension
 
+
 async def fetch_and_insert_db_data(
-    connection_string: str,
-    query: str,
-    filename: str,
-    sheet_name: str
+    connection_string: str, query: str, filename: str, sheet_name: str
 ) -> str:
     """
     Fetch data from DB (safe SELECT), clean it, and insert into Excel.
@@ -36,11 +34,9 @@ async def fetch_and_insert_db_data(
         return f"Error: {excel_result['error']}"
     return excel_result.get("message", "Data inserted successfully.")
 
+
 async def insert_calculated_data(
-    connection_string: str,
-    table: str,
-    columns: list,
-    rows: list
+    connection_string: str, table: str, columns: list, rows: list
 ) -> str:
     """
     Insert calculated/cleaned data into the database.
@@ -51,7 +47,9 @@ async def insert_calculated_data(
         rows (list): List of tuples containing data to insert.
     """
     cleaned_rows = clean_data(rows, columns)
-    result = insert_calculated_data_to_db(connection_string, table, columns, cleaned_rows)
+    result = insert_calculated_data_to_db(
+        connection_string, table, columns, cleaned_rows
+    )
     if "error" in result:
         return f"Error: {result['error']}"
     return result.get("message", "Data inserted successfully.")

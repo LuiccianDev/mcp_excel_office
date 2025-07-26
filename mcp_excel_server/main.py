@@ -7,8 +7,8 @@ from mcp_excel_server.tools import (
     format_tools,
     formulas_excel_tools,
     graphics_tools,
-    db_tools
-    )
+    db_tools,
+)
 
 from mcp.server.fastmcp import FastMCP
 
@@ -20,7 +20,8 @@ mcp = FastMCP(
     description="Excel server for processing Excel files.",
     version="0.1.0",
     author="LuiccianDev",
-    )
+)
+
 
 def register_tools():
     """
@@ -29,8 +30,7 @@ def register_tools():
     # Database tools
     mcp.tool()(db_tools.fetch_and_insert_db_data)
     mcp.tool()(db_tools.insert_calculated_data)
-    
-    
+
     # Content tools
     mcp.tool()(content_tools.read_data_from_excel)
     mcp.tool()(content_tools.write_data_to_excel)
@@ -39,9 +39,9 @@ def register_tools():
     mcp.tool()(excel_tools.create_workbook)
     mcp.tool()(excel_tools.create_worksheet)
     mcp.tool()(excel_tools.list_available_documents)
-    
-    # Formar tools 
-    
+
+    # Formar tools
+
     mcp.tool()(format_tools.format_range)
     mcp.tool()(format_tools.copy_worksheet)
     mcp.tool()(format_tools.delete_worksheet)
@@ -52,25 +52,27 @@ def register_tools():
     mcp.tool()(format_tools.copy_range)
     mcp.tool()(format_tools.delete_range)
     mcp.tool()(format_tools.validate_excel_range)
-    
+
     # Formula tools
-    
+
     mcp.tool()(formulas_excel_tools.validate_formula_syntax)
     mcp.tool()(formulas_excel_tools.apply_formula)
-    
+
     # Graphics tools
     mcp.tool()(graphics_tools.create_chart)
     mcp.tool()(graphics_tools.create_pivot_table)
-    
-    
+
+
 register_tools()
+
 
 def run_server():
     """
     Run the FastMCP server.
     """
-    mcp.run(transport='stdio')
+    mcp.run(transport="stdio")
     return mcp
+
 
 if __name__ == "__main__":
     # Run the server
