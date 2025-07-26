@@ -7,8 +7,9 @@
     "**/venv": true,
     "**/.env": true,
     "**/checkpoints": true,
+    "**/.ruff_cache/**": true,
     "**/node_modules": true,
     "**/__init__.py": true,
-    ".venv" : true
+    ".venv": true
   }
 }
