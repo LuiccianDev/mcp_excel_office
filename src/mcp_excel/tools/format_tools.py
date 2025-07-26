@@ -232,7 +232,7 @@ async def copy_range(
 
     try:
 
-        from mcp_excel.utils.sheet_utils import copy_range_operation
+        from src.mcp_excel.core.sheet import copy_range_operation
 
         result = copy_range_operation(
             filename, sheet_name, source_start, source_end, target_start, target_sheet
@@ -264,7 +264,7 @@ async def delete_range(
 
     try:
 
-        from mcp_excel.utils.sheet_utils import delete_range_operation
+        from src.mcp_excel.core.sheet import delete_range_operation
 
         result = delete_range_operation(
             filename, sheet_name, start_cell, end_cell, shift_direction

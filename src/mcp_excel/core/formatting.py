@@ -18,7 +18,7 @@ from openpyxl.styles import (
 )
 
 from mcp_excel.core.workbook import get_or_create_workbook
-from mcp_excel.utils.cell_utils import parse_cell_range, validate_cell_reference
+from mcp_excel.utils.cell import parse_cell_range, validate_cell_reference
 
 
 def format_range(

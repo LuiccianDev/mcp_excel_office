@@ -2,7 +2,7 @@ from typing import Any
 
 from mcp_excel.core.workbook import get_or_create_workbook
 from mcp_excel.exceptions.exceptions import CalculationError, ValidationError
-from mcp_excel.utils.cell_utils import validate_cell_reference
+from mcp_excel.utils.cell import validate_cell_reference
 from mcp_excel.utils.validation_utils import validate_formula
 
 

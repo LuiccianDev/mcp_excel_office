@@ -5,7 +5,7 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
-from .cell_utils import parse_cell_range, validate_cell_reference
+from mcp_excel.utils.cell import parse_cell_range, validate_cell_reference
 
 
 def validate_formula_in_cell_operation(

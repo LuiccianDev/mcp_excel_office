@@ -8,7 +8,7 @@ import shutil
 # Nueva función para obtener los directorios permitidos
 
 
-def get_allowed_directories() -> list[str]:
+def _get_allowed_directories() -> list[str]:
     """Get the list of allowed directories from environment variables."""
     # Obtener de variable de entorno, con valor predeterminado si no existe
     allowed_dirs_str = os.environ.get("MCP_ALLOWED_DIRECTORIES", "./documents")
@@ -21,7 +21,7 @@ def get_allowed_directories() -> list[str]:
 # Nueva función para verificar si una ruta está en directorios permitidos
 def is_path_in_allowed_directories(file_path: str) -> tuple[bool, str | None]:
     """Check if the given file path is within allowed directories."""
-    allowed_dirs = get_allowed_directories()
+    allowed_dirs = _get_allowed_directories()
     abs_path = os.path.abspath(file_path)
 
     # Verificar si el archivo está en alguno de los directorios permitidos
@@ -35,19 +35,19 @@ def is_path_in_allowed_directories(file_path: str) -> tuple[bool, str | None]:
     )
 
 
-def check_file_writeable(filepath: str) -> tuple[bool, str]:
+def check_file_writeable(filename: str) -> tuple[bool, str]:
     """
     Check if a file can be written to.
 
     Args:
-        filepath: Path to the file
+        filename: Path to the file
 
     Returns:
         Tuple of (is_writeable, error_message)
     """
     # If file doesn't exist, check if directory is writeable
-    if not os.path.exists(filepath):
-        directory = os.path.dirname(filepath)
+    if not os.path.exists(filename):
+        directory = os.path.dirname(filename)
         # If no directory is specified (empty string), use current directory
         if directory == "":
             directory = "."
@@ -58,16 +58,16 @@ def check_file_writeable(filepath: str) -> tuple[bool, str]:
         return True, ""
 
     # If file exists, check if it's writeable
-    if not os.access(filepath, os.W_OK):
-        return False, f"File {filepath} is not writeable (permission denied)"
+    if not os.access(filename, os.W_OK):
+        return False, f"File {filename} is not writeable (permission denied)"
 
     # Try to open the file for writing to see if it's locked
     try:
-        with open(filepath, "a"):
+        with open(filename, "a"):
             pass
         return True, ""
     except OSError as e:
-        return False, f"File {filepath} is not writeable: {str(e)}"
+        return False, f"File {filename} is not writeable: {str(e)}"
     except Exception as e:
         return False, f"Unknown error checking file permissions: {str(e)}"
 
