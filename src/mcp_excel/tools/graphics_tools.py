@@ -1,13 +1,13 @@
-from mcp_excel_server.core.chart import create_chart_in_sheet as create_chart_impl
-from mcp_excel_server.core.pivot import create_pivot_table as create_pivot_table_impl
+from mcp_excel.core.chart import create_chart_in_sheet as create_chart_impl
+from mcp_excel.core.pivot import create_pivot_table as create_pivot_table_impl
 
 # Import exceptions
-from mcp_excel_server.exceptions.exceptions import (
+from mcp_excel.exceptions.exceptions import (
     ChartError,
     PivotError,
     ValidationError,
 )
-from mcp_excel_server.utils.file_utils import (
+from mcp_excel.utils.file_utils import (
     check_file_writeable,
     ensure_xlsx_extension,
 )

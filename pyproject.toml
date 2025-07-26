@@ -11,6 +11,9 @@ dependencies = [
     "typer>=0.16.0",
 ]
 
+[project.scripts]
+mcp_server_excel = "src.mcp_server:mcp"
+
 [dependency-groups]
 dev = [
     "black>=25.1.0",

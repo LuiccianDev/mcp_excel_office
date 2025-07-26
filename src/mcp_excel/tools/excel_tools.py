@@ -1,11 +1,11 @@
 import os
 
 # Import exceptions
-from mcp_excel_server.exceptions.exceptions import (
+from mcp_excel.exceptions.exceptions import (
     ValidationError,
     WorkbookError,
 )
-from mcp_excel_server.utils.file_utils import (
+from mcp_excel.utils.file_utils import (
     check_file_writeable,
     ensure_xlsx_extension,
     is_path_in_allowed_directories,
@@ -28,7 +28,7 @@ async def create_workbook(filename: str) -> str:
     if not is_writeable:
         return f"Error: {error_message}"
     try:
-        from mcp_excel_server.core.workbook import (
+        from mcp_excel.core.workbook import (
             create_workbook as create_workbook_impl,
         )
 
@@ -57,7 +57,7 @@ async def create_worksheet(filename: str, sheet_name: str) -> str:
         return error_message
 
     try:
-        from mcp_excel_server.core.workbook import create_sheet as create_worksheet_impl
+        from mcp_excel.core.workbook import create_sheet as create_worksheet_impl
 
         result = create_worksheet_impl(filename, sheet_name)
         return result["message"]

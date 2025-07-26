@@ -1,11 +1,11 @@
-from mcp_excel_server.core.db_conection import (
+from mcp_excel.core.db_conection import (
     clean_data,
     fetch_data_from_db,
     insert_calculated_data_to_db,
     insert_data_to_excel,
     validate_sql_query,
 )
-from mcp_excel_server.utils.file_utils import ensure_xlsx_extension
+from mcp_excel.utils.file_utils import ensure_xlsx_extension
 
 
 async def fetch_and_insert_db_data(

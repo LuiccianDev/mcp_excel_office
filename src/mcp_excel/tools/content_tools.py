@@ -1,8 +1,8 @@
-from mcp_excel_server.exceptions.exceptions import (
+from mcp_excel.exceptions.exceptions import (
     DataError,
     ValidationError,
 )
-from mcp_excel_server.utils.file_utils import (
+from mcp_excel.utils.file_utils import (
     check_file_writeable,
     ensure_xlsx_extension,
 )
@@ -33,7 +33,7 @@ async def read_data_from_excel(
     if not is_readable:
         return f"Error: {error_message}"
     try:
-        from mcp_excel_server.core.data import read_excel_range
+        from mcp_excel.core.data import read_excel_range
 
         result = read_excel_range(
             filename, sheet_name, start_cell, end_cell, preview_only
@@ -73,7 +73,7 @@ async def write_data_to_excel(
     if not is_writeable:
         return f"Error: {error_message}"
     try:
-        from mcp_excel_server.core.data import write_data
+        from mcp_excel.core.data import write_data
 
         result = write_data(filename, sheet_name, data, start_cell)
         if isinstance(result, dict) and "error" in result:

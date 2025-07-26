@@ -1,23 +1,23 @@
 from typing import Any
 
-from mcp_excel_server.core.workbook import get_workbook_info
+from mcp_excel.core.workbook import get_workbook_info
 
 # Import exceptions
-from mcp_excel_server.exceptions.exceptions import (
+from mcp_excel.exceptions.exceptions import (
     FormattingError,
     SheetError,
     ValidationError,
     WorkbookError,
 )
-from mcp_excel_server.utils.file_utils import ensure_xlsx_extension
-from mcp_excel_server.utils.sheet_utils import (
+from mcp_excel.utils.file_utils import ensure_xlsx_extension
+from mcp_excel.utils.sheet_utils import (
     copy_sheet,
     delete_sheet,
     merge_range,
     rename_sheet,
     unmerge_range,
 )
-from mcp_excel_server.utils.validation_utils import (
+from mcp_excel.utils.validation_utils import (
     validate_range_in_sheet_operation as validate_range_impl,
 )
 
@@ -67,7 +67,7 @@ async def format_range(
 
     filename = ensure_xlsx_extension(filename)
     try:
-        from mcp_excel_server.core.formatting import format_range as format_range_func
+        from mcp_excel.core.formatting import format_range as format_range_func
 
         result = format_range_func(
             filename=filename,
@@ -232,7 +232,7 @@ async def copy_range(
 
     try:
 
-        from mcp_excel_server.utils.sheet_utils import copy_range_operation
+        from mcp_excel.utils.sheet_utils import copy_range_operation
 
         result = copy_range_operation(
             filename, sheet_name, source_start, source_end, target_start, target_sheet
@@ -264,7 +264,7 @@ async def delete_range(
 
     try:
 
-        from mcp_excel_server.utils.sheet_utils import delete_range_operation
+        from mcp_excel.utils.sheet_utils import delete_range_operation
 
         result = delete_range_operation(
             filename, sheet_name, start_cell, end_cell, shift_direction

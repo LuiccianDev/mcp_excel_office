@@ -1,6 +1,6 @@
 from mcp.server.fastmcp import FastMCP
 
-from mcp_excel_server.tools import (
+from mcp_excel.tools import (
     content_tools,
     db_tools,
     excel_tools,

@@ -1,15 +1,15 @@
 # Import exceptions
-from mcp_excel_server.exceptions.exceptions import (
+from mcp_excel.exceptions.exceptions import (
     CalculationError,
     ValidationError,
 )
-from mcp_excel_server.utils.file_utils import (
+from mcp_excel.utils.file_utils import (
     check_file_writeable,
     ensure_xlsx_extension,
 )
 
 # Import core/tools/utils with new structure
-from mcp_excel_server.utils.validation_utils import (
+from mcp_excel.utils.validation_utils import (
     validate_formula_in_cell_operation as validate_formula_impl,
 )
 
@@ -64,7 +64,7 @@ async def apply_formula(
             return f"Error: {validation['error']}"
 
         # If valid, apply the formula
-        from mcp_excel_server.core.calculations import (
+        from mcp_excel.core.calculations import (
             apply_formula as apply_formula_impl,
         )
 

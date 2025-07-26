@@ -17,8 +17,8 @@ from openpyxl.styles import (
     Side,
 )
 
-from mcp_excel_server.core.workbook import get_or_create_workbook
-from mcp_excel_server.utils.cell_utils import parse_cell_range, validate_cell_reference
+from mcp_excel.core.workbook import get_or_create_workbook
+from mcp_excel.utils.cell_utils import parse_cell_range, validate_cell_reference
 
 
 def format_range(
