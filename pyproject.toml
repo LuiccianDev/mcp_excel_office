@@ -1,0 +1,12 @@
+[project]
+name = "mcp-office-excel-2"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp[cli]>=1.10.1",
+    "openpyxl>=3.1.5",
+    "psycopg2>=2.9.10",
+    "typer>=0.16.0",
+]
