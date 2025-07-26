@@ -1,6 +1,7 @@
+import re
+
 import psycopg2
 from openpyxl import load_workbook
-import re
 
 
 def fetch_data_from_db(connection_string: str, query: str) -> dict:

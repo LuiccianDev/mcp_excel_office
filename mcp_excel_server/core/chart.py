@@ -1,24 +1,26 @@
-from typing import Any, Optional, Dict
 from enum import Enum
+from typing import Any
+
 from openpyxl import load_workbook
 from openpyxl.chart import (
+    AreaChart,
     BarChart,
     LineChart,
     PieChart,
-    ScatterChart,
-    AreaChart,
     Reference,
+    ScatterChart,
     Series,
 )
+from openpyxl.chart.axis import ChartLines
 from openpyxl.chart.label import DataLabelList
 from openpyxl.chart.legend import Legend
-from openpyxl.chart.axis import ChartLines
 from openpyxl.drawing.spreadsheet_drawing import (
     AnchorMarker,
     OneCellAnchor,
     SpreadsheetDrawing,
 )
 from openpyxl.utils import column_index_from_string
+
 from mcp_excel_server.utils.cell_utils import parse_cell_range
 
 
@@ -69,7 +71,7 @@ def create_chart_in_sheet(
     title: str = "",
     x_axis: str = "",
     y_axis: str = "",
-    style: Optional[Dict] = None,
+    style: dict | None = None,
 ) -> dict[str, Any]:
     """Create chart in sheet with enhanced styling options"""
     try:

@@ -1,15 +1,14 @@
-from typing import List, Optional
 import os
-from mcp_excel_server.utils.file_utils import (
-    is_path_in_allowed_directories,
-    check_file_writeable,
-    ensure_xlsx_extension,
-)
 
 # Import exceptions
 from mcp_excel_server.exceptions.exceptions import (
     ValidationError,
     WorkbookError,
+)
+from mcp_excel_server.utils.file_utils import (
+    check_file_writeable,
+    ensure_xlsx_extension,
+    is_path_in_allowed_directories,
 )
 
 

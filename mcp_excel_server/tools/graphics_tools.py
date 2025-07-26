@@ -1,19 +1,16 @@
-import os
-from typing import List, Optional
-from pathlib import Path
+from mcp_excel_server.core.chart import create_chart_in_sheet as create_chart_impl
+from mcp_excel_server.core.pivot import create_pivot_table as create_pivot_table_impl
+
+# Import exceptions
+from mcp_excel_server.exceptions.exceptions import (
+    ChartError,
+    PivotError,
+    ValidationError,
+)
 from mcp_excel_server.utils.file_utils import (
     check_file_writeable,
     ensure_xlsx_extension,
 )
-
-# Import exceptions
-from mcp_excel_server.exceptions.exceptions import (
-    ValidationError,
-    PivotError,
-    ChartError,
-)
-from mcp_excel_server.core.pivot import create_pivot_table as create_pivot_table_impl
-from mcp_excel_server.core.chart import create_chart_in_sheet as create_chart_impl
 
 
 async def create_chart(
@@ -65,9 +62,9 @@ async def create_pivot_table(
     filename: str,
     sheet_name: str,
     data_range: str,
-    rows: List[str],
-    values: List[str],
-    columns: List[str] = None,
+    rows: list[str],
+    values: list[str],
+    columns: list[str] = None,
     agg_func: str = "mean",
 ) -> str:
     """Create pivot table in worksheet.

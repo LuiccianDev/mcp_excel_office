@@ -10,12 +10,5 @@
     "**/node_modules": true,
     "**/__init__.py": true,
     ".venv" : true
-  },
-  "python.formatting.provider": "black",
-  "python.formatting.blackArgs": ["--line-length=88"],
-  "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": "explicit"
-  },
-  "python.defaultInterpreterPath": "./python"
+  }
 }

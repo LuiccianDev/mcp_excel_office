@@ -3,14 +3,12 @@ File utility functions for Word Document Server.
 """
 
 import os
-from typing import Tuple, Optional
 import shutil
-from typing import List
 
 # Nueva función para obtener los directorios permitidos
 
 
-def get_allowed_directories() -> List[str]:
+def get_allowed_directories() -> list[str]:
     """Get the list of allowed directories from environment variables."""
     # Obtener de variable de entorno, con valor predeterminado si no existe
     allowed_dirs_str = os.environ.get("MCP_ALLOWED_DIRECTORIES", "./documents")
@@ -21,7 +19,7 @@ def get_allowed_directories() -> List[str]:
 
 
 # Nueva función para verificar si una ruta está en directorios permitidos
-def is_path_in_allowed_directories(file_path: str) -> tuple[bool, Optional[str]]:
+def is_path_in_allowed_directories(file_path: str) -> tuple[bool, str | None]:
     """Check if the given file path is within allowed directories."""
     allowed_dirs = get_allowed_directories()
     abs_path = os.path.abspath(file_path)
@@ -37,7 +35,7 @@ def is_path_in_allowed_directories(file_path: str) -> tuple[bool, Optional[str]]
     )
 
 
-def check_file_writeable(filepath: str) -> Tuple[bool, str]:
+def check_file_writeable(filepath: str) -> tuple[bool, str]:
     """
     Check if a file can be written to.
 
@@ -68,15 +66,15 @@ def check_file_writeable(filepath: str) -> Tuple[bool, str]:
         with open(filepath, "a"):
             pass
         return True, ""
-    except IOError as e:
+    except OSError as e:
         return False, f"File {filepath} is not writeable: {str(e)}"
     except Exception as e:
         return False, f"Unknown error checking file permissions: {str(e)}"
 
 
 def create_document_copy(
-    source_path: str, dest_path: Optional[str] = None
-) -> Tuple[bool, str, Optional[str]]:
+    source_path: str, dest_path: str | None = None
+) -> tuple[bool, str, str | None]:
     """
     Create a copy of a document.
 

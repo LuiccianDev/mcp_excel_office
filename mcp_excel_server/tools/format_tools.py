@@ -1,19 +1,20 @@
-from typing import List, Optional, Dict, Any
-from mcp_excel_server.utils.file_utils import ensure_xlsx_extension
+from typing import Any
+
+from mcp_excel_server.core.workbook import get_workbook_info
 
 # Import exceptions
 from mcp_excel_server.exceptions.exceptions import (
+    FormattingError,
+    SheetError,
     ValidationError,
     WorkbookError,
-    SheetError,
-    FormattingError,
 )
-from mcp_excel_server.core.workbook import get_workbook_info
+from mcp_excel_server.utils.file_utils import ensure_xlsx_extension
 from mcp_excel_server.utils.sheet_utils import (
     copy_sheet,
     delete_sheet,
-    rename_sheet,
     merge_range,
+    rename_sheet,
     unmerge_range,
 )
 from mcp_excel_server.utils.validation_utils import (
@@ -38,8 +39,8 @@ async def format_range(
     alignment: str = None,
     wrap_text: bool = False,
     merge_cells: bool = False,
-    protection: Dict[str, Any] = None,
-    conditional_format: Dict[str, Any] = None,
+    protection: dict[str, Any] = None,
+    conditional_format: dict[str, Any] = None,
 ) -> str:
     """Apply formatting to a range of cells.
     Args:

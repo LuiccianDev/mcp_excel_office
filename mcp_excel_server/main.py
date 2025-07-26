@@ -1,16 +1,13 @@
-from atexit import register
-from http import server
-import os
+from mcp.server.fastmcp import FastMCP
+
 from mcp_excel_server.tools import (
     content_tools,
+    db_tools,
     excel_tools,
     format_tools,
     formulas_excel_tools,
     graphics_tools,
-    db_tools,
 )
-
-from mcp.server.fastmcp import FastMCP
 
 # This is a FastMCP server that serves as an Excel server.
 # Initializes the server with the specified configuration and starts it.

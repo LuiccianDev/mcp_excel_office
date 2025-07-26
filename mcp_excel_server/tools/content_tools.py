@@ -1,11 +1,10 @@
-from typing import List, Dict, Any
+from mcp_excel_server.exceptions.exceptions import (
+    DataError,
+    ValidationError,
+)
 from mcp_excel_server.utils.file_utils import (
     check_file_writeable,
     ensure_xlsx_extension,
-)
-from mcp_excel_server.exceptions.exceptions import (
-    ValidationError,
-    DataError,
 )
 
 
@@ -55,7 +54,7 @@ async def read_data_from_excel(
 async def write_data_to_excel(
     filename: str,
     sheet_name: str,
-    data: List[List],
+    data: list[list],
     start_cell: str = "A1",
 ) -> str:
     """

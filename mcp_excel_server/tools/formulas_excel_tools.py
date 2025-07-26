@@ -1,20 +1,16 @@
-from email import message
-from mcp_excel_server.utils.file_utils import (
-    ensure_xlsx_extension,
-    check_file_writeable,
-)
-import os
-
 # Import exceptions
 from mcp_excel_server.exceptions.exceptions import (
-    ValidationError,
     CalculationError,
+    ValidationError,
+)
+from mcp_excel_server.utils.file_utils import (
+    check_file_writeable,
+    ensure_xlsx_extension,
 )
 
 # Import core/tools/utils with new structure
 from mcp_excel_server.utils.validation_utils import (
     validate_formula_in_cell_operation as validate_formula_impl,
-    validate_range_in_sheet_operation as validate_range_impl,
 )
 
 

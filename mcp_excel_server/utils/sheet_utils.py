@@ -1,9 +1,11 @@
-from typing import Any
 from copy import copy
+from typing import Any
+
 from openpyxl import load_workbook
+from openpyxl.styles import Border, Font, PatternFill, Side
+from openpyxl.utils import column_index_from_string, get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
-from openpyxl.utils import get_column_letter, column_index_from_string
-from openpyxl.styles import Font, Border, PatternFill, Side
+
 from .cell_utils import parse_cell_range
 
 
@@ -263,7 +265,7 @@ def copy_range_operation(
                 if source_cell.has_style:
                     target_cell._style = copy(source_cell._style)
         wb.save(filename)
-        return {"message": f"Range copied successfully"}
+        return {"message": "Range copied successfully"}
     except Exception as e:
         return {"error": f"Failed to copy range: {str(e)}"}
 

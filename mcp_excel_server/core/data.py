@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import Any
+
 from openpyxl import load_workbook
-from openpyxl.styles import Font
-from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.utils import get_column_letter
-from mcp_excel_server.exceptions.exceptions import DataError
+from openpyxl.worksheet.worksheet import Worksheet
+
 from mcp_excel_server.utils.cell_utils import parse_cell_range
 
 

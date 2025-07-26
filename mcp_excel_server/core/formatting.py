@@ -1,23 +1,24 @@
-from typing import Any, Dict
-from openpyxl.styles import (
-    PatternFill,
-    Border,
-    Side,
-    Alignment,
-    Protection,
-    Font,
-    Color,
-)
+from typing import Any
+
 from openpyxl.formatting.rule import (
+    CellIsRule,
     ColorScaleRule,
     DataBarRule,
-    IconSetRule,
     FormulaRule,
-    CellIsRule,
+    IconSetRule,
 )
+from openpyxl.styles import (
+    Alignment,
+    Border,
+    Color,
+    Font,
+    PatternFill,
+    Protection,
+    Side,
+)
+
 from mcp_excel_server.core.workbook import get_or_create_workbook
 from mcp_excel_server.utils.cell_utils import parse_cell_range, validate_cell_reference
-from mcp_excel_server.exceptions.exceptions import ValidationError, FormattingError
 
 
 def format_range(
@@ -37,9 +38,9 @@ def format_range(
     alignment: str = None,
     wrap_text: bool = False,
     merge_cells: bool = False,
-    protection: Dict[str, Any] = None,
-    conditional_format: Dict[str, Any] = None,
-) -> Dict[str, Any]:
+    protection: dict[str, Any] = None,
+    conditional_format: dict[str, Any] = None,
+) -> dict[str, Any]:
     # Validación de celdas
     if not validate_cell_reference(start_cell):
         return {"error": f"Invalid start cell reference: {start_cell}"}
