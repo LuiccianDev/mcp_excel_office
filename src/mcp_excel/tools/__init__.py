@@ -3,13 +3,13 @@ from mcp_excel.tools.content_tools import (
     write_data_to_excel,
 )
 from mcp_excel.tools.db_tools import (
-    fetch_and_insert_db_data,
-    insert_calculated_data,
+    fetch_and_insert_db_to_excel,
+    insert_calculated_data_to_db,
 )
 from mcp_excel.tools.excel_tools import (
-    create_workbook,
-    create_worksheet,
-    list_available_documents,
+    create_excel_workbook,
+    create_excel_worksheet,
+    list_excel_documents,
 )
 from mcp_excel.tools.format_tools import (
     copy_range,

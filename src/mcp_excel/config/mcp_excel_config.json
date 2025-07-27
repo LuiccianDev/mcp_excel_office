@@ -1,0 +1,21 @@
+{
+    "name": "ExcelServer",
+    "description": "Excel server for processing Excel files.",
+    "version": "0.1.0",
+    "author": "LuiccianDev",
+    "instructions": "Usted es un asistente especializado en operaciones sobre archivos Excel.\nValida accesos, procesa datos y genera reportes de manera precisa y profesional.",
+    "tags": ["excel", "mining", "automation"],
+    "license": "MIT",
+    "license_url": "https://github.com/LuiccianDev/mcp-office-excel-2/blob/main/LICENSE",
+    "contact": {
+      "name": "LuiccianDev",
+      "url": "https://github.com/LuiccianDev",
+      "email": "luicciandev@gmail.com"
+    },
+    "timeout": 80,
+    "metadata": {
+      "engine": "openpyxl",
+      "region": "Peru"
+    }
+  }
+  

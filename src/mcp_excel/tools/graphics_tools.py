@@ -8,11 +8,11 @@ from mcp_excel.exceptions.exceptions import (
     ValidationError,
 )
 from mcp_excel.utils.file_utils import (
-    check_file_writeable,
+    validate_file_access,
     ensure_xlsx_extension,
 )
 
-
+@validate_file_access("filename")
 async def create_chart(
     filename: str,
     sheet_name: str,
@@ -35,10 +35,7 @@ async def create_chart(
         y_axis (str, optional): The label for the y-axis. Defaults to "".
     """
     filename = ensure_xlsx_extension(filename)
-    # Check if the file is writeable
-    is_writeable, error_message = check_file_writeable(filename)
-    if not is_writeable:
-        return f"Error: {error_message}"
+
 
     try:
         result = create_chart_impl(
@@ -58,13 +55,14 @@ async def create_chart(
         return f"Failed to create chart: {str(e)}"
 
 
+@validate_file_access("filename")
 async def create_pivot_table(
     filename: str,
     sheet_name: str,
     data_range: str,
     rows: list[str],
     values: list[str],
-    columns: list[str] = None,
+    columns: list[str] | None = None,
     agg_func: str = "mean",
 ) -> str:
     """Create pivot table in worksheet.
@@ -78,10 +76,7 @@ async def create_pivot_table(
         agg_func (str, optional): The aggregation function to be used. Defaults to "mean".
     """
     filename = ensure_xlsx_extension(filename)
-    # Check if the file is writeable
-    is_writeable, error_message = check_file_writeable(filename)
-    if not is_writeable:
-        return f"Error: {error_message}"
+
     try:
 
         result = create_pivot_table_impl(

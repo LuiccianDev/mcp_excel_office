@@ -1,3 +1,6 @@
+
+from mcp_excel.config import load_config
+
 from mcp.server.fastmcp import FastMCP
 
 from mcp_excel.tools import (
@@ -11,13 +14,9 @@ from mcp_excel.tools import (
 
 # This is a FastMCP server that serves as an Excel server.
 # Initializes the server with the specified configuration and starts it.
+config = load_config()
 
-mcp = FastMCP(
-    name="ExcelServer",
-    description="Excel server for processing Excel files.",
-    version="0.1.0",
-    author="LuiccianDev",
-)
+mcp = FastMCP(**config)
 
 
 def register_tools():
@@ -25,17 +24,17 @@ def register_tools():
     Register tools to the FastMCP server.
     """
     # Database tools
-    mcp.tool()(db_tools.fetch_and_insert_db_data)
-    mcp.tool()(db_tools.insert_calculated_data)
+    mcp.tool()(db_tools.fetch_and_insert_db_to_excel)
+    mcp.tool()(db_tools.insert_calculated_data_to_db)
 
     # Content tools
     mcp.tool()(content_tools.read_data_from_excel)
     mcp.tool()(content_tools.write_data_to_excel)
 
     # Excel tools
-    mcp.tool()(excel_tools.create_workbook)
-    mcp.tool()(excel_tools.create_worksheet)
-    mcp.tool()(excel_tools.list_available_documents)
+    mcp.tool()(excel_tools.create_excel_workbook)
+    mcp.tool()(excel_tools.create_excel_worksheet)
+    mcp.tool()(excel_tools.list_excel_documents)
 
     # Formar tools
 

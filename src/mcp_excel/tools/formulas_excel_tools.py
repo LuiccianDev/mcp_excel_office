@@ -4,7 +4,7 @@ from mcp_excel.exceptions.exceptions import (
     ValidationError,
 )
 from mcp_excel.utils.file_utils import (
-    check_file_writeable,
+    validate_file_access,
     ensure_xlsx_extension,
 )
 
@@ -36,7 +36,7 @@ async def validate_formula_syntax(
     except Exception as e:
         return f"Failed to validate formula: {str(e)}"
 
-
+@validate_file_access("filename")
 async def apply_formula(
     filename: str,
     sheet_name: str,
@@ -54,19 +54,13 @@ async def apply_formula(
     filename = ensure_xlsx_extension(filename)
 
     try:
-        is_valid, message = check_file_writeable(filename)
-        if not is_valid:
-            return f"Error: {message}"
-
         # First validate the formula
         validation = validate_formula_impl(filename, sheet_name, cell, formula)
         if isinstance(validation, dict) and "error" in validation:
             return f"Error: {validation['error']}"
 
         # If valid, apply the formula
-        from mcp_excel.core.calculations import (
-            apply_formula as apply_formula_impl,
-        )
+        from mcp_excel.core.calculations import apply_formula as apply_formula_impl
 
         result = apply_formula_impl(filename, sheet_name, cell, formula)
         return result["message"]

@@ -2,29 +2,31 @@
 File utility functions for Word Document Server.
 """
 
+import functools
+import inspect
 import os
 import shutil
+from collections.abc import Callable
+from typing import ParamSpec, TypeVar, Callable, cast, Any
 
-# Nueva función para obtener los directorios permitidos
+P = ParamSpec("P")
+R = TypeVar("R")
+F = TypeVar("F", bound=Callable[..., Any])
 
-
+# Get allowed directories from environment variables
 def _get_allowed_directories() -> list[str]:
     """Get the list of allowed directories from environment variables."""
-    # Obtener de variable de entorno, con valor predeterminado si no existe
     allowed_dirs_str = os.environ.get("MCP_ALLOWED_DIRECTORIES", "./documents")
-    # Dividir por comas si hay múltiples directorios
     allowed_dirs = [dir.strip() for dir in allowed_dirs_str.split(",")]
-    # Asegurar que las rutas estén normalizadas
     return [os.path.abspath(dir) for dir in allowed_dirs]
 
 
-# Nueva función para verificar si una ruta está en directorios permitidos
-def is_path_in_allowed_directories(file_path: str) -> tuple[bool, str | None]:
+# Check if the given file path is within allowed directories
+def _is_path_in_allowed_directories(file_path: str) -> tuple[bool, str | None]:
     """Check if the given file path is within allowed directories."""
     allowed_dirs = _get_allowed_directories()
     abs_path = os.path.abspath(file_path)
 
-    # Verificar si el archivo está en alguno de los directorios permitidos
     for allowed_dir in allowed_dirs:
         if os.path.commonpath([allowed_dir, abs_path]) == allowed_dir:
             return True, None
@@ -35,43 +37,60 @@ def is_path_in_allowed_directories(file_path: str) -> tuple[bool, str | None]:
     )
 
 
-def check_file_writeable(filename: str) -> tuple[bool, str]:
+# Check if a file can be written to, including directory permissions
+def _check_file_writeable(filename: str) -> tuple[bool, str]:
     """
-    Check if a file can be written to.
+    Check if a file can be written to, including directory permissions.
+
+    This function handles several scenarios:
+    - File doesn't exist: checks if parent directory is writeable
+    - File exists: checks if file is writeable
+    - Handles permission and I/O errors gracefully
 
     Args:
-        filename: Path to the file
+        filename: Absolute or relative path to the file
 
     Returns:
-        Tuple of (is_writeable, error_message)
+        tuple[bool, str]: (success, error_message)
+            - success: True if file can be written, False otherwise
+            - error_message: Empty string if successful, otherwise contains error details
     """
-    # If file doesn't exist, check if directory is writeable
-    if not os.path.exists(filename):
-        directory = os.path.dirname(filename)
-        # If no directory is specified (empty string), use current directory
-        if directory == "":
-            directory = "."
-        if not os.path.exists(directory):
-            return False, f"Directory {directory} does not exist"
-        if not os.access(directory, os.W_OK):
-            return False, f"Directory {directory} is not writeable"
-        return True, ""
-
-    # If file exists, check if it's writeable
-    if not os.access(filename, os.W_OK):
-        return False, f"File {filename} is not writeable (permission denied)"
-
-    # Try to open the file for writing to see if it's locked
     try:
-        with open(filename, "a"):
-            pass
-        return True, ""
-    except OSError as e:
-        return False, f"File {filename} is not writeable: {str(e)}"
+        # Normalize and get absolute path
+        abs_path = os.path.abspath(filename)
+        parent_dir = os.path.dirname(abs_path) or "."
+
+        # Check if path is in allowed directories
+        is_allowed, error = _is_path_in_allowed_directories(abs_path)
+        if not is_allowed:
+            return False, error
+
+        # If file exists, check write permissions
+        if os.path.exists(abs_path):
+            if os.path.isdir(abs_path):
+                return False, f"Path is a directory: {abs_path}"
+            if not os.access(abs_path, os.W_OK):
+                return False, f"Permission denied: {abs_path}"
+        # If file doesn't exist, check parent directory
+        else:
+            if not os.path.exists(parent_dir):
+                return False, f"Directory does not exist: {parent_dir}"
+            if not os.access(parent_dir, os.W_OK):
+                return False, f"Directory not writeable: {parent_dir}"
+
+        # Test actual write operation
+        try:
+            with open(abs_path, 'a') as f:
+                pass
+            return True, ""
+        except OSError as e:
+            return False, f"Write test failed: {str(e)}"
+
     except Exception as e:
-        return False, f"Unknown error checking file permissions: {str(e)}"
+        return False, f"Error checking file write permissions: {str(e)}"
 
 
+# * Create a copy of a document
 def create_document_copy(
     source_path: str, dest_path: str | None = None
 ) -> tuple[bool, str, str | None]:
@@ -101,6 +120,7 @@ def create_document_copy(
         return False, f"Failed to copy document: {str(e)}", None
 
 
+#! Ensure filename has .xlsx extension
 def ensure_xlsx_extension(filename: str) -> str:
     """
     Ensure filename has .xlsx extension.
@@ -114,3 +134,202 @@ def ensure_xlsx_extension(filename: str) -> str:
     if not filename.endswith(".xlsx"):
         return filename + ".xlsx"
     return filename
+
+
+# * Retrieve metadata for all Excel (.xlsx) files in the specified directory
+def list_excel_files_in_directory(directory: str) -> list[dict]:
+    """
+    Retrieve metadata for all Excel (.xlsx) files in the specified directory.
+
+    Args:
+        directory: Path to the directory to search for Excel files
+
+    Returns:
+        list[dict]: List of dictionaries containing file metadata with keys:
+            - filename (str): Name of the file
+            - size_kb (float): File size in kilobytes (2 decimal places)
+            - modified (float): Last modification timestamp
+            - path (str): Full absolute path to the file
+
+    Raises:
+        FileNotFoundError: If the specified directory does not exist
+        NotADirectoryError: If the path exists but is not a directory
+        OSError: For other filesystem-related errors
+    """
+    try:
+        # Validate directory exists and is accessible
+        if not os.path.exists(directory):
+            raise FileNotFoundError(f"Directory not found: {directory}")
+        if not os.path.isdir(directory):
+            raise NotADirectoryError(f"Not a directory: {directory}")
+
+        excel_files = []
+
+        # Use listdir with absolute paths for better error handling
+        with os.scandir(directory) as entries:
+            for entry in entries:
+                try:
+                    if entry.is_file() and entry.name.lower().endswith('.xlsx'):
+                        stat = entry.stat()
+                        excel_files.append(
+                            {
+                                "filename": entry.name,
+                                "size_kb": round(stat.st_size / 1024, 2),
+                                "modified": stat.st_mtime,
+                                "path": entry.path,
+                            }
+                        )
+                except (OSError, PermissionError):
+                    # Skip files we can't access but continue with others
+                    continue
+
+        return sorted(excel_files, key=lambda x: x['filename'].lower())
+
+    except OSError as e:
+        # Re-raise with more context
+        raise OSError(f"Error accessing directory '{directory}': {str(e)}")
+
+
+# * Decorator to validate directory access
+def validate_directory_access(param: str = "directory") -> Callable[[F], F]:
+    """
+    Decorador para validar el acceso a un directorio.
+
+    Args:
+        param: Nombre del parámetro que contiene la ruta del directorio.
+    """
+
+    def decorator(func: F) -> F:
+        def _validate_dir(args: tuple[Any, ...], kwargs: dict[str, Any]) -> str | dict[str, str]:
+            sig = inspect.signature(func)
+            bound = sig.bind(*args, **kwargs)
+            bound.apply_defaults()
+
+            if param not in bound.arguments:
+                return {"status": "error", "message": f"'{param}' argument not found."}
+
+            directory = os.path.abspath(bound.arguments[param])
+            allowed_dirs = _get_allowed_directories()
+
+            if not any(os.path.commonpath([allowed, directory]) == allowed for allowed in allowed_dirs):
+                return {"status": "error", "message": f"Directory '{directory}' is not allowed."}
+            if not os.path.exists(directory):
+                return {"status": "error", "message": f"Directory '{directory}' does not exist."}
+            if not os.path.isdir(directory):
+                return {"status": "error", "message": f"'{directory}' is not a directory."}
+
+            return directory
+
+        if inspect.iscoroutinefunction(func):
+            @functools.wraps(func)
+            async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+                result = _validate_dir(args, kwargs)
+                if isinstance(result, dict):
+                    return result
+                return await func(*args, **kwargs)
+
+            return cast(F, async_wrapper)
+
+        else:
+            @functools.wraps(func)
+            def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
+                result = _validate_dir(args, kwargs)
+                if isinstance(result, dict):
+                    return result
+                return func(*args, **kwargs)
+
+            return cast(F, sync_wrapper)
+
+    return decorator
+
+
+# * Decorator to validate file access
+def validate_file_access(param: str = "filename") -> Callable[[F], F]:
+    """
+    Decorador para validar el acceso a un archivo antes de ejecutar la función decorada.
+    - Verifica que el archivo esté en un directorio permitido.
+    - Verifica que tenga permisos de escritura.
+
+    Args:
+        param: Nombre del parámetro que contiene la ruta del archivo.
+
+    Returns:
+        Una función decoradora que puede aplicarse a funciones sync o async.
+    """
+
+    def decorator(func: F) -> F:
+        def _validate_file(args: tuple[Any, ...], kwargs: dict[str, Any]) -> str | dict[str, str]:
+            try:
+                sig = inspect.signature(func)
+                bound = sig.bind(*args, **kwargs)
+                bound.apply_defaults()
+
+                if param not in bound.arguments:
+                    return {
+                        "status": "error",
+                        "message": f"'{param}' parameter not found in function arguments"
+                    }
+
+                file_path = os.path.abspath(bound.arguments[param])
+
+                # Validar directorio permitido
+                is_allowed, dir_error = _is_path_in_allowed_directories(file_path)
+                if not is_allowed:
+                    return {
+                        "status": "error",
+                        "message": f"Access denied: {dir_error}",
+                        "path": file_path
+                    }
+
+                # Validar permisos de escritura
+                is_writable, write_error = _check_file_writeable(file_path)
+                if not is_writable:
+                    return {
+                        "status": "error",
+                        "message": f"Write access denied: {write_error}",
+                        "path": file_path
+                    }
+
+                return file_path
+
+            except Exception as e:
+                return {
+                    "status": "error",
+                    "message": f"Error during file validation: {str(e)}"
+                }
+
+        if inspect.iscoroutinefunction(func):
+            @functools.wraps(func)
+            async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+                result = _validate_file(args, kwargs)
+                if isinstance(result, dict):
+                    return result
+                try:
+                    return await func(*args, **kwargs)
+                except Exception as e:
+                    return {
+                        "status": "error",
+                        "message": f"Error in async function: {str(e)}",
+                        "path": result
+                    }
+
+            return cast(F, async_wrapper)
+
+        else:
+            @functools.wraps(func)
+            def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
+                result = _validate_file(args, kwargs)
+                if isinstance(result, dict):
+                    return result
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    return {
+                        "status": "error",
+                        "message": f"Error in function: {str(e)}",
+                        "path": result
+                    }
+
+            return cast(F, sync_wrapper)
+
+    return decorator

@@ -1,27 +1,101 @@
 import re
+from collections.abc import Generator
+from contextlib import contextmanager
+from typing import Any
 
 import psycopg2
 from openpyxl import load_workbook
+from psycopg2 import sql
+from psycopg2.extensions import connection as PsycopgConnection
+from psycopg2.extras import DictCursor
 
 
-def fetch_data_from_db(connection_string: str, query: str) -> dict:
+class DatabaseError(Exception):
+    """Custom exception for database-related errors."""
+
+    pass
+
+
+# Context manager for database connections
+@contextmanager
+def _get_db_connection(
+    connection_string: str,
+) -> Generator[PsycopgConnection, None, None]:
+    """Context manager for database connections.
+
+    Args:
+        connection_string: Database connection string.
+
+    Yields:
+        PsycopgConnection: psycopg2 connection object with DictCursor.
+
+    Raises:
+        DatabaseError: If connection cannot be established.
+    """
+    conn: PsycopgConnection | None = None
     try:
-        conn = psycopg2.connect(connection_string)
-        cur = conn.cursor()
-        cur.execute(query)
-        if cur.description is not None:
-            rows = cur.fetchall()
-            columns = [desc[0] for desc in cur.description]
-        else:
-            rows = []
-            columns = []
-        cur.close()
-        conn.close()
-        return {"columns": columns, "rows": rows}
-    except Exception as e:
+        conn = psycopg2.connect(connection_string, cursor_factory=DictCursor)
+        conn.autocommit = False
+        yield conn
+    except psycopg2.Error as e:
+        raise DatabaseError(f"Failed to connect to database: {e}")
+    finally:
+        if conn is not None:
+            conn.close()
+
+
+# Execute a query and return results
+def _execute_query(
+    conn: PsycopgConnection, query: str, params: tuple | None = None
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """Execute a query and return results.
+
+    Args:
+        conn: Database connection
+        query: SQL query to execute
+        params: Query parameters
+
+    Returns:
+        Tuple of (rows as dictionaries, column names)
+    """
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query, params or ())
+            if cursor.description:
+                columns = [desc[0] for desc in cursor.description]
+                rows = [
+                    dict(zip(columns, row, strict=False)) for row in cursor.fetchall()
+                ]
+                return rows, columns
+            return [], []
+    except psycopg2.Error as e:
+        conn.rollback()
+        raise DatabaseError(f"Query execution failed: {e}")
+
+
+# * Fetch data from database with proper connection handling
+def fetch_data_from_db(
+    connection_string: str, query: str, params: tuple | None = None
+) -> dict[str, Any]:
+    """Fetch data from database with proper connection handling.
+
+    Args:
+        connection_string: Database connection string
+        query: SQL query to execute
+        params: Optional query parameters
+
+    Returns:
+        Dictionary with 'columns' and 'rows' keys, or 'error' key if failed
+    """
+    try:
+        with _get_db_connection(connection_string) as conn:
+            rows, columns = _execute_query(conn, query, params)
+            return {"columns": columns, "rows": [tuple(row.values()) for row in rows]}
+    except DatabaseError as e:
         return {"error": str(e)}
 
 
+# * Insert data into Excel file
 def insert_data_to_excel(
     filename: str, sheet_name: str, columns: list, rows: list
 ) -> dict:
@@ -41,21 +115,61 @@ def insert_data_to_excel(
         return {"error": str(e)}
 
 
+# * Validate SQL query to prevent SQL injection
 def validate_sql_query(query: str) -> bool:
     """
-    Basic validation to prevent SQL injection in SELECT queries.
-    Only allows SELECT statements without dangerous keywords.
+    Validate SQL query to prevent SQL injection.
+
+    Args:
+        query: SQL query to validate
+
+    Returns:
+        bool: True if query is safe, False otherwise
     """
-    # Only allow SELECT queries, no semicolons, no comments, no dangerous keywords
-    allowed = re.match(r"^\s*SELECT\s+.+\s+FROM\s+\w+", query, re.IGNORECASE)
-    forbidden = re.search(
-        r"(;|--|\bDROP\b|\bDELETE\b|\bINSERT\b|\bUPDATE\b|\bALTER\b|\bTRUNCATE\b)",
-        query,
-        re.IGNORECASE,
-    )
-    return bool(allowed) and not forbidden
+    # Normalize whitespace and convert to lowercase for easier checking
+    normalized = ' '.join(query.lower().split())
+
+    # Check for multiple statements (prevent SQL injection)
+    if ';' in normalized.replace(';', ' ; ').split():
+        return False
+
+    # Check for dangerous SQL commands
+    dangerous_commands = [
+        'drop',
+        'delete',
+        'insert',
+        'update',
+        'alter',
+        'truncate',
+        'create',
+        'modify',
+        'grant',
+        'revoke',
+        'exec',
+        'execute',
+        'shutdown',
+        '--',
+        '/*',
+        '*/',
+        'xp_',
+        'sp_',
+    ]
+
+    if any(cmd in normalized for cmd in dangerous_commands):
+        return False
+
+    # Check if it's a SELECT query
+    if not normalized.startswith('select '):
+        return False
+
+    # Additional validation for table names
+    if not re.match(r'^select\s+[\w\s,*]+\s+from\s+[\w"]+', normalized):
+        return False
+
+    return True
 
 
+# * Clean data rows: remove None, strip strings, and basic type normalization.
 def clean_data(rows: list, columns: list) -> list:
     """
     Clean data rows: remove None, strip strings, and basic type normalization.
@@ -74,24 +188,69 @@ def clean_data(rows: list, columns: list) -> list:
     return cleaned
 
 
-def insert_calculated_data_to_db(
-    connection_string: str, table: str, columns: list, rows: list
-) -> dict:
+# * Insert data into the database with batch processing.
+def insert_data_to_db(
+    connection_string: str,
+    table: str,
+    columns: list[str],
+    rows: list[tuple],
+    batch_size: int = 1000,
+) -> dict[str, Any]:
     """
-    Insert calculated/cleaned data into the database.
+    Insert data into the database with batch processing.
+
+    Args:
+        connection_string: Database connection string
+        table: Target table name
+        columns: List of column names
+        rows: List of tuples with data to insert
+        batch_size: Number of rows to insert in each batch
+
+    Returns:
+        Dictionary with operation result or error message
     """
+    if not all(isinstance(col, str) for col in columns):
+        return {"error": "All column names must be strings"}
+
+    if not all(len(row) == len(columns) for row in rows):
+        return {"error": "Row length must match number of columns"}
+
     try:
-        conn = psycopg2.connect(connection_string)
-        cur = conn.cursor()
-        # Build parameterized query
-        col_names = ",".join([f'"{col}"' for col in columns])
-        placeholders = ",".join(["%s"] * len(columns))
-        query = f'INSERT INTO "{table}" ({col_names}) VALUES ({placeholders})'
-        for row in rows:
-            cur.execute(query, row)
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {"message": f"Inserted {len(rows)} rows into '{table}'"}
-    except Exception as e:
+        with _get_db_connection(connection_string) as conn:
+            with conn.cursor() as cursor:
+                # Use sql.SQL and sql.Identifier for safe SQL composition
+                query = sql.SQL(
+                    """
+                    INSERT INTO {table} ({fields})
+                    VALUES %s
+                    ON CONFLICT DO NOTHING
+                """
+                ).format(
+                    table=sql.Identifier(table),
+                    fields=sql.SQL(', ').join(map(sql.Identifier, columns)),
+                )
+
+                # Process in batches
+                total_inserted = 0
+                for i in range(0, len(rows), batch_size):
+                    batch = rows[i : i + batch_size]
+                    try:
+                        psycopg2.extras.execute_values(
+                            cursor, query, batch, template=None, page_size=batch_size
+                        )
+                        total_inserted += cursor.rowcount
+                        conn.commit()
+                    except psycopg2.Error as e:
+                        conn.rollback()
+
+                        raise DatabaseError(f"Batch insert failed: {e}")
+
+                return {
+                    "message": f"Successfully inserted {total_inserted} rows into '{table}'"
+                }
+    except DatabaseError as e:
+
         return {"error": str(e)}
+    except Exception as e:
+
+        return {"error": f"An unexpected error occurred: {str(e)}"}

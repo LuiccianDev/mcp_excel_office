@@ -3,16 +3,16 @@ from mcp_excel.exceptions.exceptions import (
     ValidationError,
 )
 from mcp_excel.utils.file_utils import (
-    check_file_writeable,
+    validate_file_access,
     ensure_xlsx_extension,
 )
 
-
+@validate_file_access("filename")
 async def read_data_from_excel(
     filename: str,
     sheet_name: str,
     start_cell: str = "A1",
-    end_cell: str = None,
+    end_cell: str | None = None,
     preview_only: bool = False,
 ) -> str:
     """
@@ -29,9 +29,7 @@ async def read_data_from_excel(
         str: Data read from the specified range in the worksheet
     """
     filename = ensure_xlsx_extension(filename)
-    is_readable, error_message = check_file_writeable(filename)
-    if not is_readable:
-        return f"Error: {error_message}"
+
     try:
         from mcp_excel.core.data import read_excel_range
 
@@ -51,6 +49,7 @@ async def read_data_from_excel(
         return f"Error: Failed to read data: {str(e)}"
 
 
+@validate_file_access("filename")
 async def write_data_to_excel(
     filename: str,
     sheet_name: str,
@@ -69,9 +68,6 @@ async def write_data_to_excel(
 
     """
     filename = ensure_xlsx_extension(filename)
-    is_writeable, error_message = check_file_writeable(filename)
-    if not is_writeable:
-        return f"Error: {error_message}"
     try:
         from mcp_excel.core.data import write_data
 
