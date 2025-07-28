@@ -1,9 +1,30 @@
 [project]
-name = "mcp-office-excel-2"
-version = "0.1.0"
-description = "Add your description here"
+name = "mcp-office-excel"
+version = "1.0.0"
+description = "Excel server for processing Excel files."
 readme = "README.md"
 requires-python = ">=3.11"
+authors = [
+    {name = "LuiccianDev", email = "luicciandev@gmail.com"}
+]
+license = {text = "MIT"}
+keywords = ["mcp", "excel", "office", "document-processing", "xlsx", "automation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
+[project.urls]
+Homepage = "https://github.com/LuiccianDev/mcp_excel_office"
+Repository = "https://github.com/LuiccianDev/mcp_excel_office"
+Documentation = "https://github.com/LuiccianDev/mcp_excel_office/blob/master/README.md"
+issues = "https://github.com/LuiccianDev/mcp_excel_office/issues"
+Changelog = "https://github.com/LuiccianDev/mcp_excel_office/blob/master/CHANGELOG.md"
+
 dependencies = [
     "mcp[cli]>=1.10.1",
     "openpyxl>=3.1.5",
@@ -12,7 +33,7 @@ dependencies = [
 ]
 
 [project.scripts]
-mcp_server_excel = "src.mcp_server:mcp"
+mcp_server_excel = "mcp_excel:create_server"
 
 [dependency-groups]
 dev = [

@@ -110,7 +110,7 @@ def create_workbook(
         _create_initial_worksheet(wb, sheet_name)
 
         # Save the workbook
-        wb.save(str(path), data_only=data_only)
+        wb.save(str(path))
 
         return {
             "message": f"Created workbook: {path}",

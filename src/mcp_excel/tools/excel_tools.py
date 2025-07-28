@@ -8,6 +8,7 @@ from mcp_excel.utils.file_utils import (
     list_excel_files_in_directory,
     validate_directory_access,
     validate_file_access,
+    resolve_safe_path
 )
 
 
@@ -20,6 +21,7 @@ async def create_excel_workbook(filename: str) -> str:
         filename: Name of the workbook to create (with or without .xlsx extension)
     """
     try:
+        filename = resolve_safe_path(filename)
         create_workbook(filename)
         return f"Created workbook at {filename}"
     except WorkbookError as e:
