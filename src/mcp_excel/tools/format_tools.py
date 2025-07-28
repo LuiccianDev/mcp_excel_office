@@ -66,7 +66,7 @@ async def format_range(
 
     filename = ensure_xlsx_extension(filename)
     try:
-        result : dict[str, Any] = format_range_func(
+        result: dict[str, Any] = format_range_func(
             filename=filename,
             sheet_name=sheet_name,
             start_cell=start_cell,
@@ -105,7 +105,7 @@ async def copy_worksheet(
     filename = ensure_xlsx_extension(filename)
 
     try:
-        result : dict[str, Any] = copy_sheet(filename, source_sheet, target_sheet)
+        result: dict[str, Any] = copy_sheet(filename, source_sheet, target_sheet)
         return result
     except (ValidationError, SheetError) as e:
         return {"error": f"Error: {str(e)}"}
@@ -122,7 +122,7 @@ async def delete_worksheet(filename: str, sheet_name: str) -> dict[str, Any]:
     filename = ensure_xlsx_extension(filename)
 
     try:
-        result : dict[str, Any] = delete_sheet(filename, sheet_name)
+        result: dict[str, Any] = delete_sheet(filename, sheet_name)
         return result
     except (ValidationError, SheetError) as e:
         return {"error": f"Error: {str(e)}"}
@@ -142,7 +142,7 @@ async def rename_worksheet(
     filename = ensure_xlsx_extension(filename)
 
     try:
-        result : dict[str, Any] = rename_sheet(filename, old_name, new_name)
+        result: dict[str, Any] = rename_sheet(filename, old_name, new_name)
         return result
     except (ValidationError, SheetError) as e:
         return {"error": f"Error: {str(e)}"}
@@ -150,7 +150,9 @@ async def rename_worksheet(
         return {"error": f"Failed to rename worksheet: {str(e)}"}
 
 
-async def get_workbook_metadata(filename: str, include_ranges: bool = False) -> dict[str, Any]:
+async def get_workbook_metadata(
+    filename: str, include_ranges: bool = False
+) -> dict[str, Any]:
     """Get metadata about workbook including sheets, ranges, etc.
     Args:
         filename: Path to the Excel file
@@ -159,7 +161,9 @@ async def get_workbook_metadata(filename: str, include_ranges: bool = False) -> 
     filename = ensure_xlsx_extension(filename)
 
     try:
-        result : dict[str, Any] = get_workbook_info(filename, include_ranges=include_ranges)
+        result: dict[str, Any] = get_workbook_info(
+            filename, include_ranges=include_ranges
+        )
         return result
     except WorkbookError as e:
         return {"error": f"Error: {str(e)}"}
@@ -181,7 +185,7 @@ async def merge_cells(
     filename = ensure_xlsx_extension(filename)
 
     try:
-        result : dict[str, Any] = merge_range(filename, sheet_name, start_cell, end_cell)
+        result: dict[str, Any] = merge_range(filename, sheet_name, start_cell, end_cell)
         return result
     except (ValidationError, SheetError) as e:
         return {"error": f"Error: {str(e)}"}
@@ -202,7 +206,9 @@ async def unmerge_cells(
     filename = ensure_xlsx_extension(filename)
 
     try:
-        result : dict[str, Any] = unmerge_range(filename, sheet_name, start_cell, end_cell)
+        result: dict[str, Any] = unmerge_range(
+            filename, sheet_name, start_cell, end_cell
+        )
         return result
     except (ValidationError, SheetError) as e:
         return {"error": f"Error: {str(e)}"}
@@ -232,7 +238,7 @@ async def copy_range(
     try:
         from src.mcp_excel.utils.sheet_utils import copy_range_operation
 
-        result : dict[str, Any] = copy_range_operation(
+        result: dict[str, Any] = copy_range_operation(
             filename, sheet_name, source_start, source_end, target_start, target_sheet
         )
         return result
@@ -261,7 +267,7 @@ async def delete_range(
     filename = ensure_xlsx_extension(filename)
 
     try:
-        result : dict[str, Any] = delete_range_operation(
+        result: dict[str, Any] = delete_range_operation(
             filename, sheet_name, start_cell, end_cell, shift_direction
         )
         return result
@@ -289,7 +295,7 @@ async def validate_excel_range(
             validate_range_in_sheet_operation as validate_range_impl,
         )
 
-        result : dict[str, Any] = validate_range_impl(filename, sheet_name, range_str)
+        result: dict[str, Any] = validate_range_impl(filename, sheet_name, range_str)
         return result
     except ValidationError as e:
         return {"error": f"Error: {str(e)}"}

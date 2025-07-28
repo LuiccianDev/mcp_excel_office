@@ -9,7 +9,7 @@ from mcp_excel.utils.file_utils import ensure_xlsx_extension, validate_file_acce
 
 
 #! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
-@validate_file_access("filename") # type: ignore[misc]
+@validate_file_access("filename")  # type: ignore[misc]
 async def create_chart(
     filename: str,
     sheet_name: str,
@@ -34,7 +34,7 @@ async def create_chart(
     filename = ensure_xlsx_extension(filename)
 
     try:
-        result : dict[str, Any] = create_chart_impl(
+        result: dict[str, Any] = create_chart_impl(
             filename=filename,
             sheet_name=sheet_name,
             data_range=data_range,
@@ -50,8 +50,9 @@ async def create_chart(
     except Exception as e:
         return {"error": f"Failed to create chart: {str(e)}"}
 
+
 #! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
-@validate_file_access("filename") # type: ignore[misc]
+@validate_file_access("filename")  # type: ignore[misc]
 async def create_pivot_table(
     filename: str,
     sheet_name: str,
@@ -74,7 +75,7 @@ async def create_pivot_table(
     filename = ensure_xlsx_extension(filename)
 
     try:
-        result : dict[str, Any] = create_pivot_table_impl(
+        result: dict[str, Any] = create_pivot_table_impl(
             filename=filename,
             sheet_name=sheet_name,
             data_range=data_range,

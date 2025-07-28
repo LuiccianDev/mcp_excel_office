@@ -3,7 +3,7 @@ from mcp_excel.utils.file_utils import ensure_xlsx_extension, validate_file_acce
 
 
 #! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
-@validate_file_access("filename") # type: ignore[misc]
+@validate_file_access("filename")  # type: ignore[misc]
 async def read_data_from_excel(
     filename: str,
     sheet_name: str,
@@ -44,8 +44,9 @@ async def read_data_from_excel(
     except Exception as e:
         return f"Error: Failed to read data: {str(e)}"
 
+
 #! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
-@validate_file_access("filename") # type: ignore[misc]
+@validate_file_access("filename")  # type: ignore[misc]
 async def write_data_to_excel(
     filename: str,
     sheet_name: str,

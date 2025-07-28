@@ -30,7 +30,7 @@ async def create_excel_workbook(filename: str) -> str:
 
 # * Create new worksheet in workbook
 #! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
-@validate_file_access("filename") # type: ignore[misc]
+@validate_file_access("filename")  # type: ignore[misc]
 async def create_excel_worksheet(filename: str, sheet_name: str) -> dict[str, Any]:
     """Create new worksheet in workbook.
     Args:
@@ -40,15 +40,16 @@ async def create_excel_worksheet(filename: str, sheet_name: str) -> dict[str, An
     filename = ensure_xlsx_extension(filename)
 
     try:
-        result : dict[str, Any] = create_sheet(filename, sheet_name)
+        result: dict[str, Any] = create_sheet(filename, sheet_name)
         return result
     except (ValidationError, WorkbookError) as e:
         return {"error": f"Error: {str(e)}"}
     except Exception as e:
         return {"error": f"Failed to create worksheet: {str(e)}"}
 
+
 #! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
-@validate_directory_access("directory") # type: ignore[misc]
+@validate_directory_access("directory")  # type: ignore[misc]
 async def list_excel_documents(directory: str = ".") -> dict[str, Any]:
     """
     List all .xlsx files in the specified directory and return info as a dict.
