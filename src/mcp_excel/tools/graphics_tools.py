@@ -1,3 +1,5 @@
+from typing import Any
+
 from mcp_excel.core.chart import create_chart_in_sheet as create_chart_impl
 from mcp_excel.core.pivot import create_pivot_table as create_pivot_table_impl
 
@@ -6,7 +8,8 @@ from mcp_excel.exceptions.exceptions import ChartError, PivotError, ValidationEr
 from mcp_excel.utils.file_utils import ensure_xlsx_extension, validate_file_access
 
 
-@validate_file_access("filename")
+#! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
+@validate_file_access("filename") # type: ignore[misc]
 async def create_chart(
     filename: str,
     sheet_name: str,
@@ -16,7 +19,7 @@ async def create_chart(
     title: str = "",
     x_axis: str = "",
     y_axis: str = "",
-) -> str:
+) -> dict[str, Any]:
     """Create chart in worksheet.
     Args:
         filename (str): The name of the Excel file.
@@ -31,7 +34,7 @@ async def create_chart(
     filename = ensure_xlsx_extension(filename)
 
     try:
-        result = create_chart_impl(
+        result : dict[str, Any] = create_chart_impl(
             filename=filename,
             sheet_name=sheet_name,
             data_range=data_range,
@@ -41,14 +44,14 @@ async def create_chart(
             x_axis=x_axis,
             y_axis=y_axis,
         )
-        return result["message"]
+        return result
     except (ValidationError, ChartError) as e:
-        return f"Error: {str(e)}"
+        return {"error": f"Error: {str(e)}"}
     except Exception as e:
-        return f"Failed to create chart: {str(e)}"
+        return {"error": f"Failed to create chart: {str(e)}"}
 
-
-@validate_file_access("filename")
+#! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
+@validate_file_access("filename") # type: ignore[misc]
 async def create_pivot_table(
     filename: str,
     sheet_name: str,
@@ -57,7 +60,7 @@ async def create_pivot_table(
     values: list[str],
     columns: list[str] | None = None,
     agg_func: str = "mean",
-) -> str:
+) -> dict[str, Any]:
     """Create pivot table in worksheet.
     Args:
         filename (str): The name of the Excel file.
@@ -71,7 +74,7 @@ async def create_pivot_table(
     filename = ensure_xlsx_extension(filename)
 
     try:
-        result = create_pivot_table_impl(
+        result : dict[str, Any] = create_pivot_table_impl(
             filename=filename,
             sheet_name=sheet_name,
             data_range=data_range,
@@ -80,8 +83,8 @@ async def create_pivot_table(
             columns=columns or [],
             agg_func=agg_func,
         )
-        return result["message"]
+        return result
     except (ValidationError, PivotError) as e:
-        return f"Error: {str(e)}"
+        return {"error": f"Error: {str(e)}"}
     except Exception as e:
-        return f"Failed to create pivot table: {str(e)}"
+        return {"error": f"Failed to create pivot table: {str(e)}"}

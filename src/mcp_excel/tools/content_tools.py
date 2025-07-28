@@ -2,7 +2,8 @@ from mcp_excel.exceptions.exceptions import DataError, ValidationError
 from mcp_excel.utils.file_utils import ensure_xlsx_extension, validate_file_access
 
 
-@validate_file_access("filename")
+#! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
+@validate_file_access("filename") # type: ignore[misc]
 async def read_data_from_excel(
     filename: str,
     sheet_name: str,
@@ -43,8 +44,8 @@ async def read_data_from_excel(
     except Exception as e:
         return f"Error: Failed to read data: {str(e)}"
 
-
-@validate_file_access("filename")
+#! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
+@validate_file_access("filename") # type: ignore[misc]
 async def write_data_to_excel(
     filename: str,
     sheet_name: str,
@@ -69,7 +70,7 @@ async def write_data_to_excel(
         result = write_data(filename, sheet_name, data, start_cell)
         if isinstance(result, dict) and "error" in result:
             return f"Error: {result['error']}"
-        return result.get("message", "Data written successfully")
+        return str(result.get("message", "Data written successfully"))
     except (ValidationError, DataError) as e:
         return f"Error: {str(e)}"
     except Exception as e:

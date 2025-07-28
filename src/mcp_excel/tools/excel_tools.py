@@ -1,4 +1,6 @@
 # Import exceptions
+from typing import Any
+
 from mcp_excel.core.workbook import create_sheet, create_workbook
 from mcp_excel.exceptions.exceptions import ValidationError, WorkbookError
 from mcp_excel.utils.file_utils import (
@@ -18,7 +20,7 @@ async def create_excel_workbook(filename: str) -> str:
         filename: Name of the workbook to create (with or without .xlsx extension)
     """
     try:
-        result = create_workbook(filename)
+        create_workbook(filename)
         return f"Created workbook at {filename}"
     except WorkbookError as e:
         return f"Error: {str(e)}"
@@ -27,8 +29,9 @@ async def create_excel_workbook(filename: str) -> str:
 
 
 # * Create new worksheet in workbook
-@validate_file_access("filename")
-async def create_excel_worksheet(filename: str, sheet_name: str) -> str:
+#! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
+@validate_file_access("filename") # type: ignore[misc]
+async def create_excel_worksheet(filename: str, sheet_name: str) -> dict[str, Any]:
     """Create new worksheet in workbook.
     Args:
         filename: Path to the workbook file
@@ -37,16 +40,16 @@ async def create_excel_worksheet(filename: str, sheet_name: str) -> str:
     filename = ensure_xlsx_extension(filename)
 
     try:
-        result = create_sheet(filename, sheet_name)
-        return result["message"]
+        result : dict[str, Any] = create_sheet(filename, sheet_name)
+        return result
     except (ValidationError, WorkbookError) as e:
-        return f"Error: {str(e)}"
+        return {"error": f"Error: {str(e)}"}
     except Exception as e:
-        return f"Failed to create worksheet: {str(e)}"
+        return {"error": f"Failed to create worksheet: {str(e)}"}
 
-
-@validate_directory_access("directory")
-async def list_excel_documents(directory: str = ".") -> dict:
+#! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
+@validate_directory_access("directory") # type: ignore[misc]
+async def list_excel_documents(directory: str = ".") -> dict[str, Any]:
     """
     List all .xlsx files in the specified directory and return info as a dict.
 

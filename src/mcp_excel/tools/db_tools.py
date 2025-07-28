@@ -46,7 +46,7 @@ async def fetch_and_insert_db_to_excel(
     if "error" in excel_result:
         return f"Error: {excel_result['error']}"
 
-    return excel_result.get("message", "Data inserted successfully.")
+    return str(excel_result.get("message", "Data inserted successfully."))
 
 
 async def insert_calculated_data_to_db(
