@@ -6,7 +6,7 @@ from openpyxl.styles import Border, Font, PatternFill, Side
 from openpyxl.utils import column_index_from_string, get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
-from .cell import parse_cell_range
+from .cell_utils import parse_cell_range
 
 
 def copy_sheet(filename: str, source_sheet: str, target_sheet: str) -> dict[str, Any]:

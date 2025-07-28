@@ -21,7 +21,7 @@ from openpyxl.drawing.spreadsheet_drawing import (
 )
 from openpyxl.utils import column_index_from_string
 
-from mcp_excel.utils.cell import parse_cell_range
+from mcp_excel.utils.cell_utils import parse_cell_range
 
 
 class ChartType(str, Enum):

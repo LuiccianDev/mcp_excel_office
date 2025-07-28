@@ -1,222 +1,307 @@
-from pathlib import Path
-from typing import Any
+"""Core functionality for reading and writing Excel data.
 
-from openpyxl import load_workbook
+This module provides functions to interact with Excel files, including reading ranges,
+writing data, and detecting headers, following the Model Context Protocol (MCP) standards.
+"""
+
+from pathlib import Path
+from typing import Any, TypedDict
+from pathlib import Path
+
+from openpyxl import load_workbook, Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
-from mcp_excel.utils.cell import parse_cell_range
+from .exceptions import (
+    DataError,
+    InvalidCellReferenceError,
+    InvalidDataError,
+    RangeError,
+    SheetError,
+    SheetNotFoundError,
+    WorkbookError,
+)
+from mcp_excel.utils.cell_utils import parse_cell_range
+
+# Type aliases for better code readability
+CellValue = Any
+RowData = list[CellValue]
+SheetData = list[RowData]
+CellRange = str
 
 
+class RangeCoordinates(TypedDict):
+    """Type definition for cell range coordinates."""
+    start_row: int
+    start_col: int
+    end_row: int
+    end_col: int
+
+
+def _get_worksheet(workbook: Any, sheet_name: str) -> Worksheet:
+    """Get a worksheet by name, raising appropriate exceptions.
+    
+    Args:
+        workbook: Openpyxl workbook object.
+        sheet_name: Name of the worksheet to retrieve.
+        
+    Returns:
+        The requested worksheet.
+        
+    Raises:
+        SheetNotFoundError: If the specified sheet doesn't exist.
+    """
+    if sheet_name not in workbook.sheetnames:
+        raise SheetNotFoundError(f"Sheet '{sheet_name}' not found")
+    return workbook[sheet_name]
+
+
+def _parse_cell_reference(cell_ref: str) -> tuple[int, int]:
+    """Parse cell reference into (row, column) coordinates.
+    
+    Args:
+        cell_ref: Cell reference (e.g., 'A1', 'B2').
+        
+    Returns:
+        Tuple of (row, column) coordinates (1-based).
+        
+    Raises:
+        InvalidCellReferenceError: If the cell reference is invalid.
+    """
+    try:
+        coords = parse_cell_range(f"{cell_ref}:{cell_ref}")
+        if not coords or None in coords[:2]:
+            raise InvalidCellReferenceError(f"Invalid cell reference: {cell_ref}")
+        return coords[0], coords[1]  # row, column
+    except ValueError as e:
+        raise InvalidCellReferenceError(f"Invalid cell format: {str(e)}") from e
+
+
+def _get_used_range(
+    worksheet: Worksheet, start_row: int, start_col: int
+) -> tuple[int, int]:
+    """Find the used range in a worksheet starting from given coordinates.
+    
+    Args:
+        worksheet: The worksheet to search.
+        start_row: Starting row (1-based).
+        start_col: Starting column (1-based).
+        
+    Returns:
+        Tuple of (end_row, end_col) coordinates.
+    """
+    end_row = start_row
+    end_col = start_col
+    
+    # Find last used row
+    while end_row <= worksheet.max_row and any(
+        worksheet.cell(row=end_row, column=c).value is not None
+        for c in range(start_col, worksheet.max_column + 1)
+    ):
+        end_row += 1
+    
+    # Find last used column
+    while end_col <= worksheet.max_column and any(
+        worksheet.cell(row=r, column=end_col).value is not None
+        for r in range(start_row, worksheet.max_row + 1)
+    ):
+        end_col += 1
+    
+    return end_row - 1, end_col - 1  # Convert to 0-based exclusive
+
+#* Read a range of data from an Excel worksheet
 def read_excel_range(
     filename: Path | str,
     sheet_name: str,
     start_cell: str = "A1",
     end_cell: str | None = None,
     preview_only: bool = False,
-) -> list[list[Any]] | dict:
+) -> SheetData:
+    """Read a range of data from an Excel worksheet.
+    
+    Args:
+        filename: Path to the Excel file.
+        sheet_name: Name of the worksheet to read from.
+        start_cell: Starting cell reference (e.g., 'A1').
+        end_cell: Optional ending cell reference. If not provided, will detect used range.
+        preview_only: If True, only returns a preview of the data.
+        
+    Returns:
+        A 2D list containing the cell values in the specified range.
+        
+    Raises:
+        FileNotFoundError: If the specified file doesn't exist.
+        SheetNotFoundError: If the specified sheet doesn't exist.
+        InvalidCellReferenceError: If cell references are invalid.
+        DataError: For errors related to data processing.
+    """
+    path = Path(filename).resolve()
+    if not path.exists():
+        raise FileNotFoundError(f"File not found: {path}")
+    
+    wb = None
     try:
-        wb = load_workbook(filename, read_only=True)
-        if sheet_name not in wb.sheetnames:
-            return {"error": f"Sheet '{sheet_name}' not found"}
-        ws = wb[sheet_name]
+        wb = load_workbook(str(path), read_only=True, data_only=True)
+        ws = _get_worksheet(wb, sheet_name)
+        
+        # Handle range string (e.g., "A1:B2")
         if ":" in start_cell:
-            start_cell, end_cell = start_cell.split(":")
-        try:
-            start_coords = parse_cell_range(f"{start_cell}:{start_cell}")
-            if not start_coords or not all(
-                coord is not None for coord in start_coords[:2]
-            ):
-                return {"error": f"Invalid start cell reference: {start_cell}"}
-            start_row, start_col = start_coords[0], start_coords[1]
-        except ValueError as e:
-            return {"error": f"Invalid start cell format: {str(e)}"}
+            start_cell, end_cell = start_cell.split(":", 1)
+        
+        # Parse start cell coordinates
+        start_row, start_col = _parse_cell_reference(start_cell)
+        
+        # Parse or detect end cell coordinates
         if end_cell:
-            try:
-                end_coords = parse_cell_range(f"{end_cell}:{end_cell}")
-                if not end_coords or not all(
-                    coord is not None for coord in end_coords[:2]
-                ):
-                    return {"error": f"Invalid end cell reference: {end_cell}"}
-                end_row, end_col = end_coords[0], end_coords[1]
-            except ValueError as e:
-                return {"error": f"Invalid end cell format: {str(e)}"}
+            end_row, end_col = _parse_cell_reference(end_cell)
         else:
-            end_row, end_col = start_row, start_col
-            while end_row <= ws.max_row and any(
-                ws.cell(row=end_row, column=c).value is not None
-                for c in range(start_col, ws.max_column + 1)
-            ):
-                end_row += 1
-            while end_col <= ws.max_column and any(
-                ws.cell(row=r, column=end_col).value is not None
-                for r in range(start_row, ws.max_row + 1)
-            ):
-                end_col += 1
-            end_row -= 1
-            end_col -= 1
+            end_row, end_col = _get_used_range(ws, start_row, start_col)
+        
+        # Validate range is within worksheet bounds
         if start_row > ws.max_row or start_col > ws.max_column:
-            return {
-                "error": (
-                    f"Start cell out of bounds. Sheet dimensions are "
-                    f"A1:{get_column_letter(ws.max_column)}{ws.max_row}"
-                )
-            }
-        data = []
-        for row in range(start_row, end_row + 1):
-            row_data = []
-            for col in range(start_col, end_col + 1):
-                cell = ws.cell(row=row, column=col)
-                row_data.append(cell.value)
+            max_cell = f"{get_column_letter(ws.max_column)}{ws.max_row}"
+            raise RangeError(
+                f"Start cell out of bounds. Sheet dimensions are A1:{max_cell}"
+            )
+        
+        # Read the data
+        data: SheetData = []
+        for row in range(start_row, min(end_row, ws.max_row) + 1):
+            row_data = [
+                ws.cell(row=row, column=col).value 
+                for col in range(start_col, min(end_col, ws.max_column) + 1)
+            ]
             if any(v is not None for v in row_data):
                 data.append(row_data)
-        wb.close()
+        
         return data
+    
     except Exception as e:
-        return {"error": str(e)}
-
-
-def write_data(
-    filename: str,
-    sheet_name: str | None,
-    data: list[list] | None,
-    start_cell: str = "A1",
-) -> dict[str, str]:
-    try:
-        if not data:
-            return {"error": "No data provided to write"}
-        wb = load_workbook(filename)
-        if not sheet_name:
-            sheet_name = wb.active.title
-        elif sheet_name not in wb.sheetnames:
-            wb.create_sheet(sheet_name)
-        ws = wb[sheet_name]
-        try:
-            start_coords = parse_cell_range(start_cell)
-            if not start_coords or not all(
-                coord is not None for coord in start_coords[:2]
-            ):
-                return {"error": f"Invalid start cell reference: {start_cell}"}
-        except ValueError as e:
-            return {"error": f"Invalid start cell format: {str(e)}"}
-        if len(data) > 0:
-            _write_data_to_worksheet(ws, data, start_cell)
-        wb.save(filename)
-        wb.close()
-        return {"message": f"Data written to {sheet_name}", "active_sheet": sheet_name}
-    except Exception as e:
-        return {"error": str(e)}
-
-
-def _looks_like_headers(row_dict):
-    """Check if a data row appears to be headers (keys match values)."""
-    return all(
-        isinstance(value, str) and str(value).strip() == str(key).strip()
-        for key, value in row_dict.items()
-    )
-
-
-def _check_for_headers_above(worksheet, start_row, start_col, headers):
-    """Check if cells above start position contain headers."""
-    if start_row <= 1:
-        return False  # Nothing above row 1
-
-    # Look for header-like content above
-    for check_row in range(max(1, start_row - 5), start_row):
-        # Count matches for this row
-        header_count = 0
-        cell_count = 0
-
-        for i, header in enumerate(headers):
-            if i >= 10:  # Limit check to first 10 columns for performance
-                break
-
-            cell = worksheet.cell(row=check_row, column=start_col + i)
-            cell_count += 1
-
-            # Check if cell is formatted like a header (bold)
-            is_formatted = cell.font.bold if hasattr(cell.font, "bold") else False
-
-            # Check for any content that could be a header
-            if cell.value is not None:
-                # Case 1: Direct match with expected header
-                if str(cell.value).strip().lower() == str(header).strip().lower():
-                    header_count += 2  # Give higher weight to exact matches
-                # Case 2: Any formatted cell with content
-                elif is_formatted and cell.value:
-                    header_count += 1
-                # Case 3: Any cell with content in the first row we check
-                elif check_row == max(1, start_row - 5):
-                    header_count += 0.5
-
-        # If we have a significant number of matching cells, consider it a header row
-        if cell_count > 0 and header_count >= cell_count * 0.5:
-            return True
-
-    # No headers found above
-    return False
-
-
-def _determine_header_behavior(worksheet, start_row, start_col, data):
-    """Determine if headers should be written based on context."""
-    if not data:
-        return False  # No data means no headers
-
-    # Check if we're in the title area (rows 1-4)
-    if start_row <= 4:
-        return False  # Don't add headers in title area
-
-    # If we already have data in the sheet, be cautious about adding headers
-    if worksheet.max_row > 1:
-        # Check if the target row already has content
-        has_content = any(
-            worksheet.cell(row=start_row, column=start_col + i).value is not None
-            for i in range(min(5, len(data[0].keys())))
-        )
-
-        if has_content:
-            return False  # Don't overwrite existing content with headers
-
-        # Check if first row appears to be headers
-        first_row_is_headers = _looks_like_headers(data[0])
-
-        # Check extensively for headers above (up to 5 rows)
-        has_headers_above = _check_for_headers_above(
-            worksheet, start_row, start_col, list(data[0].keys())
-        )
-
-        # Be conservative - don't add headers if we detect headers above or the data has headers
-        if has_headers_above or first_row_is_headers:
-            return False
-
-        # If we're appending data immediately after existing data, don't add headers
-        if any(
-            worksheet.cell(row=start_row - 1, column=start_col + i).value is not None
-            for i in range(min(5, len(data[0].keys())))
-        ):
-            return False
-
-    # For completely new sheets or empty areas far from content, add headers
-    return True
+        if not isinstance(e, (FileNotFoundError, SheetNotFoundError, 
+                            InvalidCellReferenceError, DataError)):
+            raise DataError(f"Failed to read Excel range: {str(e)}") from e
+        raise
+    finally:
+        if wb is not None:
+            wb.close()
 
 
 def _write_data_to_worksheet(
-    worksheet: Worksheet,
-    data: list[list],
-    start_cell: str = "A1",
+    worksheet: Worksheet, data: SheetData, start_row: int, start_col: int
 ) -> None:
+    """Write data to a worksheet starting at the specified coordinates.
+    
+    Args:
+        worksheet: The worksheet to write to.
+        data: 2D list of data to write.
+        start_row: Starting row (1-based).
+        start_col: Starting column (1-based).
+        
+    Note:
+        None values are skipped to preserve existing cell formatting.
+    """
+    for row_idx, row_data in enumerate(data):
+        for col_idx, value in enumerate(row_data):
+            if value is not None:  # Skip None values to preserve cell formatting
+                worksheet.cell(
+                    row=start_row + row_idx,
+                    column=start_col + col_idx,
+                    value=value
+                )
+
+#* Write data to an Excel worksheet
+def write_data(
+    filename: str | Path,
+    sheet_name: str | None,
+    data: SheetData | None,
+    start_cell: str = "A1",
+) -> dict[str, str]:
+    """Write data to an Excel worksheet.
+    
+    Args:
+        filename: Path to the Excel file.
+        sheet_name: Name of the worksheet to write to. If None, uses active sheet.
+        data: 2D list of data to write.
+        start_cell: Starting cell reference (e.g., 'A1').
+        
+    Returns:
+        Dictionary with operation status and details.
+        
+    Raises:
+        InvalidDataError: If input data is invalid.
+        InvalidCellReferenceError: If cell reference is invalid.
+        SheetError: For sheet-related errors.
+        WorkbookError: For other workbook-related errors.
+    """
+    if not data:
+        raise InvalidDataError("No data provided to write")
+    
+    path = Path(filename).resolve()
+    wb = None
     try:
-        if not data:
-            return {"error": "No data provided to write"}
+        # Load or create workbook
         try:
-            start_coords = parse_cell_range(start_cell)
-            if not start_coords or not all(x is not None for x in start_coords[:2]):
-                return {"error": f"Invalid start cell reference: {start_cell}"}
-            start_row, start_col = start_coords[0], start_coords[1]
-        except ValueError as e:
-            return {"error": f"Invalid start cell format: {str(e)}"}
-        for i, row in enumerate(data):
-            for j, val in enumerate(row):
-                worksheet.cell(row=start_row + i, column=start_col + j, value=val)
+            if path.exists():
+                wb = load_workbook(str(path))
+            else:
+                wb = Workbook()
+                # Remove default sheet if it exists
+                if wb.sheetnames:
+                    wb.remove(wb.active)
+        except Exception as e:
+            raise WorkbookError(f"Failed to access workbook: {str(e)}") from e
+        
+        # Get or create worksheet
+        try:
+            if not sheet_name:
+                if not wb.sheetnames:  # If no sheets exist
+                    ws = wb.create_sheet("Sheet1")
+                else:
+                    ws = wb.active
+            else:
+                if sheet_name in wb.sheetnames:
+                    ws = wb[sheet_name]
+                else:
+                    ws = wb.create_sheet(sheet_name)
+        except Exception as e:
+            raise SheetError(f"Failed to access worksheet: {str(e)}") from e
+        
+        # Parse start cell
+        try:
+            start_row, start_col = _parse_cell_reference(start_cell)
+        except InvalidCellReferenceError as e:
+            raise InvalidCellReferenceError(
+                f"Invalid start cell format: {str(e)}"
+            ) from e
+        
+        # Ensure parent directory exists
+        path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Write data
+        _write_data_to_worksheet(ws, data, start_row, start_col)
+        
+        # Save changes
+        try:
+            wb.save(str(path))
+        except Exception as e:
+            raise WorkbookError(f"Failed to save workbook: {str(e)}") from e
+        
+        return {
+            "message": f"Data written to {ws.title}",
+            "active_sheet": ws.title,
+            "filepath": str(path)
+        }
+    
     except Exception as e:
-        return {"error": str(e)}
+        if not isinstance(e, (InvalidDataError, InvalidCellReferenceError, 
+                            SheetError, WorkbookError)):
+            raise WorkbookError(f"Failed to write data: {str(e)}") from e
+        raise
+    finally:
+        if wb is not None:
+            try:
+                wb.close()
+            except Exception:
+                # Log the error but don't mask the original exception
+                pass
+
