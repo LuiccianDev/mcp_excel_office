@@ -106,15 +106,15 @@ def create_chart_in_sheet(
             "area": AreaChart,
         }
         chart_type_lower = chart_type.lower()
-        ChartClass = chart_classes.get(chart_type_lower)
-        if not ChartClass:
+        chart_class = chart_classes.get(chart_type_lower)
+        if not chart_class:
             return {
                 "error": (
                     f"Unsupported chart type: {chart_type}. "
                     f"Supported types: {', '.join(chart_classes.keys())}"
                 )
             }
-        chart = ChartClass()
+        chart = chart_class()
         chart.title = title
         if hasattr(chart, "x_axis"):
             chart.x_axis.title = x_axis

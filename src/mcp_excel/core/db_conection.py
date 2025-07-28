@@ -6,7 +6,7 @@ from typing import Any
 import psycopg2
 from openpyxl import load_workbook
 from psycopg2 import sql
-from psycopg2.extensions import connection as PsycopgConnection
+from psycopg2.extensions import connection
 from psycopg2.extras import DictCursor
 
 
@@ -20,25 +20,25 @@ class DatabaseError(Exception):
 @contextmanager
 def _get_db_connection(
     connection_string: str,
-) -> Generator[PsycopgConnection, None, None]:
+) -> Generator[connection, None, None]:
     """Context manager for database connections.
 
     Args:
         connection_string: Database connection string.
 
     Yields:
-        PsycopgConnection: psycopg2 connection object with DictCursor.
+        connection: psycopg2 connection object with DictCursor.
 
     Raises:
         DatabaseError: If connection cannot be established.
     """
-    conn: PsycopgConnection | None = None
+    conn: connection | None = None
     try:
         conn = psycopg2.connect(connection_string, cursor_factory=DictCursor)
         conn.autocommit = False
         yield conn
     except psycopg2.Error as e:
-        raise DatabaseError(f"Failed to connect to database: {e}")
+        raise DatabaseError(f"Failed to connect to database: {e}") from e
     finally:
         if conn is not None:
             conn.close()
@@ -46,7 +46,7 @@ def _get_db_connection(
 
 # Execute a query and return results
 def _execute_query(
-    conn: PsycopgConnection, query: str, params: tuple | None = None
+    conn: connection, query: str, params: tuple | None = None
 ) -> tuple[list[dict[str, Any]], list[str]]:
     """Execute a query and return results.
 
@@ -70,7 +70,7 @@ def _execute_query(
             return [], []
     except psycopg2.Error as e:
         conn.rollback()
-        raise DatabaseError(f"Query execution failed: {e}")
+        raise DatabaseError(f"Query execution failed: {e}") from e
 
 
 # * Fetch data from database with proper connection handling
@@ -98,7 +98,7 @@ def fetch_data_from_db(
 # * Insert data into Excel file
 def insert_data_to_excel(
     filename: str, sheet_name: str, columns: list, rows: list
-) -> dict:
+) -> dict[str, Any]:
     try:
         wb = load_workbook(filename)
         ws = wb[sheet_name]
@@ -243,7 +243,7 @@ def insert_data_to_db(
                     except psycopg2.Error as e:
                         conn.rollback()
 
-                        raise DatabaseError(f"Batch insert failed: {e}")
+                        raise DatabaseError(f"Batch insert failed: {e}") from e
 
                 return {
                     "message": f"Successfully inserted {total_inserted} rows into '{table}'"

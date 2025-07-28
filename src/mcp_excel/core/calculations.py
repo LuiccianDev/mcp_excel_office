@@ -2,14 +2,15 @@
 
 This module provides functions to apply formulas to cells.
 """
-from dataclasses import dataclass, asdict
+
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, Final
+from typing import Any, Final
 
 from openpyxl.worksheet.worksheet import Worksheet
 
-from mcp_excel.core.workbook import get_or_create_workbook
 from mcp_excel.core.exceptions import FormulaError, ValidationError
+from mcp_excel.core.workbook import get_or_create_workbook
 from mcp_excel.utils.cell_utils import validate_cell_reference
 from mcp_excel.utils.validation_utils import validate_formula
 
@@ -20,6 +21,7 @@ FORMULA_PREFIX: Final[str] = "="
 @dataclass(frozen=True)
 class FormulaApplicationResult:
     """Represents the result of applying a formula to a cell."""
+
     message: str
     cell: str
     formula: str
@@ -48,7 +50,7 @@ def _apply_formula_to_cell(worksheet: Worksheet, cell_ref: str, formula: str) ->
     try:
         worksheet[cell_ref].value = formula
     except Exception as e:
-        raise FormulaError(f"Failed to apply formula to cell: {str(e)}")
+        raise FormulaError(f"Failed to apply formula to cell: {str(e)}") from e
 
 
 def _save_workbook(workbook: Any, filename: str) -> None:
@@ -56,7 +58,7 @@ def _save_workbook(workbook: Any, filename: str) -> None:
     try:
         workbook.save(filename)
     except Exception as e:
-        raise FormulaError(f"Failed to save workbook: {str(e)}")
+        raise FormulaError(f"Failed to save workbook: {str(e)}") from e
 
 
 def apply_formula(
@@ -64,7 +66,7 @@ def apply_formula(
     sheet_name: str,
     cell: str,
     formula: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Apply an Excel formula to a specific cell in a worksheet.
 

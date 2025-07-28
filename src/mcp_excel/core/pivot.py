@@ -33,7 +33,7 @@ def create_pivot_table(
                 start_cell, end_cell
             )
         except ValueError as e:
-            raise ValidationError(f"Invalid data range format: {str(e)}")
+            raise ValidationError(f"Invalid data range format: {str(e)}") from e
         if end_row is None or end_col is None:
             raise ValidationError("Invalid data range format: missing end coordinates")
         data_range_str = f"{get_column_letter(start_col)}{start_row}:{get_column_letter(end_col)}{end_row}"
@@ -42,7 +42,7 @@ def create_pivot_table(
             if not data:
                 raise PivotError("No data found in range")
         except Exception as e:
-            raise PivotError(f"Failed to read source data: {str(e)}")
+            raise PivotError(f"Failed to read source data: {str(e)}") from e
         valid_agg_funcs = ["sum", "average", "count", "min", "max"]
         if agg_func.lower() not in valid_agg_funcs:
             raise ValidationError(
@@ -154,13 +154,15 @@ def create_pivot_table(
             if cleaned_columns:
                 for col_combo, value_field, _ in col_headers:
                     filtered = _filter_data(filtered_data, {}, col_combo)
-                    value = _aggregate_values(filtered, value_field, agg_func)
-                    pivot_ws.cell(row=current_row, column=col, value=value)
+                    value_a: float = _aggregate_values(filtered, value_field, agg_func)
+                    pivot_ws.cell(row=current_row, column=col, value=value_a)
                     col += 1
             else:
                 for value_field in cleaned_values:
-                    value = _aggregate_values(filtered_data, value_field, agg_func)
-                    pivot_ws.cell(row=current_row, column=col, value=value)
+                    value_b: float = _aggregate_values(
+                        filtered_data, value_field, agg_func
+                    )
+                    pivot_ws.cell(row=current_row, column=col, value=value_b)
                     col += 1
             current_row += 1
         # Create a table for the pivot data
@@ -179,11 +181,13 @@ def create_pivot_table(
             pivot_table.tableStyleInfo = style
             pivot_ws.add_table(pivot_table)
         except Exception as e:
-            raise PivotError(f"Failed to create pivot table formatting: {str(e)}")
+            raise PivotError(
+                f"Failed to create pivot table formatting: {str(e)}"
+            ) from e
         try:
             wb.save(filename)
         except Exception as e:
-            raise PivotError(f"Failed to save workbook: {str(e)}")
+            raise PivotError(f"Failed to save workbook: {str(e)}") from e
         return {
             "message": "Summary table created successfully",
             "details": {
@@ -198,12 +202,12 @@ def create_pivot_table(
     except (ValidationError, PivotError) as e:
         return {"error": str(e), "message": "Failed to create pivot table"}
     except Exception as e:
-        raise PivotError(str(e))
+        raise PivotError(str(e)) from e
 
 
-def _get_combinations(field_values: dict[str, set]) -> list[dict]:
+def _get_combinations(field_values: dict[str, list[str]]) -> list[dict]:
     """Get all combinations of field values."""
-    result = [{}]
+    result: list[dict] = [{}]
     for field, values in list(
         field_values.items()
     ):  # Convert to list to avoid runtime changes
@@ -240,20 +244,20 @@ def _aggregate_values(data: list[dict], field: str, agg_func: str) -> float:
     values = [
         record[field]
         for record in data
-        if field in record and isinstance(record[field], (int, float))
+        if field in record and isinstance(record[field], int | float)
     ]
     if not values:
         return 0
 
     if agg_func == "sum":
-        return sum(values)
+        return float(sum(values))
     elif agg_func == "average":
-        return sum(values) / len(values)
+        return float(sum(values) / len(values))
     elif agg_func == "count":
-        return len(values)
+        return float(len(values))
     elif agg_func == "min":
-        return min(values)
+        return float(min(values))
     elif agg_func == "max":
-        return max(values)
+        return float(max(values))
     else:
-        return sum(values)  # Default to sum
+        return float(sum(values))  # Default to sum

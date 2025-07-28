@@ -25,21 +25,21 @@ def format_range(
     filename: str,
     sheet_name: str,
     start_cell: str,
-    end_cell: str = None,
+    end_cell: str | None = None,
     bold: bool = False,
     italic: bool = False,
     underline: bool = False,
-    font_size: int = None,
-    font_color: str = None,
-    bg_color: str = None,
-    border_style: str = None,
-    border_color: str = None,
-    number_format: str = None,
-    alignment: str = None,
+    font_size: int | None = None,
+    font_color: str | None = None,
+    bg_color: str | None = None,
+    border_style: str | None = None,
+    border_color: str | None = None,
+    number_format: str | None = None,
+    alignment: str | None = None,
     wrap_text: bool = False,
     merge_cells: bool = False,
-    protection: dict[str, Any] = None,
-    conditional_format: dict[str, Any] = None,
+    protection: dict[str, Any] | None = None,
+    conditional_format: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     # Validación de celdas
     if not validate_cell_reference(start_cell):
@@ -62,7 +62,7 @@ def format_range(
         if end_col is None:
             end_col = start_col
         # Font
-        font_args = {
+        font_args: dict[str, bool | str | None | int] = {
             "bold": bold,
             "italic": italic,
             "underline": "single" if underline else None,
