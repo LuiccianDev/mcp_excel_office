@@ -228,7 +228,7 @@ def _is_valid_sheet_name(name: str) -> bool:
         return False
 
     # Check for invalid characters
-    invalid_chars = [':', '\\', '/', '?', '*', '[', ']']
+    invalid_chars = [":", "\\", "/", "?", "*", "[", "]"]
     if any(char in name for char in invalid_chars):
         return False
 

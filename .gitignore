@@ -17,7 +17,7 @@ env.bak/
 
 # IDEs y editores
 .ruff_cache/
-.windsurf/
+#.windsurf/
 
 # Archivos de testing y cobertura
 .pytest_cache/
@@ -34,3 +34,4 @@ htmlcov/
 .dmypy.json
 .pyre/
 .pytype/
+.pre-commit-config.yaml/

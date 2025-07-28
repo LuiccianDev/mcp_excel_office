@@ -1,9 +1,6 @@
 # Import exceptions
 from mcp_excel.core.workbook import create_sheet, create_workbook
-from mcp_excel.exceptions.exceptions import (
-    ValidationError,
-    WorkbookError,
-)
+from mcp_excel.exceptions.exceptions import ValidationError, WorkbookError
 from mcp_excel.utils.file_utils import (
     ensure_xlsx_extension,
     list_excel_files_in_directory,
@@ -21,7 +18,6 @@ async def create_excel_workbook(filename: str) -> str:
         filename: Name of the workbook to create (with or without .xlsx extension)
     """
     try:
-
         result = create_workbook(filename)
         return f"Created workbook at {filename}"
     except WorkbookError as e:

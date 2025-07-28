@@ -1,12 +1,6 @@
 # Import exceptions
-from mcp_excel.exceptions.exceptions import (
-    CalculationError,
-    ValidationError,
-)
-from mcp_excel.utils.file_utils import (
-    validate_file_access,
-    ensure_xlsx_extension,
-)
+from mcp_excel.exceptions.exceptions import CalculationError, ValidationError
+from mcp_excel.utils.file_utils import ensure_xlsx_extension, validate_file_access
 
 # Import core/tools/utils with new structure
 from mcp_excel.utils.validation_utils import (
@@ -35,6 +29,7 @@ async def validate_formula_syntax(
         return f"Error: {str(e)}"
     except Exception as e:
         return f"Failed to validate formula: {str(e)}"
+
 
 @validate_file_access("filename")
 async def apply_formula(

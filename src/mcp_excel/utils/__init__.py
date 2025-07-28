@@ -1,6 +1,4 @@
-from mcp_excel.utils.validation_utils import (
-    validate_formula,
-)
+from mcp_excel.utils.validation_utils import validate_formula
 from mcp_excel.utils.validation_utils import validate_formula_in_cell_operation
 from mcp_excel.utils.validation_utils import (
     validate_formula_in_cell_operation as validate_formula_impl,

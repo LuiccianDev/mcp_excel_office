@@ -127,39 +127,39 @@ def validate_sql_query(query: str) -> bool:
         bool: True if query is safe, False otherwise
     """
     # Normalize whitespace and convert to lowercase for easier checking
-    normalized = ' '.join(query.lower().split())
+    normalized = " ".join(query.lower().split())
 
     # Check for multiple statements (prevent SQL injection)
-    if ';' in normalized.replace(';', ' ; ').split():
+    if ";" in normalized.replace(";", " ; ").split():
         return False
 
     # Check for dangerous SQL commands
     dangerous_commands = [
-        'drop',
-        'delete',
-        'insert',
-        'update',
-        'alter',
-        'truncate',
-        'create',
-        'modify',
-        'grant',
-        'revoke',
-        'exec',
-        'execute',
-        'shutdown',
-        '--',
-        '/*',
-        '*/',
-        'xp_',
-        'sp_',
+        "drop",
+        "delete",
+        "insert",
+        "update",
+        "alter",
+        "truncate",
+        "create",
+        "modify",
+        "grant",
+        "revoke",
+        "exec",
+        "execute",
+        "shutdown",
+        "--",
+        "/*",
+        "*/",
+        "xp_",
+        "sp_",
     ]
 
     if any(cmd in normalized for cmd in dangerous_commands):
         return False
 
     # Check if it's a SELECT query
-    if not normalized.startswith('select '):
+    if not normalized.startswith("select "):
         return False
 
     # Additional validation for table names
@@ -227,7 +227,7 @@ def insert_data_to_db(
                 """
                 ).format(
                     table=sql.Identifier(table),
-                    fields=sql.SQL(', ').join(map(sql.Identifier, columns)),
+                    fields=sql.SQL(", ").join(map(sql.Identifier, columns)),
                 )
 
                 # Process in batches
@@ -249,8 +249,6 @@ def insert_data_to_db(
                     "message": f"Successfully inserted {total_inserted} rows into '{table}'"
                 }
     except DatabaseError as e:
-
         return {"error": str(e)}
     except Exception as e:
-
         return {"error": f"An unexpected error occurred: {str(e)}"}

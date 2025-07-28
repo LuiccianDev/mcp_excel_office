@@ -7,11 +7,10 @@ import inspect
 import os
 import shutil
 from collections.abc import Callable
-from typing import ParamSpec, TypeVar, Callable, cast, Any
+from typing import Any, TypeVar, cast
 
-P = ParamSpec("P")
-R = TypeVar("R")
 F = TypeVar("F", bound=Callable[..., Any])
+
 
 # Get allowed directories from environment variables
 def _get_allowed_directories() -> list[str]:
@@ -80,7 +79,7 @@ def _check_file_writeable(filename: str) -> tuple[bool, str]:
 
         # Test actual write operation
         try:
-            with open(abs_path, 'a') as f:
+            with open(abs_path, "a") as f:
                 pass
             return True, ""
         except OSError as e:
@@ -169,7 +168,7 @@ def list_excel_files_in_directory(directory: str) -> list[dict]:
         with os.scandir(directory) as entries:
             for entry in entries:
                 try:
-                    if entry.is_file() and entry.name.lower().endswith('.xlsx'):
+                    if entry.is_file() and entry.name.lower().endswith(".xlsx"):
                         stat = entry.stat()
                         excel_files.append(
                             {
@@ -183,7 +182,7 @@ def list_excel_files_in_directory(directory: str) -> list[dict]:
                     # Skip files we can't access but continue with others
                     continue
 
-        return sorted(excel_files, key=lambda x: x['filename'].lower())
+        return sorted(excel_files, key=lambda x: x["filename"].lower())
 
     except OSError as e:
         # Re-raise with more context
@@ -200,7 +199,9 @@ def validate_directory_access(param: str = "directory") -> Callable[[F], F]:
     """
 
     def decorator(func: F) -> F:
-        def _validate_dir(args: tuple[Any, ...], kwargs: dict[str, Any]) -> str | dict[str, str]:
+        def _validate_dir(
+            args: tuple[Any, ...], kwargs: dict[str, Any]
+        ) -> str | dict[str, str]:
             sig = inspect.signature(func)
             bound = sig.bind(*args, **kwargs)
             bound.apply_defaults()
@@ -211,16 +212,29 @@ def validate_directory_access(param: str = "directory") -> Callable[[F], F]:
             directory = os.path.abspath(bound.arguments[param])
             allowed_dirs = _get_allowed_directories()
 
-            if not any(os.path.commonpath([allowed, directory]) == allowed for allowed in allowed_dirs):
-                return {"status": "error", "message": f"Directory '{directory}' is not allowed."}
+            if not any(
+                os.path.commonpath([allowed, directory]) == allowed
+                for allowed in allowed_dirs
+            ):
+                return {
+                    "status": "error",
+                    "message": f"Directory '{directory}' is not allowed.",
+                }
             if not os.path.exists(directory):
-                return {"status": "error", "message": f"Directory '{directory}' does not exist."}
+                return {
+                    "status": "error",
+                    "message": f"Directory '{directory}' does not exist.",
+                }
             if not os.path.isdir(directory):
-                return {"status": "error", "message": f"'{directory}' is not a directory."}
+                return {
+                    "status": "error",
+                    "message": f"'{directory}' is not a directory.",
+                }
 
             return directory
 
         if inspect.iscoroutinefunction(func):
+
             @functools.wraps(func)
             async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
                 result = _validate_dir(args, kwargs)
@@ -231,6 +245,7 @@ def validate_directory_access(param: str = "directory") -> Callable[[F], F]:
             return cast(F, async_wrapper)
 
         else:
+
             @functools.wraps(func)
             def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
                 result = _validate_dir(args, kwargs)
@@ -258,7 +273,9 @@ def validate_file_access(param: str = "filename") -> Callable[[F], F]:
     """
 
     def decorator(func: F) -> F:
-        def _validate_file(args: tuple[Any, ...], kwargs: dict[str, Any]) -> str | dict[str, str]:
+        def _validate_file(
+            args: tuple[Any, ...], kwargs: dict[str, Any]
+        ) -> str | dict[str, str]:
             try:
                 sig = inspect.signature(func)
                 bound = sig.bind(*args, **kwargs)
@@ -267,7 +284,7 @@ def validate_file_access(param: str = "filename") -> Callable[[F], F]:
                 if param not in bound.arguments:
                     return {
                         "status": "error",
-                        "message": f"'{param}' parameter not found in function arguments"
+                        "message": f"'{param}' parameter not found in function arguments",
                     }
 
                 file_path = os.path.abspath(bound.arguments[param])
@@ -278,7 +295,7 @@ def validate_file_access(param: str = "filename") -> Callable[[F], F]:
                     return {
                         "status": "error",
                         "message": f"Access denied: {dir_error}",
-                        "path": file_path
+                        "path": file_path,
                     }
 
                 # Validar permisos de escritura
@@ -287,7 +304,7 @@ def validate_file_access(param: str = "filename") -> Callable[[F], F]:
                     return {
                         "status": "error",
                         "message": f"Write access denied: {write_error}",
-                        "path": file_path
+                        "path": file_path,
                     }
 
                 return file_path
@@ -295,10 +312,11 @@ def validate_file_access(param: str = "filename") -> Callable[[F], F]:
             except Exception as e:
                 return {
                     "status": "error",
-                    "message": f"Error during file validation: {str(e)}"
+                    "message": f"Error during file validation: {str(e)}",
                 }
 
         if inspect.iscoroutinefunction(func):
+
             @functools.wraps(func)
             async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
                 result = _validate_file(args, kwargs)
@@ -310,12 +328,13 @@ def validate_file_access(param: str = "filename") -> Callable[[F], F]:
                     return {
                         "status": "error",
                         "message": f"Error in async function: {str(e)}",
-                        "path": result
+                        "path": result,
                     }
 
             return cast(F, async_wrapper)
 
         else:
+
             @functools.wraps(func)
             def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
                 result = _validate_file(args, kwargs)
@@ -327,7 +346,7 @@ def validate_file_access(param: str = "filename") -> Callable[[F], F]:
                     return {
                         "status": "error",
                         "message": f"Error in function: {str(e)}",
-                        "path": result
+                        "path": result,
                     }
 
             return cast(F, sync_wrapper)

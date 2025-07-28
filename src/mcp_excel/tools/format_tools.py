@@ -141,7 +141,6 @@ async def rename_worksheet(filename: str, old_name: str, new_name: str) -> str:
     filename = ensure_xlsx_extension(filename)
 
     try:
-
         result = rename_sheet(filename, old_name, new_name)
         return result["message"]
     except (ValidationError, SheetError) as e:
@@ -202,7 +201,6 @@ async def unmerge_cells(
     filename = ensure_xlsx_extension(filename)
 
     try:
-
         result = unmerge_range(filename, sheet_name, start_cell, end_cell)
         return result["message"]
     except (ValidationError, SheetError) as e:
@@ -231,7 +229,6 @@ async def copy_range(
     filename = ensure_xlsx_extension(filename)
 
     try:
-
         from src.mcp_excel.core.sheet import copy_range_operation
 
         result = copy_range_operation(
@@ -263,7 +260,6 @@ async def delete_range(
     filename = ensure_xlsx_extension(filename)
 
     try:
-
         from src.mcp_excel.core.sheet import delete_range_operation
 
         result = delete_range_operation(
@@ -289,7 +285,6 @@ async def validate_excel_range(
     filename = ensure_xlsx_extension(filename)
 
     try:
-
         range_str = start_cell if not end_cell else f"{start_cell}:{end_cell}"
         result = validate_range_impl(filename, sheet_name, range_str)
         return result["message"]
