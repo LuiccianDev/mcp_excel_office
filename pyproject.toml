@@ -90,7 +90,8 @@ ignore = [
     "E501",  # line too long, handled by black
     "B008",  # do not perform function calls in argument defaults
     "S101",  # use of assert detected (pytest uses assert)
-    "S110",  # raise exception in __init__ or any files 
+    "S110",  #! raise exception in __init__ or any files after remove
+    "S112",  #! use of assert detected (pytest uses assert) after remove
 ]
 
 [tool.ruff.lint.per-file-ignores]
