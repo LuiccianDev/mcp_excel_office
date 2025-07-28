@@ -37,7 +37,7 @@ def _is_path_in_allowed_directories(file_path: str) -> tuple[bool, str | None]:
 
 
 # Check if a file can be written to, including directory permissions
-def _check_file_writeable(filename: str) -> tuple[bool, str]:
+def _check_file_writeable(filename: str) -> tuple[bool, str | None]:
     """
     Check if a file can be written to, including directory permissions.
 
@@ -79,7 +79,7 @@ def _check_file_writeable(filename: str) -> tuple[bool, str]:
 
         # Test actual write operation
         try:
-            with open(abs_path, "a") as f:
+            with open(abs_path, "a"):
                 pass
             return True, ""
         except OSError as e:
@@ -186,7 +186,7 @@ def list_excel_files_in_directory(directory: str) -> list[dict]:
 
     except OSError as e:
         # Re-raise with more context
-        raise OSError(f"Error accessing directory '{directory}': {str(e)}")
+        raise OSError(f"Error accessing directory '{directory}': {str(e)}") from e
 
 
 # * Decorator to validate directory access
@@ -209,7 +209,7 @@ def validate_directory_access(param: str = "directory") -> Callable[[F], F]:
             if param not in bound.arguments:
                 return {"status": "error", "message": f"'{param}' argument not found."}
 
-            directory = os.path.abspath(bound.arguments[param])
+            directory: str = os.path.abspath(bound.arguments[param])
             allowed_dirs = _get_allowed_directories()
 
             if not any(
@@ -287,7 +287,7 @@ def validate_file_access(param: str = "filename") -> Callable[[F], F]:
                         "message": f"'{param}' parameter not found in function arguments",
                     }
 
-                file_path = os.path.abspath(bound.arguments[param])
+                file_path: str = os.path.abspath(bound.arguments[param])
 
                 # Validar directorio permitido
                 is_allowed, dir_error = _is_path_in_allowed_directories(file_path)

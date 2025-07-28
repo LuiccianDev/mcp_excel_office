@@ -80,6 +80,7 @@ def copy_range(
 
     if src_end_row is None:
         src_end_row = src_start_row
+    if src_end_col is None:
         src_end_col = src_start_col
 
     if target_start is None:
@@ -168,6 +169,7 @@ def delete_range(
 
     if end_row is None:
         end_row = start_row
+    if end_col is None:
         end_col = start_col
 
     for row in range(start_row, end_row + 1):
@@ -233,8 +235,8 @@ def copy_range_operation(
     source_start: str,
     source_end: str,
     target_start: str,
-    target_sheet: str = None,
-) -> dict:
+    target_sheet: str | None = None,
+) -> dict[str, Any]:
     """Copy a range of cells to another location."""
     try:
         wb = load_workbook(filename)
@@ -246,6 +248,8 @@ def copy_range_operation(
             start_row, start_col, end_row, end_col = parse_cell_range(
                 source_start, source_end
             )
+            if end_row is None or end_col is None:
+                return {"error": "Source end range is missing or invalid."}
         except ValueError as e:
             return {"error": f"Invalid source range: {str(e)}"}
         try:

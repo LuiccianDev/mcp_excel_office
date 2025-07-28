@@ -19,7 +19,8 @@ def validate_formula_in_cell_operation(
         if sheet_name not in wb.sheetnames:
             return {"error": f"Sheet '{sheet_name}' not found"}
         # Validar sintaxis de fórmula
-        is_valid, message = validate_formula(formula)
+        result: tuple[bool, str] = validate_formula(formula)
+        is_valid, message = result
         if not is_valid:
             return {"error": f"Invalid formula syntax: {message}"}
         # Validar referencias de celda en la fórmula
@@ -78,6 +79,9 @@ def validate_formula_in_cell_operation(
             }
     except Exception as e:
         return {"error": str(e)}
+
+    # Fallback de seguridad si ningún return anterior se ejecutó usando mypy or ruff
+    return {"error": "Unknown error: no result was returned from the function logic"}
 
 
 def validate_range_in_sheet_operation(
