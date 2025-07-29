@@ -1,20 +1,52 @@
 # MCP Office Excel Server 2
 
-Servidor MCP para integración con Microsoft Excel que permite crear, modificar y gestionar archivos de Excel a través de herramientas MCP.
+Servidor MCP (Model Context Protocol) para integración con Microsoft Excel que permite crear, modificar y gestionar archivos de Excel de manera programática a través de herramientas MCP estandarizadas.
 
-## Instalación
+## Características Principales
+
+- **Procesamiento de Hojas de Cálculo**: Creación, lectura y modificación de archivos Excel (.xlsx)
+- **Operaciones de Formato**: Aplicación de estilos, formatos y fórmulas
+- **Integración MCP**: Compatible con el Modelo de Contexto de Protocolo para integración con otros servicios
+- **Alto Rendimiento**: Optimizado para manejar archivos grandes de manera eficiente
+- **Seguro**: Validación de acceso a archivos y manejo de errores robusto
+
+## 🚀 Instalación
+
+### Requisitos Previos
+- Python 3.11 o superior
+- Gestor de paquetes UV (recomendado) o pip
+
+### Instalación con UV (Recomendado)
 
 ```bash
 # Instalar dependencias usando uv
 uv sync
 
-# O usar el script helper
+# Instalar en modo desarrollo (incluye dependencias de desarrollo)
+uv sync --dev
+
+# Instalar en modo producción (solo dependencias necesarias)
+uv sync --production
+```
+
+### Instalación con pip
+
+```bash
+# Instalar dependencias
+pip install .
+
+# Instalar en modo desarrollo
+pip install -e ".[dev]"
+```
+
+### Scripts de Ayuda
+
+```bash
+# Usar el script helper para instalación
 python scripts.py install
 ```
 
-## Desarrollo
 
-### Formateo de Código
 
 Este proyecto usa `black` como formateador de código Python.
 
@@ -65,24 +97,79 @@ La configuración de black está en `pyproject.toml`:
 - Target Python: 3.11+
 - Excluye directorios estándar (cache, git, etc.)
 
-## Scripts Disponibles
+## 🛠 Scripts Disponibles
 
-- `python scripts.py format` - Formatear código
-- `python scripts.py check` - Verificar formato
-- `python scripts.py run` - Ejecutar servidor
+### Básicos
+- `python scripts.py format` - Formatear código automáticamente
+- `python scripts.py check` - Verificar formato del código
+- `python scripts.py run` - Iniciar el servidor MCP
 - `python scripts.py install` - Instalar dependencias
 
-## Estructura del Proyecto
+### Herramientas MCP
+- `mcp_server_excel` - Inicia el servidor MCP para Excel
+  ```bash
+  mcp_server_excel
+  ```
 
+### Pruebas
+```bash
+# Ejecutar pruebas unitarias
+pytest
+
+# Ejecutar pruebas con cobertura
+pytest --cov=mcp_excel_server tests/
 ```
-mcp-office-excel-2/
-├── mcp_excel_server/     # Código principal del servidor
-│   ├── core/            # Funcionalidades principales
-│   ├── tools/           # Herramientas MCP
-│   ├── utils/           # Utilidades
-│   └── exceptions/      # Excepciones personalizadas
-├── scripts.py           # Scripts de desarrollo
-├── format.py           # Script de formateo
-├── pyproject.toml      # Configuración del proyecto
-└── README.md           # Este archivo
+
+## 🗂 Estructura del Proyecto
+
+```text
+mcp-office-excel/
+├── mcp_excel/               # Código principal del servidor
+│   ├── core/                # Funcionalidades principales
+│   ├── tools/               # Herramientas MCP
+│   ├── utils/               # Utilidades
+│   └── exceptions/          # Excepciones personalizadas
+├── tests/                   # Pruebas unitarias
+├── format.py                # Script de formateo
+├── pyproject.toml           # Configuración del proyecto
+├── TOOLS.md                 # Documentación de herramientas MCP
+└── README.md                # Documentación principal
 ```
+
+## 🔧 Herramientas MCP Disponibles
+
+### Operaciones de Libro de Trabajo
+- `create_workbook`: Crea un nuevo libro de Excel
+- `create_worksheet`: Añade una nueva hoja a un libro existente
+- `get_workbook_metadata`: Obtiene metadatos del libro
+
+### Operaciones de Datos
+- `write_data_to_excel`: Escribe datos en una hoja de cálculo
+- `read_data_from_excel`: Lee datos de una hoja de cálculo
+
+### Operaciones de Formato
+- `format_range`: Aplica formato a un rango de celdas
+- `set_column_width`: Ajusta el ancho de columnas
+- `set_row_height`: Ajusta la altura de filas
+
+Para una documentación detallada de todas las herramientas MCP, consulte [TOOLS.md](TOOLS.md).
+
+## 🌟 Características MCP
+
+### Protocolo de Contexto
+- Integración con el ecosistema MCP
+- Interfaz estandarizada para operaciones de Excel
+- Manejo de errores consistente
+
+### Seguridad
+- Validación de rutas de archivos
+- Manejo seguro de memoria
+- Protección contra inyección de fórmulas
+
+## 📄 Licencia
+
+Este proyecto está bajo la licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
+
+## 🤝 Contribuir
+
+Las contribuciones son bienvenidas. Por favor, lea las [pautas de contribución](CONTRIBUTING.md) antes de enviar cambios.

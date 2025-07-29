@@ -1,6 +1,15 @@
 # Excel MCP Server Tools
 
-This document provides detailed information about all available tools in the Excel MCP server.
+This document provides detailed information about all available tools in the Excel MCP server, organized by functional categories.
+
+## Table of Contents
+- [Workbook Operations](#workbook-operations)
+- [Worksheet Operations](#worksheet-operations)
+- [Data Operations](#data-operations)
+- [Formatting Operations](#formatting-operations)
+- [Formula Operations](#formula-operations)
+- [Database Operations](#database-operations)
+- [Chart and Pivot Table Operations](#chart-and-pivot-table-operations)
 
 ## Workbook Operations
 
@@ -12,32 +21,83 @@ Creates a new Excel workbook.
 create_workbook(filepath: str) -> str
 ```
 
-- `filepath`: Path where to create workbook
+- `filepath`: Path where to create the workbook (with or without .xlsx extension)
 - Returns: Success message with created file path
 
-### create_worksheet
+### list_excel_documents
 
-Creates a new worksheet in an existing workbook.
+Lists all Excel documents in a directory.
 
 ```python
-create_worksheet(filepath: str, sheet_name: str) -> str
+list_excel_documents(directory: str) -> List[Dict[str, str]]
 ```
 
-- `filepath`: Path to Excel file
-- `sheet_name`: Name for the new worksheet
-- Returns: Success message
+- `directory`: Path to the directory to search in
+- Returns: List of dictionaries containing file information (name, path, size, etc.)
 
 ### get_workbook_metadata
 
 Get metadata about workbook including sheets and ranges.
 
 ```python
-get_workbook_metadata(filepath: str, include_ranges: bool = False) -> str
+get_workbook_metadata(filepath: str, include_ranges: bool = False) -> Dict[str, Any]
 ```
 
 - `filepath`: Path to Excel file
-- `include_ranges`: Whether to include range information
-- Returns: String representation of workbook metadata
+- `include_ranges`: Whether to include range information (default: False)
+- Returns: Dictionary containing workbook metadata
+
+## Worksheet Operations
+
+### create_worksheet
+
+Creates a new worksheet in an existing workbook.
+
+```python
+create_worksheet(filepath: str, sheet_name: str) -> Dict[str, Any]
+```
+
+- `filepath`: Path to Excel file
+- `sheet_name`: Name for the new worksheet
+- Returns: Dictionary with operation status and details
+
+### copy_worksheet
+
+Creates a copy of an existing worksheet.
+
+```python
+copy_worksheet(filepath: str, source_sheet: str, target_sheet: str) -> Dict[str, Any]
+```
+
+- `filepath`: Path to Excel file
+- `source_sheet`: Name of the sheet to copy
+- `target_sheet`: Name for the new sheet
+- Returns: Dictionary with operation status
+
+### delete_worksheet
+
+Deletes a worksheet from a workbook.
+
+```python
+delete_worksheet(filepath: str, sheet_name: str) -> Dict[str, Any]
+```
+
+- `filepath`: Path to Excel file
+- `sheet_name`: Name of the sheet to delete
+- Returns: Dictionary with operation status
+
+### rename_worksheet
+
+Renames an existing worksheet.
+
+```python
+rename_worksheet(filepath: str, old_name: str, new_name: str) -> Dict[str, Any]
+```
+
+- `filepath`: Path to Excel file
+- `old_name`: Current name of the sheet
+- `new_name`: New name for the sheet
+- Returns: Dictionary with operation status
 
 ## Data Operations
 
@@ -145,6 +205,53 @@ unmerge_cells(filepath: str, sheet_name: str, start_cell: str, end_cell: str) ->
 - `end_cell`: Ending cell of range
 - Returns: Success message
 
+### copy_range
+
+Copy a range of cells to another location.
+
+```python
+copy_range(
+    filepath: str,
+    sheet_name: str,
+    source_range: str,
+    target_cell: str,
+    include_formatting: bool = True
+) -> str
+```
+
+- `filepath`: Path to Excel file
+- `sheet_name`: Worksheet name
+- `source_range`: Range to copy (e.g., "A1:B10")
+- `target_cell`: Top-left cell of target range
+- `include_formatting`: Whether to copy cell formatting (default: True)
+- Returns: Success message
+
+### delete_range
+
+Clear contents and formatting from a range of cells.
+
+```python
+delete_range(filepath: str, sheet_name: str, cell_range: str) -> str
+```
+
+- `filepath`: Path to Excel file
+- `sheet_name`: Worksheet name
+- `cell_range`: Range to clear (e.g., "A1:B10")
+- Returns: Success message
+
+### validate_excel_range
+
+Validate if a range reference is valid for the specified worksheet.
+
+```python
+validate_excel_range(filepath: str, sheet_name: str, cell_range: str) -> Dict[str, Any]
+```
+
+- `filepath`: Path to Excel file
+- `sheet_name`: Worksheet name
+- `cell_range`: Range to validate (e.g., "A1:B10")
+- Returns: Dictionary with validation result and details
+
 ## Formula Operations
 
 ### apply_formula
@@ -166,20 +273,62 @@ apply_formula(filepath: str, sheet_name: str, cell: str, formula: str) -> str
 Validate Excel formula syntax without applying it.
 
 ```python
-validate_formula_syntax(filepath: str, sheet_name: str, cell: str, formula: str) -> str
+validate_formula_syntax(filepath: str, sheet_name: str, cell: str, formula: str) -> Dict[str, Any]
 ```
 
 - `filepath`: Path to Excel file
 - `sheet_name`: Target worksheet name
 - `cell`: Target cell reference
 - `formula`: Excel formula to validate
-- Returns: Validation result message
+- Returns: Dictionary with validation result and details
 
-## Chart Operations
+## Database Operations
+
+### fetch_and_insert_db_to_excel
+
+Fetch data from a database and insert it into an Excel worksheet.
+
+```python
+fetch_and_insert_db_to_excel(
+    connection_string: str,
+    query: str,
+    filename: str,
+    sheet_name: str
+) -> str
+```
+
+- `connection_string`: Database connection string
+- `query`: SQL SELECT query to fetch data
+- `filename`: Path to Excel file
+- `sheet_name`: Target worksheet name
+- Returns: Status message
+
+### insert_calculated_data_to_db
+
+Insert calculated data from Excel into a database.
+
+```python
+insert_calculated_data_to_db(
+    connection_string: str,
+    table_name: str,
+    filename: str,
+    sheet_name: str,
+    range_ref: str
+) -> str
+```
+
+- `connection_string`: Database connection string
+- `table_name`: Target database table
+- `filename`: Path to Excel file
+- `sheet_name`: Source worksheet name
+- `range_ref`: Cell range containing data to insert
+- Returns: Status message
+
+## Chart and Pivot Table Operations
 
 ### create_chart
 
-Create chart in worksheet.
+Create a chart in the specified worksheet.
 
 ```python
 create_chart(
@@ -191,149 +340,44 @@ create_chart(
     title: str = "",
     x_axis: str = "",
     y_axis: str = ""
-) -> str
+) -> Dict[str, Any]
 ```
 
 - `filepath`: Path to Excel file
 - `sheet_name`: Target worksheet name
-- `data_range`: Range containing chart data
-- `chart_type`: Type of chart (line, bar, pie, scatter, area)
-- `target_cell`: Cell where to place chart
-- `title`: Optional chart title
-- `x_axis`: Optional X-axis label
-- `y_axis`: Optional Y-axis label
-- Returns: Success message
-
-## Pivot Table Operations
+- `data_range`: Range containing chart data (e.g., "A1:B10")
+- `chart_type`: Type of chart (e.g., "line", "bar", "pie", "scatter", "area")
+- `target_cell`: Cell where to place the top-left corner of the chart
+- `title`: Chart title (optional)
+- `x_axis`: X-axis title (optional)
+- `y_axis`: Y-axis title (optional)
+- Returns: Dictionary with operation status
 
 ### create_pivot_table
 
-Create pivot table in worksheet.
+Create a pivot table in the specified worksheet.
 
 ```python
 create_pivot_table(
     filepath: str,
-    sheet_name: str,
+    source_sheet: str,
+    target_sheet: str,
     data_range: str,
-    target_cell: str,
     rows: List[str],
-    values: List[str],
     columns: List[str] = None,
-    agg_func: str = "mean"
-) -> str
+    values: List[Tuple[str, str]] = None,
+    filters: List[str] = None,
+    pivot_table_name: str = "PivotTable1"
+) -> Dict[str, Any]
 ```
 
 - `filepath`: Path to Excel file
-- `sheet_name`: Target worksheet name
-- `data_range`: Range containing source data
-- `target_cell`: Cell where to place pivot table
-- `rows`: Fields for row labels
-- `values`: Fields for values
-- `columns`: Optional fields for column labels
-- `agg_func`: Aggregation function (sum, count, average, max, min)
-- Returns: Success message
-
-## Worksheet Operations
-
-### copy_worksheet
-
-Copy worksheet within workbook.
-
-```python
-copy_worksheet(filepath: str, source_sheet: str, target_sheet: str) -> str
-```
-
-- `filepath`: Path to Excel file
-- `source_sheet`: Name of sheet to copy
-- `target_sheet`: Name for new sheet
-- Returns: Success message
-
-### delete_worksheet
-
-Delete worksheet from workbook.
-
-```python
-delete_worksheet(filepath: str, sheet_name: str) -> str
-```
-
-- `filepath`: Path to Excel file
-- `sheet_name`: Name of sheet to delete
-- Returns: Success message
-
-### rename_worksheet
-
-Rename worksheet in workbook.
-
-```python
-rename_worksheet(filepath: str, old_name: str, new_name: str) -> str
-```
-
-- `filepath`: Path to Excel file
-- `old_name`: Current sheet name
-- `new_name`: New sheet name
-- Returns: Success message
-
-## Range Operations
-
-### copy_range
-
-Copy a range of cells to another location.
-
-```python
-copy_range(
-    filepath: str,
-    sheet_name: str,
-    source_start: str,
-    source_end: str,
-    target_start: str,
-    target_sheet: str = None
-) -> str
-```
-
-- `filepath`: Path to Excel file
-- `sheet_name`: Source worksheet name
-- `source_start`: Starting cell of source range
-- `source_end`: Ending cell of source range
-- `target_start`: Starting cell for paste
-- `target_sheet`: Optional target worksheet name
-- Returns: Success message
-
-### delete_range
-
-Delete a range of cells and shift remaining cells.
-
-```python
-delete_range(
-    filepath: str,
-    sheet_name: str,
-    start_cell: str,
-    end_cell: str,
-    shift_direction: str = "up"
-) -> str
-```
-
-- `filepath`: Path to Excel file
-- `sheet_name`: Target worksheet name
-- `start_cell`: Starting cell of range
-- `end_cell`: Ending cell of range
-- `shift_direction`: Direction to shift cells ("up" or "left")
-- Returns: Success message
-
-### validate_excel_range
-
-Validate if a range exists and is properly formatted.
-
-```python
-validate_excel_range(
-    filepath: str,
-    sheet_name: str,
-    start_cell: str,
-    end_cell: str = None
-) -> str
-```
-
-- `filepath`: Path to Excel file
-- `sheet_name`: Target worksheet name
-- `start_cell`: Starting cell of range
-- `end_cell`: Optional ending cell of range
-- Returns: Validation result message
+- `source_sheet`: Name of the sheet containing source data
+- `target_sheet`: Name of the sheet where to create the pivot table
+- `data_range`: Range containing source data (e.g., "A1:D100")
+- `rows`: List of field names to use as rows
+- `columns`: List of field names to use as columns (optional)
+- `values`: List of tuples (field_name, aggregate_function) for values
+- `filters`: List of field names to use as filters (optional)
+- `pivot_table_name`: Name for the pivot table (default: "PivotTable1")
+- Returns: Dictionary with operation status
