@@ -35,15 +35,20 @@ dependencies = [
 [project.scripts]
 mcp_server_excel = "mcp_excel:create_server"
 
+# uv add --dev modulo
 [dependency-groups]
 dev = [
     "black>=25.1.0",
     "isort>=6.0.1",
     "mypy>=1.17.0",
-    "pytest>=8.4.1",
-    "pytest-asyncio>=1.1.0",
-    "pytest-cov>=6.2.1",
+    "pre-commit>=4.2.0",
     "ruff>=0.12.5",
+]
+# uv add --group test modulo
+test = [
+    "pytest>=8.4.1",
+    "pytest-async>=0.1.1",
+    "pytest-cov>=6.2.1",
 ]
 # Configuración de Black (formateador)
 [tool.black]
@@ -108,6 +113,7 @@ select = [
     "S",  # bandit
 ]
 ignore = [
+    "W291",  # trailing whitespace
     "E501",  # line too long, handled by black
     "B008",  # do not perform function calls in argument defaults
     "S101",  # use of assert detected (pytest uses assert)
