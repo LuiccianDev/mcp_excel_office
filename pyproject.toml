@@ -54,7 +54,7 @@ test = [
 [tool.black]
 line-length = 88
 target-version = ['py311']
-include = '\.pyi?$'
+include = 'src/.*\.py$'
 skip-string-normalization = true # Evita la normalización de cadenas
 extend-exclude = '''
 # Directorios o archivos a excluir
@@ -76,6 +76,7 @@ force_grid_wrap = 0
 use_parentheses = true
 ensure_newline_before_comments = true
 skip_glob = ["__pycache__", ".git", ".venv", "build", "dist"]
+src_paths = ["src"]
 
 # Configuración de MyPy (verificador de tipos)
 [tool.mypy]
@@ -94,6 +95,8 @@ warn_unreachable = true
 strict_equality = true
 show_error_codes = true
 ignore_missing_imports = true
+exclude = ["tests", "build", ".venv"]
+files = ["src"]
 
 # Configuración de Ruff (linting y formateo)
 [tool.ruff]
