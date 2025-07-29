@@ -6,8 +6,8 @@ import functools
 import inspect
 import os
 import shutil
-from pathlib import Path
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any, TypeVar, cast
 
 F = TypeVar("F", bound=Callable[..., Any])
@@ -35,24 +35,23 @@ def _is_path_in_allowed_directories(file_path: str) -> tuple[bool, str | None]:
         False,
         f"Path '{file_path}' is not in allowed directories: {', '.join(allowed_dirs)}",
     )
+
+
 def resolve_safe_path(filename: str | Path) -> Path:
     """Resolve file path to an allowed directory.
-    
     Args:
         filename: File name or path to resolve.
-        
     Returns:
         Path object pointing to an allowed directory.
-        
     Raises:
         PermissionError: If no allowed directories are available.
     """
     path = Path(filename)
     allowed_dirs = _get_allowed_directories()
-    
+
     if not allowed_dirs:
         raise PermissionError("No allowed directories available for file operations")
-    
+
     # If absolute path, validate it's in an allowed directory
     if path.is_absolute():
         for allowed_dir in allowed_dirs:
@@ -62,10 +61,10 @@ def resolve_safe_path(filename: str | Path) -> Path:
                 return path  # Path is allowed
             except ValueError:
                 continue  # Path is not within this allowed directory
-        
+
         # If not in any allowed directory, use filename in first allowed dir
         return Path(allowed_dirs[0]) / path.name
-    
+
     # If relative path, use first allowed directory
     return Path(allowed_dirs[0]) / filename
 
@@ -74,7 +73,6 @@ def resolve_safe_path(filename: str | Path) -> Path:
 def _check_file_writeable(filename: str) -> tuple[bool, str | None]:
     """
     Check if a file can be written to, including directory permissions.
-
     This function handles several scenarios:
     - File doesn't exist: checks if parent directory is writeable
     - File exists: checks if file is writeable

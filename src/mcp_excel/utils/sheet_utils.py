@@ -1,8 +1,7 @@
-from copy import copy
 from typing import Any
 
 from openpyxl import load_workbook
-from openpyxl.styles import Border, Font, PatternFill, Side
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import column_index_from_string, get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -155,7 +154,20 @@ def copy_range(
                 if source_cell.number_format:
                     target_cell.number_format = source_cell.number_format
                 if source_cell.alignment:
-                    target_cell.alignment = source_cell.alignment
+                    # Create a new Alignment object to avoid StyleProxy issues
+                    alignment = source_cell.alignment
+                    # Create alignment with correct parameter names
+                    target_cell.alignment = Alignment(
+                        horizontal=alignment.horizontal,
+                        vertical=alignment.vertical,
+                        textRotation=alignment.textRotation,
+                        wrapText=alignment.wrapText,
+                        shrinkToFit=alignment.shrinkToFit,
+                        indent=alignment.indent,
+                        relativeIndent=alignment.relativeIndent,
+                        justifyLastLine=alignment.justifyLastLine,
+                        readingOrder=alignment.readingOrder,
+                    )
 
             except Exception:
                 continue
@@ -180,7 +192,8 @@ def delete_range(
             cell.border = Border()
             cell.fill = PatternFill()
             cell.number_format = "General"
-            cell.alignment = None
+            # Reset alignment to default instead of None
+            cell.alignment = Alignment()
 
 
 def merge_range(
@@ -267,7 +280,43 @@ def copy_range_operation(
                 target_cell = target_ws.cell(row=i + row_offset, column=j + col_offset)
                 target_cell.value = source_cell.value
                 if source_cell.has_style:
-                    target_cell._style = copy(source_cell._style)
+                    # Safely copy cell style attributes
+                    # Create new style objects instead of copying StyleProxy
+                    if source_cell.font:
+                        target_cell.font = Font(
+                            name=source_cell.font.name,
+                            size=source_cell.font.size,
+                            bold=source_cell.font.bold,
+                            italic=source_cell.font.italic,
+                            color=source_cell.font.color,
+                        )
+                    if source_cell.border:
+                        target_cell.border = Border(
+                            left=source_cell.border.left,
+                            right=source_cell.border.right,
+                            top=source_cell.border.top,
+                            bottom=source_cell.border.bottom,
+                        )
+                    if source_cell.fill:
+                        target_cell.fill = PatternFill(
+                            fill_type=source_cell.fill.fill_type,
+                            fgColor=source_cell.fill.fgColor,
+                            bgColor=source_cell.fill.bgColor,
+                        )
+                    target_cell.number_format = source_cell.number_format
+                    if source_cell.alignment:
+                        align = source_cell.alignment
+                        target_cell.alignment = Alignment(
+                            horizontal=align.horizontal,
+                            vertical=align.vertical,
+                            textRotation=align.textRotation,
+                            wrapText=align.wrapText,
+                            shrinkToFit=align.shrinkToFit,
+                            indent=align.indent,
+                            relativeIndent=align.relativeIndent,
+                            justifyLastLine=align.justifyLastLine,
+                            readingOrder=align.readingOrder,
+                        )
         wb.save(filename)
         return {"message": "Range copied successfully"}
     except Exception as e:

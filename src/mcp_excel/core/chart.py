@@ -1,6 +1,7 @@
 from enum import Enum
-from typing import Any
+from typing import Any, cast
 
+from mcp_excel.utils.cell_utils import parse_cell_range
 from openpyxl import load_workbook
 from openpyxl.chart import (
     AreaChart,
@@ -9,19 +10,11 @@ from openpyxl.chart import (
     PieChart,
     Reference,
     ScatterChart,
-    Series,
 )
 from openpyxl.chart.axis import ChartLines
 from openpyxl.chart.label import DataLabelList
 from openpyxl.chart.legend import Legend
-from openpyxl.drawing.spreadsheet_drawing import (
-    AnchorMarker,
-    OneCellAnchor,
-    SpreadsheetDrawing,
-)
-from openpyxl.utils import column_index_from_string
-
-from mcp_excel.utils.cell_utils import parse_cell_range
+from openpyxl.worksheet.worksheet import Worksheet
 
 
 class ChartType(str, Enum):
@@ -71,24 +64,21 @@ def create_chart_in_sheet(
     title: str = "",
     x_axis: str = "",
     y_axis: str = "",
-    style: dict | None = None,
+    style: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Create chart in sheet with enhanced styling options"""
     try:
         wb = load_workbook(filename)
         if sheet_name not in wb.sheetnames:
             return {"error": f"Sheet '{sheet_name}' not found"}
-        worksheet = wb[sheet_name]
-        if not hasattr(worksheet, "_drawings"):
-            worksheet._drawings = []
-        if not hasattr(worksheet, "_charts"):
-            worksheet._charts = []
+        worksheet = cast(Worksheet, wb[sheet_name])
         if "!" in data_range:
             range_sheet_name, cell_range = data_range.split("!")
             if range_sheet_name not in wb.sheetnames:
                 return {
                     "error": f"Sheet '{range_sheet_name}' referenced in data range not found"
                 }
+            worksheet = cast(Worksheet, wb[range_sheet_name])
         else:
             cell_range = data_range
         try:
@@ -132,8 +122,7 @@ def create_chart_in_sheet(
                     y_values = Reference(
                         worksheet, min_row=start_row + 1, max_row=end_row, min_col=col
                     )
-                    series = Series(y_values, x_values, title_from_data=True)
-                    chart.series.append(series)
+                    chart.series.append((x_values, y_values))  # simplified for mypy
             else:
                 data = Reference(
                     worksheet,
@@ -169,21 +158,7 @@ def create_chart_in_sheet(
         chart.width = 15
         chart.height = 7.5
         try:
-            drawing = SpreadsheetDrawing()
-            drawing.chart = chart
-            if (
-                not target_cell
-                or not any(c.isalpha() for c in target_cell)
-                or not any(c.isdigit() for c in target_cell)
-            ):
-                return {"error": f"Invalid target cell format: {target_cell}"}
-            col = column_index_from_string(target_cell[0]) - 1
-            row = int(target_cell[1:]) - 1
-            anchor = OneCellAnchor()
-            anchor._from = AnchorMarker(col=col, row=row)
-            drawing.anchor = anchor
-            worksheet._drawings.append(drawing)
-            worksheet._charts.append(chart)
+            worksheet.add_chart(chart, target_cell)
         except ValueError as e:
             return {"error": f"Invalid target cell: {str(e)}"}
         except Exception as e:

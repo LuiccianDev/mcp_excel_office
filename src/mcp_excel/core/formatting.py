@@ -1,5 +1,7 @@
-from typing import Any
+from typing import Any, Literal, TypedDict
 
+from mcp_excel.core.workbook import get_or_create_workbook
+from mcp_excel.utils.cell_utils import parse_cell_range, validate_cell_reference
 from openpyxl.formatting.rule import (
     CellIsRule,
     ColorScaleRule,
@@ -17,8 +19,37 @@ from openpyxl.styles import (
     Side,
 )
 
-from mcp_excel.core.workbook import get_or_create_workbook
-from mcp_excel.utils.cell_utils import parse_cell_range, validate_cell_reference
+# Define valid border styles
+BorderStyle = Literal[
+    'dashDot',
+    'dashDotDot',
+    'dashed',
+    'dotted',
+    'double',
+    'hair',
+    'medium',
+    'mediumDashDot',
+    'mediumDashDotDot',
+    'mediumDashed',
+    'slantDashDot',
+    'thick',
+    'thin',
+    'none',
+    None,
+]
+
+# Define valid underline styles
+UnderlineStyle = Literal[
+    'single', 'double', 'singleAccounting', 'doubleAccounting', 'none'
+]
+
+
+class FontArgs(TypedDict, total=False):
+    bold: bool
+    italic: bool
+    underline: UnderlineStyle | None
+    size: int
+    color: Color
 
 
 def format_range(
@@ -32,7 +63,7 @@ def format_range(
     font_size: int | None = None,
     font_color: str | None = None,
     bg_color: str | None = None,
-    border_style: str | None = None,
+    border_style: BorderStyle = None,
     border_color: str | None = None,
     number_format: str | None = None,
     alignment: str | None = None,
@@ -61,8 +92,8 @@ def format_range(
             end_row = start_row
         if end_col is None:
             end_col = start_col
-        # Font
-        font_args: dict[str, bool | str | None | int] = {
+        # Font configuration with proper typing
+        font_args: FontArgs = {
             "bold": bold,
             "italic": italic,
             "underline": "single" if underline else None,
@@ -74,8 +105,10 @@ def format_range(
                 font_color if font_color.startswith("FF") else f"FF{font_color}"
             )
             font_args["color"] = Color(rgb=font_color)
+
         font = Font(**font_args)
-        # Fill
+
+        # Fill configuration
         fill = None
         if bg_color is not None:
             bg_color = bg_color if bg_color.startswith("FF") else f"FF{bg_color}"
@@ -84,23 +117,27 @@ def format_range(
                 end_color=Color(rgb=bg_color),
                 fill_type="solid",
             )
-        # Border
+
+        # Border configuration
         border = None
-        if border_style is not None:
+        if border_style is not None and border_style != 'none':
             border_color = border_color if border_color else "000000"
             border_color = (
                 border_color if border_color.startswith("FF") else f"FF{border_color}"
             )
             side = Side(style=border_style, color=Color(rgb=border_color))
             border = Border(left=side, right=side, top=side, bottom=side)
+
         # Alignment
         align = None
         if alignment is not None or wrap_text:
             align = Alignment(
                 horizontal=alignment, vertical="center", wrap_text=wrap_text
             )
+
         # Protection
         protect = Protection(**protection) if protection else None
+
         # Aplicar formato
         for row in range(start_row, end_row + 1):
             for col in range(start_col, end_col + 1):

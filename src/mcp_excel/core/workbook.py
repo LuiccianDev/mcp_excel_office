@@ -9,6 +9,7 @@ from typing import Any, TypedDict
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.worksheet import Worksheet
 
 from .exceptions import SheetExistsError, ValidationError, WorkbookError, WorksheetError
 
@@ -74,7 +75,10 @@ def _create_initial_worksheet(workbook: Workbook, sheet_name: str) -> None:
     """
     try:
         # Remove default sheet and create a new one with the specified name
-        workbook.remove(workbook.active)
+        default_sheet = workbook.active
+
+        if isinstance(default_sheet, Worksheet):
+            workbook.remove(default_sheet)
         workbook.create_sheet(sheet_name)
     except Exception as e:
         raise WorksheetError(f"Failed to create initial worksheet: {e}") from e

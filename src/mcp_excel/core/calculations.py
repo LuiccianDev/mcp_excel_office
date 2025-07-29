@@ -7,12 +7,11 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Final
 
-from openpyxl.worksheet.worksheet import Worksheet
-
 from mcp_excel.core.exceptions import FormulaError, ValidationError
 from mcp_excel.core.workbook import get_or_create_workbook
 from mcp_excel.utils.cell_utils import validate_cell_reference
 from mcp_excel.utils.validation_utils import validate_formula
+from openpyxl.worksheet.worksheet import Worksheet
 
 # Constants
 FORMULA_PREFIX: Final[str] = "="

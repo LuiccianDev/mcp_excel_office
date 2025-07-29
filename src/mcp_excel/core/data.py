@@ -7,11 +7,13 @@ writing data, and detecting headers, following the Model Context Protocol (MCP) 
 from pathlib import Path
 from typing import Any, TypedDict
 
+from mcp_excel.utils.cell_utils import parse_cell_range
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
+from openpyxl.workbook.workbook import Workbook as OpenpyxlWorkbook
+from openpyxl.worksheet._read_only import ReadOnlyWorksheet
+from openpyxl.worksheet._write_only import WriteOnlyWorksheet
 from openpyxl.worksheet.worksheet import Worksheet
-
-from mcp_excel.utils.cell_utils import parse_cell_range
 
 from .exceptions import (
     DataError,
@@ -39,7 +41,7 @@ class RangeCoordinates(TypedDict):
     end_col: int
 
 
-def _get_worksheet(workbook: Any, sheet_name: str) -> Worksheet:
+def _get_worksheet(workbook: OpenpyxlWorkbook, sheet_name: str) -> Worksheet:
     """Get a worksheet by name, raising appropriate exceptions.
 
     Args:
@@ -252,7 +254,13 @@ def write_data(
             else:
                 wb = Workbook()
                 # Remove default sheet if it exists
-                if wb.sheetnames:
+                if (
+                    wb.sheetnames
+                    and wb.active
+                    and isinstance(
+                        wb.active, Worksheet | ReadOnlyWorksheet | WriteOnlyWorksheet
+                    )
+                ):
                     wb.remove(wb.active)
         except Exception as e:
             raise WorkbookError(f"Failed to access workbook: {str(e)}") from e

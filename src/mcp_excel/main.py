@@ -1,5 +1,4 @@
 from mcp.server.fastmcp import FastMCP
-
 from mcp_excel.config import load_config
 from mcp_excel.tools.register_tools import register_all_tools
 
