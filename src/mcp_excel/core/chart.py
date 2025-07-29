@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import Any, cast
 
-from mcp_excel.utils.cell_utils import parse_cell_range
 from openpyxl import load_workbook
 from openpyxl.chart import (
     AreaChart,
@@ -15,6 +14,8 @@ from openpyxl.chart.axis import ChartLines
 from openpyxl.chart.label import DataLabelList
 from openpyxl.chart.legend import Legend
 from openpyxl.worksheet.worksheet import Worksheet
+
+from mcp_excel.utils.cell_utils import parse_cell_range
 
 
 class ChartType(str, Enum):

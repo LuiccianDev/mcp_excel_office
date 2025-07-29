@@ -1,7 +1,5 @@
 from typing import Any, Literal, TypedDict
 
-from mcp_excel.core.workbook import get_or_create_workbook
-from mcp_excel.utils.cell_utils import parse_cell_range, validate_cell_reference
 from openpyxl.formatting.rule import (
     CellIsRule,
     ColorScaleRule,
@@ -18,6 +16,9 @@ from openpyxl.styles import (
     Protection,
     Side,
 )
+
+from mcp_excel.core.workbook import get_or_create_workbook
+from mcp_excel.utils.cell_utils import parse_cell_range, validate_cell_reference
 
 # Define valid border styles
 BorderStyle = Literal[
