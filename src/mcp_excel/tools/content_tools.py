@@ -1,3 +1,6 @@
+from typing import Any
+
+from mcp_excel.core.data import read_excel_range
 from mcp_excel.exceptions.exceptions import DataError, ValidationError
 from mcp_excel.utils.file_utils import ensure_xlsx_extension, validate_file_access
 
@@ -10,39 +13,62 @@ async def read_data_from_excel(
     start_cell: str = "A1",
     end_cell: str | None = None,
     preview_only: bool = False,
-) -> str:
+) -> dict[str, Any]:
     """
-    Read data from Excel worksheet.
+    Read data from an Excel worksheet and return it in a structured format.
 
     Args:
-        filename: Path to the workbook file
+        filename: Path to the Excel workbook file (.xlsx)
         sheet_name: Name of the worksheet to read data from
         start_cell: Cell reference where to start reading data (default is "A1")
-        end_cell: Cell reference where to stop reading data (default is None, which means read until the end)
-        preview_only: If True, only preview the data without loading the entire range
+        end_cell: Optional cell reference where to stop reading data
+        preview_only: If True, only returns a preview of the data
 
-    returns:
-        str: Data read from the specified range in the worksheet
+    Returns:
+        Dict containing:
+        - status: "success" or "error"
+        - data: 2D list of cell values (if successful)
+        - message: Error message (if error occurred)
     """
-    filename = ensure_xlsx_extension(filename)
-
     try:
-        from mcp_excel.core.data import read_excel_range
+        # Ensure filename has .xlsx extension
+        filename = ensure_xlsx_extension(filename)
 
-        result = read_excel_range(
-            filename, sheet_name, start_cell, end_cell, preview_only
+        # Read data from Excel
+        data = read_excel_range(
+            filename=filename,
+            sheet_name=sheet_name,
+            start_cell=start_cell,
+            end_cell=end_cell,
+            preview_only=preview_only,
         )
-        if isinstance(result, dict) and "error" in result:
-            return f"Error: {result['error']}"
-        if not result:
-            return "No data found in specified range"
-        # Opcional: convertir a JSON si se requiere interoperabilidad
-        # import json
-        # return json.dumps(result)
-        data_str = "\n".join([str(row) for row in result])
-        return data_str
+
+        # Handle empty results
+        if not data:
+            return {
+                "status": "error",
+                "message": "No data found in the specified range",
+                "data": [],
+            }
+
+        return {
+            "status": "success",
+            "data": data,
+            "message": f"Successfully read {len(data)} rows from {sheet_name}",
+        }
+
+    except FileNotFoundError:
+        return {
+            "status": "error",
+            "message": f"File not found: {filename}",
+            "data": None,
+        }
     except Exception as e:
-        return f"Error: Failed to read data: {str(e)}"
+        return {
+            "status": "error",
+            "message": f"Failed to read Excel data: {str(e)}",
+            "data": None,
+        }
 
 
 #! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
