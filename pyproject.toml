@@ -93,7 +93,7 @@ warn_unreachable = true
 strict_equality = true
 show_error_codes = true
 ignore_missing_imports = true
-exclude = ["tests", "build", ".venv"]
+exclude = ["tests/", "build", ".venv"]
 files = ["src"]
 
 # Configuración de Ruff (linting y formateo)
