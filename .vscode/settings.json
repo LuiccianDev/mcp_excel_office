@@ -7,8 +7,15 @@
     "**/venv": true,
     "**/.env": true,
     "**/checkpoints": true,
-    "**/.ruff_cache/**": true,
-    "**/node_modules": true,
-    ".venv": true
+    ".ruff_cache": true,
+    ".venv": true,
+    ".mypy_cache": true,
+    ".pytest_cache": true,
+    "htmlcov": true,
+    "htmlcov/**": true,
+    ".coverage": true,
+    ".coverage/**": true,
+    "coverage.xml": true,
+    "coverage.xml/**": true
   }
 }
