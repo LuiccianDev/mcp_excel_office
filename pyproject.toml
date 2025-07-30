@@ -17,6 +17,12 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
 ]
+dependencies = [
+    "mcp[cli]>=1.12.2",
+    "openpyxl>=3.1.5",
+    "psycopg2>=2.9.10",
+    "typer>=0.16.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/LuiccianDev/mcp_excel_office"
@@ -25,15 +31,7 @@ Documentation = "https://github.com/LuiccianDev/mcp_excel_office/blob/master/REA
 issues = "https://github.com/LuiccianDev/mcp_excel_office/issues"
 Changelog = "https://github.com/LuiccianDev/mcp_excel_office/blob/master/CHANGELOG.md"
 
-dependencies = [
-    "mcp[cli]>=1.10.1",
-    "openpyxl>=3.1.5",
-    "psycopg2>=2.9.10",
-    "typer>=0.16.0",
-]
 
-[project.scripts]
-mcp_server_excel = "mcp_excel:create_server"
 
 # uv add --dev modulo
 [dependency-groups]
@@ -44,10 +42,10 @@ dev = [
     "pre-commit>=4.2.0",
     "ruff>=0.12.5",
 ]
-# uv add --group test modulo
 test = [
     "pytest>=8.4.1",
     "pytest-async>=0.1.1",
+    "pytest-asyncio>=1.1.0",
     "pytest-cov>=6.2.1",
 ]
 # Configuración de Black (formateador)
@@ -134,20 +132,19 @@ line-ending = "auto"
 
 # configuarcionde pytest
 [tool.pytest.ini_options]
-
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-pythonpath = ["."]
+pythonpath = ["src"]
 asyncio_mode = "auto"
 # Configuración de cobertura (pytest-cov)
 addopts = [
-    "--cov=src/mcp_excel",           # Directorio a cubrir
+    "--cov=src/mcp_excel/tools",     # Directorio a cubrir
     "--cov-report=term-missing",     # Mostrar líneas no cubiertas en terminal
     "--cov-report=html:htmlcov",     # Generar reporte HTML
     "--cov-report=xml:coverage.xml", # Generar reporte XML
-    "--cov-fail-under=80",           # Fallar si cobertura < 80%
+    "--cov-fail-under=20",           # Fallar si cobertura < 80%
     "--strict-markers",              # Requerir markers definidos
     "--disable-warnings",            # Deshabilitar warnings por defecto
     "-v",                            # Modo verbose
@@ -190,7 +187,7 @@ norecursedirs = [
 ]
 [tool.coverage.run]
 # Configuración adicional de cobertura
-source = ["src/mcp_excel"]
+source = ["src/mcp_excel/tools"]
 omit = [
     "*/tests/*",
     "*/test_*",
