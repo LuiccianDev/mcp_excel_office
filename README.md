@@ -1,8 +1,26 @@
-# MCP Office Excel Server 2
+<div align="center">
+  <h1> MCP Office Excel Server</h1>
+  <p>
+    <em>Potente servidor para la manipulación programática de documentos Excel (.xlsx) mediante MCP</em>
+  </p>
 
+[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-brightgreen)](https://modelcontextprotocol.io)
+</Div>
 Servidor MCP (Model Context Protocol) para integración con Microsoft Excel que permite crear, modificar y gestionar archivos de Excel de manera programática a través de herramientas MCP estandarizadas.
 
-## Características Principales
+## 📋 Tabla de Contenidos
+
+- [✨ Características Principales](#-características-principales)
+- [🚀 Instalación](#-instalación)
+- [⚙️ Configuración](#️-configuración)
+- [📚 Uso](#-uso)
+- [🧪 Testing](#-testing)
+- [🤝 Contribuyendo](#-contribuyendo)
+
+## ✨ Características Principales
 
 - **Procesamiento de Hojas de Cálculo**: Creación, lectura y modificación de archivos Excel (.xlsx)
 - **Operaciones de Formato**: Aplicación de estilos, formatos y fórmulas
@@ -12,11 +30,11 @@ Servidor MCP (Model Context Protocol) para integración con Microsoft Excel que 
 
 ## 🚀 Instalación
 
-### Requisitos Previos
+### 📋 Requisitos Previos
 - Python 3.11 o superior
 - Gestor de paquetes UV (recomendado) o pip
 
-### Instalación con UV (Recomendado)
+### ⚡ Instalación con UV (Recomendado)
 
 ```bash
 # Instalar dependencias usando uv
@@ -29,7 +47,7 @@ uv sync --dev
 uv sync --production
 ```
 
-### Instalación con pip
+### 🐍 Instalación con pip
 
 ```bash
 # Instalar dependencias
@@ -39,7 +57,7 @@ pip install .
 pip install -e ".[dev]"
 ```
 
-### Scripts de Ayuda
+### 🛠️ Scripts de Ayuda
 
 ```bash
 # Usar el script helper para instalación
@@ -74,7 +92,7 @@ python scripts.py check
 python format.py --check
 ```
 
-### Ejecutar el servidor:
+## 🚀 Ejecutar el servidor
 ```bash
 # Usando uv
 uv run python main.py
@@ -83,21 +101,21 @@ uv run python main.py
 python scripts.py run
 ```
 
-## Configuración
+## ⚙️ Configuración
 
-### VS Code
+### 🔧 VS Code
 El proyecto incluye configuración automática para VS Code que:
 - Formatea automáticamente al guardar
 - Usa black como formateador
 - Organiza imports automáticamente
 
-### Black Configuration
+### ⚡ Configuración de Black
 La configuración de black está en `pyproject.toml`:
 - Longitud de línea: 88 caracteres
 - Target Python: 3.11+
 - Excluye directorios estándar (cache, git, etc.)
 
-## 🛠 Scripts Disponibles
+## 🛠️ Scripts Disponibles
 
 ### Básicos
 - `python scripts.py format` - Formatear código automáticamente
