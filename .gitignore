@@ -35,3 +35,4 @@ htmlcov/
 .pyre/
 .pytype/
 .pre-commit-config.yaml/
+documents/
