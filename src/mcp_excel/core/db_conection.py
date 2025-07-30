@@ -173,9 +173,15 @@ def validate_sql_query(query: str) -> bool:
 def clean_data(rows: list, columns: list) -> list:
     """
     Clean data rows: remove None, strip strings, and basic type normalization.
+    Validates that each row matches the expected number of columns.
     """
     cleaned = []
-    for row in rows:
+    expected_len = len(columns)
+
+    for i, row in enumerate(rows):
+        if len(row) != expected_len:
+            raise ValueError(f"Row {i} has {len(row)} values, expected {expected_len}.")
+
         cleaned_row = []
         for value in row:
             if isinstance(value, str):
@@ -185,6 +191,7 @@ def clean_data(rows: list, columns: list) -> list:
             else:
                 cleaned_row.append(value)
         cleaned.append(tuple(cleaned_row))
+
     return cleaned
 
 

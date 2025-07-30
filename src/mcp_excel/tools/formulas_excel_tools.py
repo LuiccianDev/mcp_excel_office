@@ -1,13 +1,12 @@
 # Import exceptions
 from typing import Any
 
+from mcp_excel.core.calculations import apply_formula
 from mcp_excel.exceptions.exceptions import CalculationError, ValidationError
 from mcp_excel.utils.file_utils import ensure_xlsx_extension, validate_file_access
 
 # Import core/tools/utils with new structure
-from mcp_excel.utils.validation_utils import (
-    validate_formula_in_cell_operation as validate_formula_impl,
-)
+from mcp_excel.utils.validation_utils import validate_formula_in_cell_operation
 
 
 async def validate_formula_syntax(
@@ -25,19 +24,19 @@ async def validate_formula_syntax(
     """
     filename = ensure_xlsx_extension(filename)
     try:
-        result: dict[str, Any] = validate_formula_impl(
+        result: dict[str, Any] = validate_formula_in_cell_operation(
             filename, sheet_name, cell, formula
         )
         return result
     except (ValidationError, CalculationError) as e:
-        return {"error": f"Error: {str(e)}"}
+        return {"status": "error", "message": f"Error: {str(e)}"}
     except Exception as e:
-        return {"error": f"Failed to validate formula: {str(e)}"}
+        return {"status": "error", "message": f"Failed to validate formula: {str(e)}"}
 
 
 #! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
 @validate_file_access("filename")  # type: ignore[misc]
-async def apply_formula(
+async def apply_formula_excel(
     filename: str,
     sheet_name: str,
     cell: str,
@@ -55,18 +54,15 @@ async def apply_formula(
 
     try:
         # First validate the formula
-        validation: dict[str, Any] = validate_formula_impl(
+        validation: dict[str, Any] = validate_formula_in_cell_operation(
             filename, sheet_name, cell, formula
         )
-        if isinstance(validation, dict) and "error" in validation:
+        if isinstance(validation, dict) and validation.get("status") == "error":
             return validation
 
-        # If valid, apply the formula
-        from mcp_excel.core.calculations import apply_formula as apply_formula_impl
-
-        result: dict[str, Any] = apply_formula_impl(filename, sheet_name, cell, formula)
+        result: dict[str, Any] = apply_formula(filename, sheet_name, cell, formula)
         return result
     except (ValidationError, CalculationError) as e:
-        return {"error": f"Error: {str(e)}"}
+        return {"status": "error", "message": f"Error: {str(e)}"}
     except Exception as e:
-        return {"error": f"Failed to apply formula: {str(e)}"}
+        return {"status": "error", "message": f"Failed to apply formula: {str(e)}"}

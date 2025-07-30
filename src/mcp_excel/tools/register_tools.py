@@ -29,7 +29,7 @@ def register_all_tools(mcp: FastMCP) -> None:
 
     # Formar tools
 
-    mcp.tool()(format_tools.format_range)
+    mcp.tool()(format_tools.format_range_excel)
     mcp.tool()(format_tools.copy_worksheet)
     mcp.tool()(format_tools.delete_worksheet)
     mcp.tool()(format_tools.rename_worksheet)
@@ -43,7 +43,7 @@ def register_all_tools(mcp: FastMCP) -> None:
     # Formula tools
 
     mcp.tool()(formulas_excel_tools.validate_formula_syntax)
-    mcp.tool()(formulas_excel_tools.apply_formula)
+    mcp.tool()(formulas_excel_tools.apply_formula_excel)
 
     # Graphics tools
     mcp.tool()(graphics_tools.create_chart)

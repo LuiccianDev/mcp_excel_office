@@ -13,16 +13,16 @@ def validate_formula_in_cell_operation(
 ) -> dict[str, Any]:
     # Validaciones rápidas
     if not validate_cell_reference(cell):
-        return {"error": f"Invalid cell reference: {cell}"}
+        return {"status": "error", "message": f"Invalid cell reference: {cell}"}
     try:
         wb = load_workbook(filepath)
         if sheet_name not in wb.sheetnames:
-            return {"error": f"Sheet '{sheet_name}' not found"}
+            return {"status": "error", "message": f"Sheet '{sheet_name}' not found"}
         # Validar sintaxis de fórmula
         result: tuple[bool, str] = validate_formula(formula)
         is_valid, message = result
         if not is_valid:
-            return {"error": f"Invalid formula syntax: {message}"}
+            return {"status": "error", "message": f"Invalid formula syntax: {message}"}
         # Validar referencias de celda en la fórmula
         cell_refs = re.findall(r"[A-Z]+[0-9]+(?::[A-Z]+[0-9]+)?", formula)
         for ref in cell_refs:
@@ -31,10 +31,16 @@ def validate_formula_in_cell_operation(
                 if not (
                     validate_cell_reference(start) and validate_cell_reference(end)
                 ):
-                    return {"error": f"Invalid cell range reference in formula: {ref}"}
+                    return {
+                        "status": "error",
+                        "message": f"Invalid cell range reference in formula: {ref}",
+                    }
             else:
                 if not validate_cell_reference(ref):
-                    return {"error": f"Invalid cell reference in formula: {ref}"}
+                    return {
+                        "status": "error",
+                        "message": f"Invalid cell reference in formula: {ref}",
+                    }
         # Comparar con el contenido actual de la celda
         sheet = wb[sheet_name]
         cell_obj = sheet[cell]
@@ -43,6 +49,7 @@ def validate_formula_in_cell_operation(
             if formula.startswith("="):
                 if current_formula != formula:
                     return {
+                        "status": "error",
                         "message": "Formula is valid but doesn't match cell content",
                         "valid": True,
                         "matches": False,
@@ -53,6 +60,7 @@ def validate_formula_in_cell_operation(
             else:
                 if current_formula != f"={formula}":
                     return {
+                        "status": "error",
                         "message": "Formula is valid but doesn't match cell content",
                         "valid": True,
                         "matches": False,
@@ -62,6 +70,7 @@ def validate_formula_in_cell_operation(
                     }
                 else:
                     return {
+                        "status": "success",
                         "message": "Formula is valid and matches cell content",
                         "valid": True,
                         "matches": True,
@@ -70,6 +79,7 @@ def validate_formula_in_cell_operation(
                     }
         else:
             return {
+                "status": "error",
                 "message": "Formula is valid but cell contains no formula",
                 "valid": True,
                 "matches": False,
@@ -78,10 +88,13 @@ def validate_formula_in_cell_operation(
                 "current_content": str(current_formula) if current_formula else "",
             }
     except Exception as e:
-        return {"error": str(e)}
+        return {"status": "error", "message": str(e)}
 
     # Fallback de seguridad si ningún return anterior se ejecutó usando mypy or ruff
-    return {"error": "Unknown error: no result was returned from the function logic"}
+    return {
+        "status": "error",
+        "message": "Unknown error: no result was returned from the function logic",
+    }
 
 
 def validate_range_in_sheet_operation(
@@ -91,13 +104,16 @@ def validate_range_in_sheet_operation(
     end_cell: str | None = None,
 ) -> dict[str, Any]:
     if not validate_cell_reference(start_cell):
-        return {"error": f"Invalid start cell reference: {start_cell}"}
+        return {
+            "status": "error",
+            "message": f"Invalid start cell reference: {start_cell}",
+        }
     if end_cell and not validate_cell_reference(end_cell):
-        return {"error": f"Invalid end cell reference: {end_cell}"}
+        return {"status": "error", "message": f"Invalid end cell reference: {end_cell}"}
     try:
         wb = load_workbook(filepath)
         if sheet_name not in wb.sheetnames:
-            return {"error": f"Sheet '{sheet_name}' not found"}
+            return {"status": "error", "message": f"Sheet '{sheet_name}' not found"}
         worksheet = wb[sheet_name]
         data_max_row = worksheet.max_row
         data_max_col = worksheet.max_column
@@ -106,7 +122,7 @@ def validate_range_in_sheet_operation(
                 start_cell, end_cell
             )
         except ValueError as e:
-            return {"error": f"Invalid range: {str(e)}"}
+            return {"status": "error", "message": f"Invalid range: {str(e)}"}
         if end_row is None:
             end_row = start_row
         if end_col is None:
@@ -115,11 +131,12 @@ def validate_range_in_sheet_operation(
             worksheet, start_row, start_col, end_row, end_col
         )
         if not is_valid:
-            return {"error": message}
+            return {"status": "error", "message": message}
         range_str = f"{start_cell}" if end_cell is None else f"{start_cell}:{end_cell}"
         data_range_str = f"A1:{get_column_letter(data_max_col)}{data_max_row}"
         extends_beyond_data = end_row > data_max_row or end_col > data_max_col
         return {
+            "status": "success",
             "message": (
                 f"Range '{range_str}' is valid. "
                 f"Sheet contains data in range '{data_range_str}'"
@@ -135,7 +152,7 @@ def validate_range_in_sheet_operation(
             },
         }
     except Exception as e:
-        return {"error": str(e)}
+        return {"status": "error", "message": str(e)}
 
 
 def validate_formula(formula: str) -> tuple[bool, str]:

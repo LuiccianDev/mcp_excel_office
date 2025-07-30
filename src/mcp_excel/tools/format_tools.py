@@ -1,6 +1,6 @@
 from typing import Any
 
-from mcp_excel.core.formatting import format_range as format_range_func
+from mcp_excel.core.formatting import format_range
 from mcp_excel.core.workbook import get_workbook_info
 
 # Import exceptions
@@ -21,7 +21,7 @@ from mcp_excel.utils.sheet_utils import (
 )
 
 
-async def format_range(
+async def format_range_excel(
     filename: str,
     sheet_name: str,
     start_cell: str,
@@ -66,7 +66,7 @@ async def format_range(
 
     filename = ensure_xlsx_extension(filename)
     try:
-        result: dict[str, Any] = format_range_func(
+        result: dict[str, Any] = format_range(
             filename=filename,
             sheet_name=sheet_name,
             start_cell=start_cell,
@@ -88,9 +88,9 @@ async def format_range(
         )
         return result
     except (ValidationError, FormattingError) as e:
-        return {"error": f"Error: {str(e)}"}
+        return {"status": "error", "message": f"Error: {str(e)}"}
     except Exception as e:
-        return {"error": f"Failed to format range: {str(e)}"}
+        return {"status": "error", "message": f"Failed to format range: {str(e)}"}
 
 
 async def copy_worksheet(
@@ -108,9 +108,9 @@ async def copy_worksheet(
         result: dict[str, Any] = copy_sheet(filename, source_sheet, target_sheet)
         return result
     except (ValidationError, SheetError) as e:
-        return {"error": f"Error: {str(e)}"}
+        return {"status": "error", "message": f"Error: {str(e)}"}
     except Exception as e:
-        return {"error": f"Failed to copy worksheet: {str(e)}"}
+        return {"status": "error", "message": f"Failed to copy worksheet: {str(e)}"}
 
 
 async def delete_worksheet(filename: str, sheet_name: str) -> dict[str, Any]:
@@ -125,9 +125,9 @@ async def delete_worksheet(filename: str, sheet_name: str) -> dict[str, Any]:
         result: dict[str, Any] = delete_sheet(filename, sheet_name)
         return result
     except (ValidationError, SheetError) as e:
-        return {"error": f"Error: {str(e)}"}
+        return {"status": "error", "message": f"Error: {str(e)}"}
     except Exception as e:
-        return {"error": f"Failed to delete worksheet: {str(e)}"}
+        return {"status": "error", "message": f"Failed to delete worksheet: {str(e)}"}
 
 
 async def rename_worksheet(
@@ -145,9 +145,9 @@ async def rename_worksheet(
         result: dict[str, Any] = rename_sheet(filename, old_name, new_name)
         return result
     except (ValidationError, SheetError) as e:
-        return {"error": f"Error: {str(e)}"}
+        return {"status": "error", "message": f"Error: {str(e)}"}
     except Exception as e:
-        return {"error": f"Failed to rename worksheet: {str(e)}"}
+        return {"status": "error", "message": f"Failed to rename worksheet: {str(e)}"}
 
 
 async def get_workbook_metadata(
@@ -166,9 +166,12 @@ async def get_workbook_metadata(
         )
         return result
     except WorkbookError as e:
-        return {"error": f"Error: {str(e)}"}
+        return {"status": "error", "message": f"Error: {str(e)}"}
     except Exception as e:
-        return {"error": f"Failed to get workbook metadata: {str(e)}"}
+        return {
+            "status": "error",
+            "message": f"Failed to get workbook metadata: {str(e)}",
+        }
 
 
 async def merge_cells(
@@ -188,9 +191,9 @@ async def merge_cells(
         result: dict[str, Any] = merge_range(filename, sheet_name, start_cell, end_cell)
         return result
     except (ValidationError, SheetError) as e:
-        return {"error": f"Error: {str(e)}"}
+        return {"status": "error", "message": f"Error: {str(e)}"}
     except Exception as e:
-        return {"error": f"Failed to merge cells: {str(e)}"}
+        return {"status": "error", "message": f"Failed to merge cells: {str(e)}"}
 
 
 async def unmerge_cells(
@@ -211,9 +214,9 @@ async def unmerge_cells(
         )
         return result
     except (ValidationError, SheetError) as e:
-        return {"error": f"Error: {str(e)}"}
+        return {"status": "error", "message": f"Error: {str(e)}"}
     except Exception as e:
-        return {"error": f"Failed to unmerge cells: {str(e)}"}
+        return {"status": "error", "message": f"Failed to unmerge cells: {str(e)}"}
 
 
 async def copy_range(
@@ -243,9 +246,9 @@ async def copy_range(
         )
         return result
     except (ValidationError, SheetError) as e:
-        return {"error": f"Error: {str(e)}"}
+        return {"status": "error", "message": f"Error: {str(e)}"}
     except Exception as e:
-        return {"error": f"Failed to copy range: {str(e)}"}
+        return {"status": "error", "message": f"Failed to copy range: {str(e)}"}
 
 
 async def delete_range(
@@ -272,9 +275,9 @@ async def delete_range(
         )
         return result
     except (ValidationError, SheetError) as e:
-        return {"error": f"Error: {str(e)}"}
+        return {"status": "error", "message": f"Error: {str(e)}"}
     except Exception as e:
-        return {"error": f"Failed to delete range: {str(e)}"}
+        return {"status": "error", "message": f"Failed to delete range: {str(e)}"}
 
 
 async def validate_excel_range(
@@ -298,6 +301,6 @@ async def validate_excel_range(
         result: dict[str, Any] = validate_range_impl(filename, sheet_name, range_str)
         return result
     except ValidationError as e:
-        return {"error": f"Error: {str(e)}"}
+        return {"status": "error", "message": f"Error: {str(e)}"}
     except Exception as e:
-        return {"error": f"Failed to validate range: {str(e)}"}
+        return {"status": "error", "message": f"Failed to validate range: {str(e)}"}

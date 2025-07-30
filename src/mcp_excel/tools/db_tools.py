@@ -13,7 +13,7 @@ from mcp_excel.utils.file_utils import ensure_xlsx_extension
 
 async def fetch_and_insert_db_to_excel(
     connection_string: str, query: str, filename: str, sheet_name: str
-) -> str:
+) -> dict[str, Any]:
     """
     Fetch data from DB (safe SELECT), clean it, and insert into Excel.
     Args:
@@ -24,13 +24,16 @@ async def fetch_and_insert_db_to_excel(
     """
     filename = ensure_xlsx_extension(filename)
     if not validate_sql_query(query):
-        return "Error: Invalid or potentially unsafe SQL query."
+        return {
+            "status": "error",
+            "message": "Invalid or potentially unsafe SQL query.",
+        }
 
     # Run blocking DB call in a separate thread
     db_result = await asyncio.to_thread(fetch_data_from_db, connection_string, query)
 
     if "error" in db_result:
-        return f"Error: {db_result['error']}"
+        return {"status": "error", "message": f"Error: {db_result['error']}"}
 
     columns = db_result.get("columns", [])
     rows = db_result.get("rows", [])
@@ -44,9 +47,12 @@ async def fetch_and_insert_db_to_excel(
     )
 
     if "error" in excel_result:
-        return f"Error: {excel_result['error']}"
+        return {"status": "error", "message": f"Error: {excel_result['error']}"}
 
-    return str(excel_result.get("message", "Data inserted successfully."))
+    return {
+        "status": "success",
+        "message": excel_result.get("message", "Data inserted successfully."),
+    }
 
 
 async def insert_calculated_data_to_db(
@@ -71,7 +77,7 @@ async def insert_calculated_data_to_db(
             insert_data_to_db, connection_string, table, columns, cleaned_rows
         )
 
-        if "error" in result:
+        if result.get("status") == "error":
             return {
                 "status": "error",
                 "message": f"Database insert failed: {result['error']}",
@@ -88,7 +94,7 @@ async def insert_calculated_data_to_db(
     except Exception as e:
         return {
             "status": "error",
-            "message": "Unexpected error during data insertion.",
-            "error": str(e),
+            "message": str(e),
+            "error": repr(e),
             "table": table,
         }

@@ -3,7 +3,6 @@
 This module provides functions to apply formulas to cells.
 """
 
-from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Final
 
@@ -16,15 +15,6 @@ from mcp_excel.utils.validation_utils import validate_formula
 
 # Constants
 FORMULA_PREFIX: Final[str] = "="
-
-
-@dataclass(frozen=True)
-class FormulaApplicationResult:
-    """Represents the result of applying a formula to a cell."""
-
-    message: str
-    cell: str
-    formula: str
 
 
 def _validate_worksheet_exists(workbook: Any, sheet_name: str) -> None:
@@ -101,9 +91,10 @@ def apply_formula(
     _save_workbook(workbook, str(filename))
 
     # Return success result
-    result = FormulaApplicationResult(
-        message=f"Applied formula '{formula}' to cell {cell}",
-        cell=cell,
-        formula=formula,
-    )
-    return asdict(result)
+    result = {
+        "status": "success",
+        "message": f"Applied formula '{formula}' to cell {cell}",
+        "cell": cell,
+        "formula": formula,
+    }
+    return result

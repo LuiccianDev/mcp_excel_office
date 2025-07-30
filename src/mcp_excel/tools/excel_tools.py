@@ -14,7 +14,7 @@ from mcp_excel.utils.file_utils import (
 
 # * Create a new Excel workbook
 # @validate_file_access()
-async def create_excel_workbook(filename: str) -> str:
+async def create_excel_workbook(filename: str) -> dict[str, Any]:
     """Create a new Excel workbook.
 
     Args:
@@ -22,12 +22,12 @@ async def create_excel_workbook(filename: str) -> str:
     """
     try:
         filename = resolve_safe_path(filename)
-        create_workbook(filename)
-        return f"Created workbook at {filename}"
+        result: dict[str, Any] = create_workbook(filename)
+        return result
     except WorkbookError as e:
-        return f"Error: {str(e)}"
+        return {"error": f"Error: {str(e)}"}
     except Exception as e:
-        return f"Failed to create workbook: {str(e)}"
+        return {"error": f"Failed to create workbook: {str(e)}"}
 
 
 # * Create new worksheet in workbook
@@ -45,9 +45,9 @@ async def create_excel_worksheet(filename: str, sheet_name: str) -> dict[str, An
         result: dict[str, Any] = create_sheet(filename, sheet_name)
         return result
     except (ValidationError, WorkbookError) as e:
-        return {"error": f"Error: {str(e)}"}
+        return {"status": "error", "message": f"Error: {str(e)}"}
     except Exception as e:
-        return {"error": f"Failed to create worksheet: {str(e)}"}
+        return {"status": "error", "message": f"Failed to create worksheet: {str(e)}"}
 
 
 #! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml

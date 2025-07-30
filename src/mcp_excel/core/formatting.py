@@ -75,20 +75,23 @@ def format_range(
 ) -> dict[str, Any]:
     # Validación de celdas
     if not validate_cell_reference(start_cell):
-        return {"error": f"Invalid start cell reference: {start_cell}"}
+        return {
+            "status": "error",
+            "message": f"Invalid start cell reference: {start_cell}",
+        }
     if end_cell and not validate_cell_reference(end_cell):
-        return {"error": f"Invalid end cell reference: {end_cell}"}
+        return {"status": "error", "message": f"Invalid end cell reference: {end_cell}"}
     try:
         wb = get_or_create_workbook(filename)
         if sheet_name not in wb.sheetnames:
-            return {"error": f"Sheet '{sheet_name}' not found"}
+            return {"status": "error", "message": f"Sheet '{sheet_name}' not found"}
         sheet = wb[sheet_name]
         try:
             start_row, start_col, end_row, end_col = parse_cell_range(
                 start_cell, end_cell
             )
         except ValueError as e:
-            return {"error": f"Invalid cell range: {str(e)}"}
+            return {"status": "error", "message": f"Invalid cell range: {str(e)}"}
         if end_row is None:
             end_row = start_row
         if end_col is None:
@@ -159,13 +162,19 @@ def format_range(
             try:
                 sheet.merge_cells(f"{start_cell}:{end_cell}")
             except ValueError as e:
-                return {"error": f"Failed to merge cells: {str(e)}"}
+                return {
+                    "status": "error",
+                    "message": f"Failed to merge cells: {str(e)}",
+                }
         # Conditional formatting
         if conditional_format:
             range_str = f"{start_cell}:{end_cell}" if end_cell else start_cell
             rule_type = conditional_format.get("type")
             if not rule_type:
-                return {"error": "Conditional format type not specified"}
+                return {
+                    "status": "error",
+                    "message": "Conditional format type not specified",
+                }
             params = conditional_format.get("params", {})
             if rule_type == "cell_is" and "fill" in params:
                 fill_params = params["fill"]
@@ -189,15 +198,22 @@ def format_range(
                 elif rule_type == "cell_is":
                     rule = CellIsRule(**params)
                 else:
-                    return {"error": f"Invalid conditional format type: {rule_type}"}
+                    return {
+                        "status": "error",
+                        "message": f"Invalid conditional format type: {rule_type}",
+                    }
                 sheet.conditional_formatting.add(range_str, rule)
             except Exception as e:
-                return {"error": f"Failed to apply conditional formatting: {str(e)}"}
+                return {
+                    "status": "error",
+                    "message": f"Failed to apply conditional formatting: {str(e)}",
+                }
         wb.save(filename)
         range_str = f"{start_cell}:{end_cell}" if end_cell else start_cell
         return {
+            "status": "success",
             "message": f"Applied formatting to range {range_str}",
             "range": range_str,
         }
     except Exception as e:
-        return {"error": str(e)}
+        return {"status": "error", "message": str(e)}
