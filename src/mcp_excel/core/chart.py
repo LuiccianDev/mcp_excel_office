@@ -71,13 +71,14 @@ def create_chart_in_sheet(
     try:
         wb = load_workbook(filename)
         if sheet_name not in wb.sheetnames:
-            return {"error": f"Sheet '{sheet_name}' not found"}
+            return {"status": "error", "message": f"Sheet '{sheet_name}' not found"}
         worksheet = cast(Worksheet, wb[sheet_name])
         if "!" in data_range:
             range_sheet_name, cell_range = data_range.split("!")
             if range_sheet_name not in wb.sheetnames:
                 return {
-                    "error": f"Sheet '{range_sheet_name}' referenced in data range not found"
+                    "status": "error",
+                    "message": f"Sheet '{range_sheet_name}' referenced in data range not found",
                 }
             worksheet = cast(Worksheet, wb[range_sheet_name])
         else:
@@ -88,7 +89,10 @@ def create_chart_in_sheet(
                 start_cell, end_cell
             )
         except ValueError as e:
-            return {"error": f"Invalid data range format: {str(e)}"}
+            return {
+                "status": "error",
+                "message": f"Invalid data range format: {str(e)}",
+            }
         chart_classes = {
             "line": LineChart,
             "bar": BarChart,
@@ -100,10 +104,11 @@ def create_chart_in_sheet(
         chart_class = chart_classes.get(chart_type_lower)
         if not chart_class:
             return {
-                "error": (
+                "status": "error",
+                "message": (
                     f"Unsupported chart type: {chart_type}. "
                     f"Supported types: {', '.join(chart_classes.keys())}"
-                )
+                ),
             }
         chart = chart_class()
         chart.title = title
@@ -138,7 +143,10 @@ def create_chart_in_sheet(
                 chart.add_data(data, titles_from_data=True)
                 chart.set_categories(cats)
         except Exception as e:
-            return {"error": f"Failed to create chart data references: {str(e)}"}
+            return {
+                "status": "error",
+                "message": f"Failed to create chart data references: {str(e)}",
+            }
         try:
             if style:
                 if style.get("show_legend", True):
@@ -155,20 +163,30 @@ def create_chart_in_sheet(
                     if hasattr(chart, "y_axis"):
                         chart.y_axis.majorGridlines = ChartLines()
         except Exception as e:
-            return {"error": f"Failed to apply chart style: {str(e)}"}
+            return {
+                "status": "error",
+                "message": f"Failed to apply chart style: {str(e)}",
+            }
         chart.width = 15
         chart.height = 7.5
         try:
             worksheet.add_chart(chart, target_cell)
         except ValueError as e:
-            return {"error": f"Invalid target cell: {str(e)}"}
+            return {"status": "error", "message": f"Invalid target cell: {str(e)}"}
         except Exception as e:
-            return {"error": f"Failed to create chart drawing: {str(e)}"}
+            return {
+                "status": "error",
+                "message": f"Failed to create chart drawing: {str(e)}",
+            }
         try:
             wb.save(filename)
         except Exception as e:
-            return {"error": f"Failed to save workbook with chart: {str(e)}"}
+            return {
+                "status": "error",
+                "message": f"Failed to save workbook with chart: {str(e)}",
+            }
         return {
+            "status": "success",
             "message": f"{chart_type.capitalize()} chart created successfully",
             "details": {
                 "type": chart_type,
@@ -177,4 +195,7 @@ def create_chart_in_sheet(
             },
         }
     except Exception as e:
-        return {"error": f"Unexpected error creating chart: {str(e)}"}
+        return {
+            "status": "error",
+            "message": f"Unexpected error creating chart: {str(e)}",
+        }

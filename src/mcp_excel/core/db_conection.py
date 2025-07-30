@@ -90,9 +90,13 @@ def fetch_data_from_db(
     try:
         with _get_db_connection(connection_string) as conn:
             rows, columns = _execute_query(conn, query, params)
-            return {"columns": columns, "rows": [tuple(row.values()) for row in rows]}
+            return {
+                "status": "success",
+                "columns": columns,
+                "rows": [tuple(row.values()) for row in rows],
+            }
     except DatabaseError as e:
-        return {"error": str(e)}
+        return {"status": "error", "message": str(e)}
 
 
 # * Insert data into Excel file
@@ -110,9 +114,12 @@ def insert_data_to_excel(
             for col_num, value in enumerate(row_data, 1):
                 ws.cell(row=row_num, column=col_num, value=value)
         wb.save(filename)
-        return {"message": f"Inserted {len(rows)} rows into '{sheet_name}'"}
+        return {
+            "status": "success",
+            "message": f"Inserted {len(rows)} rows into '{sheet_name}'",
+        }
     except Exception as e:
-        return {"error": str(e)}
+        return {"status": "error", "message": str(e)}
 
 
 # * Validate SQL query to prevent SQL injection
@@ -217,10 +224,10 @@ def insert_data_to_db(
         Dictionary with operation result or error message
     """
     if not all(isinstance(col, str) for col in columns):
-        return {"error": "All column names must be strings"}
+        return {"status": "error", "message": "All column names must be strings"}
 
     if not all(len(row) == len(columns) for row in rows):
-        return {"error": "Row length must match number of columns"}
+        return {"status": "error", "message": "Row length must match number of columns"}
 
     try:
         with _get_db_connection(connection_string) as conn:
@@ -253,9 +260,10 @@ def insert_data_to_db(
                         raise DatabaseError(f"Batch insert failed: {e}") from e
 
                 return {
-                    "message": f"Successfully inserted {total_inserted} rows into '{table}'"
+                    "   status": "success",
+                    "message": f"Successfully inserted {total_inserted} rows into '{table}'",
                 }
     except DatabaseError as e:
-        return {"error": str(e)}
+        return {"status": "error", "message": str(e)}
     except Exception as e:
-        return {"error": f"An unexpected error occurred: {str(e)}"}
+        return {"status": "error", "message": f"An unexpected error occurred: {str(e)}"}

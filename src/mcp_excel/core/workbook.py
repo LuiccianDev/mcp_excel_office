@@ -117,6 +117,7 @@ def create_workbook(
         wb.save(str(path))
 
         return {
+            "status": "success",
             "message": f"Created workbook: {path}",
             "active_sheet": sheet_name,
             "filepath": str(path),
@@ -252,6 +253,7 @@ def create_sheet(filename: str | Path, sheet_name: str) -> WorkbookResult:
         wb.save(str(path))
 
         return {
+            "status": "success",
             "message": f"Created sheet '{sheet_name}' in {path}",
             "sheet_name": sheet_name,
             "filepath": str(path),

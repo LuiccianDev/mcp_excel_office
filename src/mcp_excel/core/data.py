@@ -302,6 +302,7 @@ def write_data(
             raise WorkbookError(f"Failed to save workbook: {str(e)}") from e
 
         return {
+            "status": "success",
             "message": f"Data written to {ws.title}",
             "active_sheet": ws.title,
             "filepath": str(path),
