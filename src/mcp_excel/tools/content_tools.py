@@ -15,20 +15,37 @@ async def read_data_from_excel(
     preview_only: bool = False,
 ) -> dict[str, Any]:
     """
-    Read data from an Excel worksheet and return it in a structured format.
+    Read a specific range of tabular data from an Excel worksheet and return it in a structured format.
+
+    Context for AI/LLM:
+        Use this tool to extract tabular data from a defined worksheet and cell range within an Excel workbook.
+        Ideal for automated data ingestion, previewing spreadsheet contents, or validating required data before processing.
+
+    Typical use cases:
+        1. Loading a data range for analysis or transformation.
+        2. Previewing the first N rows of a sheet to confirm layout.
+        3. Validating that a required sheet exists and contains data.
 
     Args:
-        filename: Path to the Excel workbook file (.xlsx)
-        sheet_name: Name of the worksheet to read data from
-        start_cell: Cell reference where to start reading data (default is "A1")
-        end_cell: Optional cell reference where to stop reading data
-        preview_only: If True, only returns a preview of the data
+        filename (str): Absolute or relative path to the Excel workbook (.xlsx). The extension is enforced automatically.
+        sheet_name (str): Name of the worksheet to read from.
+        start_cell (str, optional): Top-left cell reference of the range to read. Defaults to "A1".
+        end_cell (str | None, optional): Bottom-right cell reference. If None, reads until the first empty row/column. Defaults to None.
+        preview_only (bool, optional): If True, returns only a small subset (e.g., first 100 rows) for quick inspection. Defaults to False.
 
     Returns:
-        Dict containing:
-        - status: "success" or "error"
-        - data: 2D list of cell values (if successful)
-        - message: Error message (if error occurred)
+        dict[str, Any]: A dictionary containing:
+            - status (str): "success" or "error".
+            - data (list[list[Any]] | None): 2-D list of cell values from the worksheet range when status is "success".
+            - message (str): Human-readable message or error description.
+
+    Raises:
+        FileNotFoundError: If the workbook cannot be located.
+        ValidationError | DataError: If the sheet name or range is invalid or missing.
+
+    Notes:
+        • The specified worksheet must already exist; the function does not create new sheets.
+        • If the target range is empty, status will be "error" with a descriptive message.
     """
     try:
         # Ensure filename has .xlsx extension
@@ -80,15 +97,33 @@ async def write_data_to_excel(
     start_cell: str = "A1",
 ) -> str:
     """
-    Write data to Excel worksheet.
-    Excel formula will write to cell without any verification.
+    Write data to an Excel worksheet beginning at the specified cell.
+
+    Context for AI/LLM:
+        Employ this tool to programmatically populate or update a worksheet with tabular data produced by prior computations or external systems. Suitable for automated report generation, data export, or incremental updates to existing files.
+
+    Typical use cases:
+        1. Dumping processed data frames into Excel for business users.
+        2. Appending new monthly records to a reporting sheet.
+        3. Overwriting a template region with fresh values for distribution.
 
     Args:
-        filename: Path to the workbook file
-        sheet_name: Name of the worksheet to write data to
-        data: Data to write (list of lists)
-        start_cell: Cell reference where to start writing data (default is "A1")
+        filename (str): Path to the workbook. The .xlsx extension is enforced.
+        sheet_name (str): Target worksheet name. Must already exist.
+        data (list[list]): 2-D list where each sub-list represents a row to write.
+        start_cell (str, optional): Top-left cell where writing begins (e.g., "A1"). Defaults to "A1".
 
+    Returns:
+        str: Success confirmation message, or an error description prefixed with "Error:".
+
+    Raises:
+        ValidationError | DataError: When validation of input parameters or write operation fails.
+        Exception: For unexpected I/O or library errors.
+
+    Notes:
+        • Data will overwrite any existing content in the target range.
+        • The function does not create new worksheets; the target sheet must already exist.
+        • Input data is written as-is, without formula injection or type conversion.
     """
     filename = ensure_xlsx_extension(filename)
     try:

@@ -41,27 +41,39 @@ async def format_range_excel(
     protection: dict[str, Any] | None = None,
     conditional_format: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Apply formatting to a range of cells.
-    Args:
-        filename: Path to the Excel file
-        sheet_name: Name of the worksheet
-        start_cell: Starting cell reference (e.g., "A1")
-        end_cell: Optional ending cell reference (e.g., "B2")
-        bold: Whether to make text bold
-        italic: Whether to make text italic
-        underline: Whether to underline text
-        font_size: Font size in points
-        font_color: Font color (hex code)
-        bg_color: Background color (hex code)
-        border_style: Border style (e.g., "thin", "thick")
-        border_color: Border color (hex code)
-        number_format: Number format string (e.g., "0.00")
-        alignment: Text alignment (e.g., "center", "left", "right")
-        wrap_text: Whether to wrap text in the cell
-        merge_cells: Whether to merge the specified range of cells
-        protection: Cell protection options (e.g., {"locked": True})
-        conditional_format: Conditional formatting rules
+    """Apply a wide range of visual and data formatting styles to a specified cell range in an Excel worksheet.
 
+    Context for AI/LLM:
+        Use this comprehensive tool to programmatically style reports, highlight data, or enforce a consistent visual layout in an Excel sheet. It is ideal for automating the final presentation layer of data generation workflows.
+
+    Typical use cases:
+        1. Styling table headers with bold text, background colors, and borders.
+        2. Applying currency or date formats to numerical data columns.
+        3. Setting up conditional formatting to highlight values above a certain threshold.
+        4. Merging cells to create report titles or grouped headers.
+
+    Args:
+        filename (str): Path to the Excel workbook.
+        sheet_name (str): The name of the worksheet to format.
+        start_cell (str): The top-left cell of the target range (e.g., "A1").
+        end_cell (str | None): The bottom-right cell of the target range (e.g., "B2").
+        bold (bool, optional): Apply bold font style. Defaults to False.
+        italic (bool, optional): Apply italic font style. Defaults to False.
+        underline (bool, optional): Apply underline. Defaults to False.
+        font_size (int | None, optional): Set the font size. Defaults to None.
+        font_color (str | None, optional): Font color as a hex code (e.g., "#FF0000"). Defaults to None.
+        bg_color (str | None, optional): Cell background color as a hex code. Defaults to None.
+        border_style (str | None, optional): Border style (e.g., "thin", "thick"). Defaults to None.
+        border_color (str | None, optional): Border color as a hex code. Defaults to None.
+        number_format (str | None, optional): Number format code (e.g., "0.00%", "YYYY-MM-DD"). Defaults to None.
+        alignment (str | None, optional): Horizontal alignment ("left", "center", "right"). Defaults to None.
+        wrap_text (bool, optional): Enable text wrapping within cells. Defaults to False.
+        merge_cells (bool, optional): Merge the entire specified range into a single cell. Defaults to False.
+        protection (dict[str, Any] | None, optional): Cell protection settings (e.g., `{"locked": True}`). Defaults to None.
+        conditional_format (dict[str, Any] | None, optional): Rules for conditional formatting. Defaults to None.
+
+    Returns:
+        dict[str, Any]: A dictionary indicating the status ("success" or "error") and a descriptive message.
     """
 
     filename = ensure_xlsx_extension(filename)
@@ -96,11 +108,18 @@ async def format_range_excel(
 async def copy_worksheet(
     filename: str, source_sheet: str, target_sheet: str
 ) -> dict[str, Any]:
-    """Copy worksheet within workbook.
+    """Create a duplicate of an existing worksheet within the same Excel workbook.
+
+    Context for AI/LLM:
+        Use this tool when you need to create a new worksheet based on an existing template or data sheet. It preserves all content, formatting, and formulas from the original.
+
     Args:
-        filename: Path to the Excel file
-        source_sheet: Name of the worksheet to copy
-        target_sheet: Name of the new worksheet
+        filename (str): Path to the Excel workbook.
+        source_sheet (str): The name of the worksheet to be copied.
+        target_sheet (str): The name for the newly created worksheet. Must not already exist.
+
+    Returns:
+        dict[str, Any]: A status dictionary with a confirmation message or error details.
     """
     filename = ensure_xlsx_extension(filename)
 
@@ -114,10 +133,17 @@ async def copy_worksheet(
 
 
 async def delete_worksheet(filename: str, sheet_name: str) -> dict[str, Any]:
-    """Delete worksheet from workbook.
+    """Permanently delete a worksheet from a workbook.
+
+    Context for AI/LLM:
+        This is a destructive operation. Use it to remove temporary, outdated, or unnecessary worksheets from an Excel file as part of a cleanup or automation workflow. Ensure the agent confirms this action if the sheet contains data.
+
     Args:
-        filename: Path to the Excel file
-        sheet_name: Name of the worksheet to delete
+        filename (str): Path to the Excel workbook.
+        sheet_name (str): The name of the worksheet to be deleted.
+
+    Returns:
+        dict[str, Any]: A status dictionary indicating success or failure with a message.
     """
     filename = ensure_xlsx_extension(filename)
 
@@ -133,11 +159,18 @@ async def delete_worksheet(filename: str, sheet_name: str) -> dict[str, Any]:
 async def rename_worksheet(
     filename: str, old_name: str, new_name: str
 ) -> dict[str, Any]:
-    """Rename worksheet in workbook.
+    """Change the name of an existing worksheet within a workbook.
+
+    Context for AI/LLM:
+        Use this tool to update worksheet names to be more descriptive or to follow a required naming convention as part of an automated process.
+
     Args:
-        filename: Path to the Excel file
-        old_name: Current name of the worksheet
-        new_name: New name for the worksheet
+        filename (str): Path to the Excel workbook.
+        old_name (str): The current name of the worksheet to be renamed.
+        new_name (str): The new name for the worksheet. Must be unique and follow Excel's naming rules.
+
+    Returns:
+        dict[str, Any]: A status dictionary with a confirmation or error message.
     """
     filename = ensure_xlsx_extension(filename)
 
@@ -153,10 +186,17 @@ async def rename_worksheet(
 async def get_workbook_metadata(
     filename: str, include_ranges: bool = False
 ) -> dict[str, Any]:
-    """Get metadata about workbook including sheets, ranges, etc.
+    """Retrieve metadata about an Excel workbook, including a list of all worksheets and optional details about named ranges.
+
+    Context for AI/LLM:
+        Use this tool for discovery and inspection. It allows an agent to understand the structure of a workbook before performing read, write, or format operations. It's a crucial first step in many interactive or complex workflows.
+
     Args:
-        filename: Path to the Excel file
-        include_ranges: Whether to include range information
+        filename (str): Path to the Excel workbook to inspect.
+        include_ranges (bool, optional): If True, the metadata will include details about named ranges. Defaults to False.
+
+    Returns:
+        dict[str, Any]: A dictionary containing workbook metadata, such as a list of sheet names and properties.
     """
     filename = ensure_xlsx_extension(filename)
 
@@ -177,13 +217,19 @@ async def get_workbook_metadata(
 async def merge_cells(
     filename: str, sheet_name: str, start_cell: str, end_cell: str
 ) -> dict[str, Any]:
-    """Merge a range of cells.
+    """Merge a rectangular range of cells into a single, larger cell.
+
+    Context for AI/LLM:
+        Use this tool to create titles, headers, or grouped labels that span multiple columns or rows. This is a common formatting step in report generation.
 
     Args:
-        filename: Path to the Excel file
-        sheet_name: Name of the worksheet
-        start_cell: Starting cell reference (e.g., "A1")
-        end_cell: Ending cell reference (e.g., "B2")
+        filename (str): Path to the Excel workbook.
+        sheet_name (str): The name of the worksheet where the merge will occur.
+        start_cell (str): The top-left cell of the range to merge.
+        end_cell (str): The bottom-right cell of the range to merge.
+
+    Returns:
+        dict[str, Any]: A status dictionary indicating success or failure.
     """
     filename = ensure_xlsx_extension(filename)
 
@@ -199,12 +245,19 @@ async def merge_cells(
 async def unmerge_cells(
     filename: str, sheet_name: str, start_cell: str, end_cell: str
 ) -> dict[str, Any]:
-    """Unmerge a range of cells.
+    """Unmerge a previously merged cell range, reverting it to individual cells.
+
+    Context for AI/LLM:
+        Use this tool to reverse a merge operation, typically as part of a re-formatting or data extraction workflow where individual cell access is required.
+
     Args:
-        filename: Path to the Excel file
-        sheet_name: Name of the worksheet
-        start_cell: Starting cell reference (e.g., "A1")
-        end_cell: Ending cell reference (e.g., "B2")
+        filename (str): Path to the Excel workbook.
+        sheet_name (str): The name of the worksheet containing the merged cells.
+        start_cell (str): The top-left cell of the range to unmerge.
+        end_cell (str): The bottom-right cell of the range to unmerge.
+
+    Returns:
+        dict[str, Any]: A status dictionary indicating success or failure.
     """
     filename = ensure_xlsx_extension(filename)
 
@@ -227,14 +280,21 @@ async def copy_range(
     target_start: str,
     target_sheet: str | None = None,
 ) -> dict[str, Any]:
-    """Copy a range of cells to another location.
+    """Copy a range of cells, including their values and formatting, to a new location, potentially in a different worksheet.
+
+    Context for AI/LLM:
+        Use this tool to duplicate data or templates within a workbook. It's useful for creating summaries, staging data for charts, or replicating formatted tables.
+
     Args:
-        filename: Path to the Excel file
-        sheet_name: Name of the worksheet
-        source_start: Starting cell reference of the source range (e.g., "A1")
-        source_end: Ending cell reference of the source range (e.g., "B2")
-        target_start: Starting cell reference of the target range (e.g., "C1")
-        target_sheet: Optional name of the target worksheet
+        filename (str): Path to the Excel workbook.
+        sheet_name (str): The name of the source worksheet.
+        source_start (str): The top-left cell of the source range to copy.
+        source_end (str): The bottom-right cell of the source range.
+        target_start (str): The top-left cell of the destination.
+        target_sheet (str | None, optional): The name of the destination worksheet. If None, the same sheet is used. Defaults to None.
+
+    Returns:
+        dict[str, Any]: A status dictionary indicating success or failure.
     """
     filename = ensure_xlsx_extension(filename)
 
@@ -258,14 +318,20 @@ async def delete_range(
     end_cell: str,
     shift_direction: str = "up",
 ) -> dict[str, Any]:
-    """Delete a range of cells and shift remaining cells.
+    """Delete a range of cells and optionally shift the surrounding cells to fill the gap.
+
+    Context for AI/LLM:
+        This is a destructive operation used to remove rows or columns of data programmatically. It's useful for cleaning up datasets by removing invalid or unnecessary records.
 
     Args:
-        filename: Path to the Excel file
-        sheet_name: Name of the worksheet
-        start_cell: Starting cell reference (e.g., "A1")
-        end_cell: Optional ending cell reference (e.g., "B2")
-        shift_direction: Direction to shift cells ("up" or "left")
+        filename (str): Path to the Excel workbook.
+        sheet_name (str): The name of the worksheet.
+        start_cell (str): The top-left cell of the range to delete.
+        end_cell (str): The bottom-right cell of the range to delete.
+        shift_direction (str, optional): Direction to shift cells after deletion ('up' or 'left'). Defaults to "up".
+
+    Returns:
+        dict[str, Any]: A status dictionary indicating success or failure.
     """
     filename = ensure_xlsx_extension(filename)
 
@@ -283,12 +349,19 @@ async def delete_range(
 async def validate_excel_range(
     filename: str, sheet_name: str, start_cell: str, end_cell: str | None = None
 ) -> dict[str, Any]:
-    """Validate if a range exists and is properly formatted.
+    """Validate that a given cell range is valid within a specific worksheet.
+
+    Context for AI/LLM:
+        Use this tool as a precondition check before attempting to read from or write to a range. This helps prevent errors by ensuring the target sheet and cell references are valid.
+
     Args:
-        filename: Path to the Excel file
-        sheet_name: Name of the worksheet
-        start_cell: Starting cell reference (e.g., "A1")
-        end_cell: Optional ending cell reference (e.g., "B2")
+        filename (str): Path to the Excel workbook.
+        sheet_name (str): The name of the worksheet to check.
+        start_cell (str): The top-left cell of the range.
+        end_cell (str | None, optional): The bottom-right cell of the range. Defaults to None.
+
+    Returns:
+        dict[str, Any]: A dictionary with validation status ("success" or "error") and a descriptive message.
     """
     filename = ensure_xlsx_extension(filename)
 

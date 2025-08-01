@@ -20,16 +20,23 @@ async def create_chart(
     x_axis: str = "",
     y_axis: str = "",
 ) -> dict[str, Any]:
-    """Create chart in worksheet.
+    """Create a chart in a worksheet based on a specified data range.
+
+    Context for AI/LLM:
+        Use this tool to visually represent data within an Excel sheet. It is perfect for automating the creation of dashboards and reports, allowing an agent to generate charts like bar, line, or pie charts from existing data tables.
+
     Args:
-        filename (str): The name of the Excel file.
-        sheet_name (str): The name of the worksheet.
-        data_range (str): The range of data to be used for the chart.
-        chart_type (str): The type of chart to create.
-        target_cell (str): The cell where the chart will be placed.
+        filename (str): The path to the Excel workbook.
+        sheet_name (str): The name of the worksheet where the chart will be created.
+        data_range (str): The cell range containing the data for the chart (e.g., "A1:B10").
+        chart_type (str): The type of chart to create (e.g., 'bar', 'line', 'pie', 'scatter').
+        target_cell (str): The top-left cell where the chart will be anchored.
         title (str, optional): The title of the chart. Defaults to "".
         x_axis (str, optional): The label for the x-axis. Defaults to "".
         y_axis (str, optional): The label for the y-axis. Defaults to "".
+
+    Returns:
+        dict[str, Any]: A status dictionary indicating success or failure, with a descriptive message.
     """
     filename = ensure_xlsx_extension(filename)
 
@@ -62,15 +69,22 @@ async def create_pivot_table(
     columns: list[str] | None = None,
     agg_func: str = "mean",
 ) -> dict[str, Any]:
-    """Create pivot table in worksheet.
+    """Create a pivot table in a worksheet to summarize and analyze data from a given range.
+
+    Context for AI/LLM:
+        Use this powerful tool to perform data aggregation and summarization automatically. It's ideal for creating summary reports that group data by different categories and calculate metrics like sums, averages, or counts.
+
     Args:
-        filename (str): The name of the Excel file.
-        sheet_name (str): The name of the worksheet.
-        data_range (str): The range of data to be used for the pivot table.
-        rows (List[str]): The rows to be used in the pivot table.
-        values (List[str]): The values to be used in the pivot table.
-        columns (List[str], optional): The columns to be used in the pivot table. Defaults to None.
-        agg_func (str, optional): The aggregation function to be used. Defaults to "mean".
+        filename (str): The path to the Excel workbook.
+        sheet_name (str): The name of the worksheet where the pivot table will be created.
+        data_range (str): The source data range for the pivot table (e.g., "A1:D100").
+        rows (list[str]): A list of column headers from the data range to use as rows in the pivot table.
+        values (list[str]): A list of column headers to use for aggregation in the pivot table.
+        columns (list[str] | None, optional): A list of column headers to use as columns. Defaults to None.
+        agg_func (str, optional): The aggregation function to apply to the values (e.g., 'sum', 'mean', 'count'). Defaults to "mean".
+
+    Returns:
+        dict[str, Any]: A status dictionary indicating success or failure, with a descriptive message.
     """
     filename = ensure_xlsx_extension(filename)
 

@@ -15,12 +15,32 @@ async def fetch_and_insert_db_to_excel(
     connection_string: str, query: str, filename: str, sheet_name: str
 ) -> dict[str, Any]:
     """
-    Fetch data from DB (safe SELECT), clean it, and insert into Excel.
+    Fetch tabular data from a database using a validated SELECT query, clean the results, and insert them into a specified Excel worksheet.
+
+    Context for AI/LLM:
+        Use this tool to automate the extraction of data from a SQL database and its transfer into Excel for reporting, analysis, or archival. The function ensures only safe SELECT queries are executed, cleans the data for Excel compatibility, and writes the results to the specified worksheet.
+
+    Typical use cases:
+        1. Migrating data from a database to Excel for business reporting.
+        2. Automating ETL (Extract, Transform, Load) workflows.
+        3. Creating Excel-based dashboards from live database queries.
+
     Args:
-        connection_string (str): Database connection string.
-        query (str): SQL SELECT query to fetch data.
-        filename (str): Path to the Excel file.
-        sheet_name (str): Name of the sheet to insert data into.
+        connection_string (str): Database connection string (driver, server, credentials, etc.).
+        query (str): SQL SELECT query to fetch data. Must be validated as safe.
+        filename (str): Path to the target Excel file. The .xlsx extension is enforced.
+        sheet_name (str): Name of the worksheet to insert data into. Must exist.
+
+    Returns:
+        dict[str, Any]:
+            - status (str): "success" or "error".
+            - message (str): Details of the operation or error encountered.
+
+    Notes:
+        • Only SELECT queries are allowed; unsafe queries are rejected.
+        • The worksheet must already exist in the Excel file.
+        • Data is cleaned for Excel compatibility before insertion.
+        • Blocking I/O is handled in threads for async compatibility.
     """
     filename = ensure_xlsx_extension(filename)
     if not validate_sql_query(query):
@@ -59,14 +79,34 @@ async def insert_calculated_data_to_db(
     connection_string: str, table: str, columns: list, rows: list
 ) -> dict[str, Any]:
     """
-    Insert calculated/cleaned data into the database.
+    Insert calculated or cleaned tabular data into a database table.
+
+    Context for AI/LLM:
+        Use this tool to automate the process of persisting processed or cleaned data into a SQL database. This is useful for updating reporting tables, storing results from data pipelines, or archiving analytics outputs.
+
+    Typical use cases:
+        1. Saving processed analytics results to a database for later retrieval.
+        2. Batch-inserting cleaned records from Excel or other sources.
+        3. Automating the final step of a data processing workflow.
+
     Args:
         connection_string (str): Database connection string.
-        table (str): Target table name.
-        columns (list): List of column names.
-        rows (list): List of tuples containing data to insert.
+        table (str): Target table name for data insertion.
+        columns (list): List of column names corresponding to the data.
+        rows (list): List of tuples or lists, each representing a row to insert.
+
     Returns:
-        dict[str, Any]: Status dictionary with message and optional error.
+        dict[str, Any]:
+            - status (str): "success" or "error".
+            - message (str): Details of the operation or error encountered.
+            - rows_inserted (int, optional): Number of rows successfully inserted (on success).
+            - table (str): Target table name.
+            - details (dict, optional): Additional error details (on failure).
+
+    Notes:
+        • Input data is cleaned before insertion to match DB schema.
+        • Blocking I/O is handled in threads for async compatibility.
+        • On error, returns descriptive message and error details.
     """
     try:
         # Clean input rows

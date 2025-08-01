@@ -15,12 +15,19 @@ async def validate_formula_syntax(
     cell: str,
     formula: str,
 ) -> dict[str, Any]:
-    """Validate Excel formula syntax without applying it.
+    """Validate the syntax of an Excel formula without writing it to a cell.
+
+    Context for AI/LLM:
+        Use this as a crucial pre-flight check before applying a formula, especially if the formula is user-supplied or dynamically generated. This prevents writing invalid formulas to the sheet, which could corrupt calculations.
+
     Args:
-        filename: Path to the Excel file
-        sheet_name: Name of the worksheet
-        cell: Cell reference (e.g., "A1")
-        formula: Formula to validate (e.g., "=SUM(A1:A10)")
+        filename (str): Path to the Excel workbook.
+        sheet_name (str): The worksheet context for the validation.
+        cell (str): The cell reference to use as context for the formula.
+        formula (str): The Excel formula string to validate (must start with '=').
+
+    Returns:
+        dict[str, Any]: A dictionary with validation status ("success" or "error") and a message.
     """
     filename = ensure_xlsx_extension(filename)
     try:
@@ -43,12 +50,28 @@ async def apply_formula_excel(
     formula: str,
 ) -> dict[str, Any]:
     """
-    Apply an Excel formula to a specific cell in a worksheet.
+    Apply a validated Excel formula to a specific cell in a worksheet.
+
+    Context for AI/LLM:
+        Use this tool to perform calculations within Excel by programmatically inserting formulas. It's ideal for automating summaries, financial models, or any task requiring dynamic calculations based on other cell values.
+
+    Typical use cases:
+        1. Adding a `=SUM(A1:A10)` formula to cell A11 to total a column.
+        2. Placing a `=VLOOKUP(...)` formula to link data between sheets.
+        3. Automating the creation of calculated columns in a data table.
+
     Args:
-        filename: Path to the Excel file
-        sheet_name: Name of the worksheet
-        cell: Cell reference (e.g., "A1")
-        formula: Formula to apply (e.g., "=SUM(A1:A10)")
+        filename (str): Path to the Excel workbook.
+        sheet_name (str): The name of the worksheet where the formula will be applied.
+        cell (str): The cell reference to write the formula to (e.g., "A1").
+        formula (str): The Excel formula to apply (e.g., "=SUM(A1:A10)").
+
+    Returns:
+        dict[str, Any]: A status dictionary indicating success or failure, with a descriptive message.
+
+    Notes:
+        • The tool automatically validates the formula's syntax before attempting to apply it.
+        • The cell's existing value or formula will be overwritten.
     """
     filename = ensure_xlsx_extension(filename)
 
