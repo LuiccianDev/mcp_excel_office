@@ -1,4 +1,5 @@
 # Import exceptions
+import os
 from typing import Any
 
 from mcp_excel.core.workbook import create_sheet, create_workbook
@@ -79,7 +80,9 @@ async def create_excel_worksheet(filename: str, sheet_name: str) -> dict[str, An
 
 #! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
 @validate_directory_access("directory")  # type: ignore[misc]
-async def list_excel_documents(directory: str = ".") -> dict[str, Any]:
+async def list_excel_documents(
+    directory: str = os.environ.get("MCP_ALLOWED_DIRECTORIES", "./documents")
+) -> dict[str, Any]:
     """
     List all .xlsx files in the specified directory.
 
