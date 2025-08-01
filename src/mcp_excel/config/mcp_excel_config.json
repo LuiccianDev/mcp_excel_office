@@ -6,7 +6,7 @@
     "instructions": "Usted es un asistente especializado en operaciones sobre archivos Excel.\nValida accesos, procesa datos y genera reportes de manera precisa y profesional.",
     "tags": ["excel", "mining", "automation"],
     "license": "MIT",
-    "license_url": "https://github.com/LuiccianDev/mcp-office-excel-2/blob/main/LICENSE",
+    "license_url": "https://github.com/LuiccianDev/mcp_excel_office/blob/master/LICENSE",
     "contact": {
       "name": "LuiccianDev",
       "url": "https://github.com/LuiccianDev",

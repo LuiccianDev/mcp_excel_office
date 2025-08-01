@@ -68,6 +68,29 @@ project/
     import os
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
     ```
+### Uso de Archivos Temporales en Tests
+
+- Para pruebas que requieren crear archivos o carpetas, utilizar las fixtures `tmp_path` o `tmp_path_factory` de `pytest`.
+- Estas proporcionan rutas únicas y temporales que se limpian automáticamente después de cada test.
+- Evitar escribir en rutas reales como `tests/data/` o `documents/` durante los tests.
+
+Ejemplo de uso:
+  - Funcion
+
+   ```python
+    def test_creacion_archivo_temporal(tmp_path):
+      file = tmp_path / "archivo.txt"
+      file.write_text("contenido")
+      assert file.exists()
+   ```
+   ```python
+    @pytest.mark.asyncio
+    async def test_funcion_async(tmp_path):
+          ruta = tmp_path / "archivo.xlsx"
+          ruta.write_text("contenido ficticio")
+          resultado = await mi_funcion_async(str(ruta))
+          assert resultado == "ok"
+   ```
 
 ### Buenas Prácticas en Tests
 6. **Evitar el uso de `print()`** en los tests. En su lugar, usar `assert` para verificaciones automáticas
