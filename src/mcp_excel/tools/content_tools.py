@@ -93,7 +93,7 @@ async def read_data_from_excel(
 async def write_data_to_excel(
     filename: str,
     sheet_name: str,
-    data: list[list],
+    data: list[list[Any]],
     start_cell: str = "A1",
 ) -> str:
     """
@@ -110,7 +110,7 @@ async def write_data_to_excel(
     Args:
         filename (str): Path to the workbook. The .xlsx extension is enforced.
         sheet_name (str): Target worksheet name. Must already exist.
-        data (list[list]): 2-D list where each sub-list represents a row to write.
+        data (list[list[Any]]): 2-D list where each sub-list represents a row to write.
         start_cell (str, optional): Top-left cell where writing begins (e.g., "A1"). Defaults to "A1".
 
     Returns:
