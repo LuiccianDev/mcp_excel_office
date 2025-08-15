@@ -1,10 +1,16 @@
 # Python-generated files
 __pycache__/
 *.py[oc]
+*.pyc
+*.pyd
+*.pyo
+*.so
+*.egg
 build/
 dist/
 wheels/
-*.egg-info
+*.egg-info/
+*.egg
 
 # Virtual environments
 .venv
@@ -14,10 +20,17 @@ env/
 ENV/
 env.bak/
 .uv/
+.python-version
 
 # IDEs y editores
 .ruff_cache/
-#.windsurf/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-*
 
 # Archivos de testing y cobertura
 .pytest_cache/
@@ -26,13 +39,52 @@ coverage.xml
 htmlcov/
 .tox/
 .nox/
+.coverage.*
+.pytest
 
-# herramientas de linters  y formateo
-
+# Herramientas de desarrollo y formateo
 .mypy_cache/
 .ruff_cache/
 .dmypy.json
 .pyre/
 .pytype/
-.pre-commit-config.yaml/
+.pre-commit-config.yaml
+.mypy.ini
+.ruff.toml
+
+# Archivos de logs
+*.log
+logs/
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos de configuración local
+.env
+.env.local
+.env.*.local
+
+# Directorios de documentación generada
+docs/_build/
+docs/api/
+
+# Archivos temporales
+*.tmp
+*.bak
+*~
+
+# Directorio de documentos
 documents/
+
+# Archivos de Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb
+
+# Archivos de caché de Python
+.python-version
+
+# Archivos de paquetes
+*.whl
+*.tar.gz
