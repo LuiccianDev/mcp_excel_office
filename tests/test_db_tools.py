@@ -8,6 +8,7 @@ from mcp_excel.tools.db_tools import (
     insert_calculated_data_to_db,
 )
 
+
 # Mock the database connection at the module level
 pytestmark = pytest.mark.asyncio
 
@@ -37,13 +38,13 @@ async def test_fetch_and_insert_db_to_excel_success() -> None:
     """Test successful database fetch and Excel insert."""
     with (
         patch(
-            'mcp_excel.tools.db_tools.validate_sql_query', return_value=True
+            "mcp_excel.tools.db_tools.validate_sql_query", return_value=True
         ) as mock_validate,
         patch(
-            'mcp_excel.tools.db_tools.fetch_data_from_db', return_value=MOCK_DB_RESULT
+            "mcp_excel.tools.db_tools.fetch_data_from_db", return_value=MOCK_DB_RESULT
         ) as mock_fetch,
         patch(
-            'mcp_excel.tools.db_tools.insert_data_to_excel',
+            "mcp_excel.tools.db_tools.insert_data_to_excel",
             return_value={"status": "success", "message": "Data inserted successfully"},
         ) as mock_insert,
     ):
@@ -63,7 +64,7 @@ async def test_fetch_and_insert_db_to_excel_success() -> None:
 @pytest.mark.asyncio  # type: ignore[misc]
 async def test_fetch_and_insert_db_to_excel_invalid_query() -> None:
     """Test with invalid SQL query."""
-    with patch('mcp_excel.tools.db_tools.validate_sql_query', return_value=False):
+    with patch("mcp_excel.tools.db_tools.validate_sql_query", return_value=False):
         result = await fetch_and_insert_db_to_excel(
             TEST_CONN_STR, "DROP TABLE users", TEST_FILENAME, TEST_SHEET
         )
@@ -76,9 +77,9 @@ async def test_fetch_and_insert_db_to_excel_invalid_query() -> None:
 async def test_fetch_and_insert_db_to_excel_db_error() -> None:
     """Test database error handling."""
     with (
-        patch('mcp_excel.tools.db_tools.validate_sql_query', return_value=True),
+        patch("mcp_excel.tools.db_tools.validate_sql_query", return_value=True),
         patch(
-            'mcp_excel.tools.db_tools.fetch_data_from_db',
+            "mcp_excel.tools.db_tools.fetch_data_from_db",
             return_value={"error": "Connection failed"},
         ),
     ):
@@ -96,12 +97,12 @@ async def test_fetch_and_insert_db_to_excel_db_error() -> None:
 async def test_fetch_and_insert_db_to_excel_excel_error() -> None:
     """Test Excel insertion error handling."""
     with (
-        patch('mcp_excel.tools.db_tools.validate_sql_query', return_value=True),
+        patch("mcp_excel.tools.db_tools.validate_sql_query", return_value=True),
         patch(
-            'mcp_excel.tools.db_tools.fetch_data_from_db', return_value=MOCK_DB_RESULT
+            "mcp_excel.tools.db_tools.fetch_data_from_db", return_value=MOCK_DB_RESULT
         ),
         patch(
-            'mcp_excel.tools.db_tools.insert_data_to_excel',
+            "mcp_excel.tools.db_tools.insert_data_to_excel",
             return_value={"error": "Excel error"},
         ),
     ):
@@ -128,10 +129,10 @@ async def test_insert_calculated_data_to_db_success() -> None:
 
     with (
         patch(
-            'mcp_excel.tools.db_tools.clean_data', return_value=TEST_ROWS
+            "mcp_excel.tools.db_tools.clean_data", return_value=TEST_ROWS
         ) as mock_clean,
         patch(
-            'mcp_excel.tools.db_tools.insert_data_to_db', return_value=mock_result
+            "mcp_excel.tools.db_tools.insert_data_to_db", return_value=mock_result
         ) as mock_insert,
     ):
 
@@ -160,9 +161,9 @@ async def test_insert_calculated_data_to_db_error() -> None:
     }
 
     with (
-        patch('mcp_excel.tools.db_tools.clean_data', return_value=TEST_ROWS),
+        patch("mcp_excel.tools.db_tools.clean_data", return_value=TEST_ROWS),
         patch(
-            'mcp_excel.tools.db_tools.insert_data_to_db', return_value=error_response
+            "mcp_excel.tools.db_tools.insert_data_to_db", return_value=error_response
         ),
     ):
 
@@ -178,7 +179,7 @@ async def test_insert_calculated_data_to_db_error() -> None:
 async def test_insert_calculated_data_to_db_validation_error() -> None:
     """Test validation error during data insertion."""
     with patch(
-        'mcp_excel.tools.db_tools.clean_data', side_effect=ValueError("Invalid data")
+        "mcp_excel.tools.db_tools.clean_data", side_effect=ValueError("Invalid data")
     ) as mock_clean:
 
         result = await insert_calculated_data_to_db(
@@ -199,9 +200,9 @@ async def test_insert_calculated_data_to_db_connection_error() -> None:
     }
 
     with (
-        patch('mcp_excel.tools.db_tools.clean_data', return_value=TEST_ROWS),
+        patch("mcp_excel.tools.db_tools.clean_data", return_value=TEST_ROWS),
         patch(
-            'mcp_excel.tools.db_tools.insert_data_to_db', return_value=error_response
+            "mcp_excel.tools.db_tools.insert_data_to_db", return_value=error_response
         ),
     ):
 
@@ -216,9 +217,9 @@ async def test_insert_calculated_data_to_db_connection_error() -> None:
 async def test_insert_calculated_data_to_db_exception() -> None:
     """Test exception handling during database insertion."""
     with (
-        patch('mcp_excel.tools.db_tools.clean_data', return_value=TEST_ROWS),
+        patch("mcp_excel.tools.db_tools.clean_data", return_value=TEST_ROWS),
         patch(
-            'mcp_excel.tools.db_tools.insert_data_to_db',
+            "mcp_excel.tools.db_tools.insert_data_to_db",
             side_effect=Exception("Unexpected error"),
         ) as mock_insert,
     ):

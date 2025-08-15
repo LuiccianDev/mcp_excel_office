@@ -13,6 +13,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from .exceptions import SheetExistsError, ValidationError, WorkbookError, WorksheetError
 
+
 # Type aliases
 WorkbookResult = dict[str, Any]  # Type alias for workbook operation results
 SheetName = str  # Type alias for Excel sheet names
@@ -55,9 +56,9 @@ def _validate_sheet_name(sheet_name: str) -> None:
         raise ValidationError("Sheet name must be a non-empty string")
     if len(sheet_name) > 31:
         raise ValidationError("Sheet name cannot exceed 31 characters")
-    if any(char in sheet_name for char in '[]:*?/\\'):
+    if any(char in sheet_name for char in "[]:*?/\\"):
         raise ValidationError(
-            'Sheet name cannot contain any of these characters: []:*?/\\'
+            "Sheet name cannot contain any of these characters: []:*?/\\"
         )
     if sheet_name.startswith("'"):
         raise ValidationError("Sheet name cannot start with a single quote")

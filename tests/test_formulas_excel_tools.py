@@ -6,6 +6,7 @@ import pytest
 from mcp_excel.exceptions.exceptions import ValidationError
 from mcp_excel.tools import formulas_excel_tools
 
+
 # Test data
 TEST_DIR = Path(__file__).parent.parent / "documents"
 TEST_DIR.mkdir(exist_ok=True)
@@ -21,7 +22,7 @@ TEST_INVALID_FORMULA = "=SUM(A1:A10"  # Missing closing parenthesis
 async def test_validate_formula_syntax_valid() -> None:
     """Test successful formula validation."""
     with patch(
-        'mcp_excel.tools.formulas_excel_tools.validate_formula_in_cell_operation'
+        "mcp_excel.tools.formulas_excel_tools.validate_formula_in_cell_operation"
     ) as mock_validate:
         mock_validate.return_value = {"valid": True, "formula": TEST_FORMULA}
 
@@ -43,7 +44,7 @@ async def test_validate_formula_syntax_valid() -> None:
 async def test_validate_formula_syntax_invalid() -> None:
     """Test validation of invalid formula."""
     with patch(
-        'mcp_excel.tools.formulas_excel_tools.validate_formula_in_cell_operation'
+        "mcp_excel.tools.formulas_excel_tools.validate_formula_in_cell_operation"
     ) as mock_validate:
         mock_validate.side_effect = ValidationError("Invalid formula syntax")
 
@@ -68,9 +69,9 @@ async def test_apply_formula_success() -> None:
     """Test successful formula application."""
     with (
         patch(
-            'mcp_excel.tools.formulas_excel_tools.validate_formula_in_cell_operation'
+            "mcp_excel.tools.formulas_excel_tools.validate_formula_in_cell_operation"
         ) as mock_validate,
-        patch('mcp_excel.tools.formulas_excel_tools.apply_formula') as mock_apply,
+        patch("mcp_excel.tools.formulas_excel_tools.apply_formula") as mock_apply,
     ):
 
         # Simular validación exitosa
@@ -121,7 +122,7 @@ async def test_apply_formula_success() -> None:
 async def test_apply_formula_validation_failure() -> None:
     """Test formula application with invalid formula."""
     with patch(
-        'mcp_excel.tools.formulas_excel_tools.validate_formula_in_cell_operation'
+        "mcp_excel.tools.formulas_excel_tools.validate_formula_in_cell_operation"
     ) as mock_validate:
 
         # Simular validación exitosa

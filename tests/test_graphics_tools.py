@@ -6,6 +6,7 @@ import pytest
 from mcp_excel.exceptions.exceptions import ChartError, PivotError, ValidationError
 from mcp_excel.tools import graphics_tools
 
+
 # Test data
 TEST_DIR = Path(__file__).parent.parent / "documents"
 TEST_DIR.mkdir(exist_ok=True)
@@ -19,7 +20,7 @@ TEST_TARGET_CELL = "E5"
 @pytest.mark.asyncio  # type: ignore[misc]
 async def test_create_chart_success() -> None:
     """Test successful chart creation."""
-    with patch('mcp_excel.tools.graphics_tools.create_chart_impl') as mock_create_chart:
+    with patch("mcp_excel.tools.graphics_tools.create_chart_impl") as mock_create_chart:
         # Mock successful chart creation
         mock_create_chart.return_value = {
             "status": "success",
@@ -55,7 +56,7 @@ async def test_create_chart_success() -> None:
 @pytest.mark.asyncio  # type: ignore[misc]
 async def test_create_chart_validation_error() -> None:
     """Test chart creation with validation error."""
-    with patch('mcp_excel.tools.graphics_tools.create_chart_impl') as mock_create_chart:
+    with patch("mcp_excel.tools.graphics_tools.create_chart_impl") as mock_create_chart:
         # Mock validation error
         mock_create_chart.side_effect = ValidationError("Invalid chart type")
 
@@ -74,7 +75,7 @@ async def test_create_chart_validation_error() -> None:
 @pytest.mark.asyncio  # type: ignore[misc]
 async def test_create_chart_chart_error() -> None:
     """Test chart creation with chart-specific error."""
-    with patch('mcp_excel.tools.graphics_tools.create_chart_impl') as mock_create_chart:
+    with patch("mcp_excel.tools.graphics_tools.create_chart_impl") as mock_create_chart:
         # Mock chart error
         mock_create_chart.side_effect = ChartError("Data range is empty")
 
@@ -95,7 +96,7 @@ async def test_create_chart_chart_error() -> None:
 async def test_create_pivot_table_success() -> None:
     """Test successful pivot table creation."""
     with patch(
-        'mcp_excel.tools.graphics_tools.create_pivot_table_impl'
+        "mcp_excel.tools.graphics_tools.create_pivot_table_impl"
     ) as mock_create_pivot:
         # Mock successful pivot table creation
         mock_create_pivot.return_value = {
@@ -130,7 +131,7 @@ async def test_create_pivot_table_success() -> None:
 async def test_create_pivot_table_validation_error() -> None:
     """Test pivot table creation with validation error."""
     with patch(
-        'mcp_excel.tools.graphics_tools.create_pivot_table_impl'
+        "mcp_excel.tools.graphics_tools.create_pivot_table_impl"
     ) as mock_create_pivot:
         # Mock validation error
         mock_create_pivot.side_effect = ValidationError("Invalid data range")
@@ -151,7 +152,7 @@ async def test_create_pivot_table_validation_error() -> None:
 async def test_create_pivot_table_pivot_error() -> None:
     """Test pivot table creation with pivot-specific error."""
     with patch(
-        'mcp_excel.tools.graphics_tools.create_pivot_table_impl'
+        "mcp_excel.tools.graphics_tools.create_pivot_table_impl"
     ) as mock_create_pivot:
         # Mock pivot error
         mock_create_pivot.side_effect = PivotError("No numeric data in specified range")

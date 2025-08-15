@@ -10,6 +10,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any, TypeVar, cast
 
+
 F = TypeVar("F", bound=Callable[..., Any])
 
 

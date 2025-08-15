@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from typing import Any, cast
 
+
 CONFIG_PATH_JSON = Path(__file__).resolve().parent / "mcp_excel_config.json"
 
 

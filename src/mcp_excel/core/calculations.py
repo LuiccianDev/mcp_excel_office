@@ -13,6 +13,7 @@ from mcp_excel.core.workbook import get_or_create_workbook
 from mcp_excel.utils.cell_utils import validate_cell_reference
 from mcp_excel.utils.validation_utils import validate_formula
 
+
 # Constants
 FORMULA_PREFIX: Final[str] = "="
 

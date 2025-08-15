@@ -26,6 +26,7 @@ from .exceptions import (
     WorkbookError,
 )
 
+
 # Type aliases for better code readability
 CellValue = Any
 RowData = list[CellValue]

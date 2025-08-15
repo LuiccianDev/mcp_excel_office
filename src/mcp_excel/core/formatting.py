@@ -20,28 +20,29 @@ from openpyxl.styles import (
 from mcp_excel.core.workbook import get_or_create_workbook
 from mcp_excel.utils.cell_utils import parse_cell_range, validate_cell_reference
 
+
 # Define valid border styles
 BorderStyle = Literal[
-    'dashDot',
-    'dashDotDot',
-    'dashed',
-    'dotted',
-    'double',
-    'hair',
-    'medium',
-    'mediumDashDot',
-    'mediumDashDotDot',
-    'mediumDashed',
-    'slantDashDot',
-    'thick',
-    'thin',
-    'none',
+    "dashDot",
+    "dashDotDot",
+    "dashed",
+    "dotted",
+    "double",
+    "hair",
+    "medium",
+    "mediumDashDot",
+    "mediumDashDotDot",
+    "mediumDashed",
+    "slantDashDot",
+    "thick",
+    "thin",
+    "none",
     None,
 ]
 
 # Define valid underline styles
 UnderlineStyle = Literal[
-    'single', 'double', 'singleAccounting', 'doubleAccounting', 'none'
+    "single", "double", "singleAccounting", "doubleAccounting", "none"
 ]
 
 
@@ -124,7 +125,7 @@ def format_range(
 
         # Border configuration
         border = None
-        if border_style is not None and border_style != 'none':
+        if border_style is not None and border_style != "none":
             border_color = border_color if border_color else "000000"
             border_color = (
                 border_color if border_color.startswith("FF") else f"FF{border_color}"
