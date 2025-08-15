@@ -37,54 +37,6 @@ class WorkbookInfo(TypedDict, total=False):
     used_ranges: dict[SheetName, str] | None
 
 
-def _validate_sheet_name(sheet_name: str) -> None:
-    """Validate that the sheet name is valid according to Excel's rules.
-
-    Args:
-        sheet_name: Name of the sheet to validate.
-
-    Raises:
-        ValidationError: If the sheet name is invalid.
-            Possible reasons:
-            - Empty or None value
-            - Not a string
-            - Exceeds 31 characters
-            - Contains invalid characters ([]:*?/\\')
-            - Starts with a single quote
-    """
-    if not sheet_name or not isinstance(sheet_name, str):
-        raise ValidationError("Sheet name must be a non-empty string")
-    if len(sheet_name) > 31:
-        raise ValidationError("Sheet name cannot exceed 31 characters")
-    if any(char in sheet_name for char in "[]:*?/\\"):
-        raise ValidationError(
-            "Sheet name cannot contain any of these characters: []:*?/\\"
-        )
-    if sheet_name.startswith("'"):
-        raise ValidationError("Sheet name cannot start with a single quote")
-
-
-def _create_initial_worksheet(workbook: Workbook, sheet_name: str) -> None:
-    """Create the initial worksheet with the specified name.
-
-    This function removes the default worksheet that comes with a new workbook
-    and creates a new one with the specified name.
-
-    Args:
-        workbook: The workbook to add the sheet to.
-        sheet_name: Name for the new worksheet.
-    """
-    try:
-        # Remove default sheet and create a new one with the specified name
-        default_sheet = workbook.active
-
-        if isinstance(default_sheet, Worksheet):
-            workbook.remove(default_sheet)
-        workbook.create_sheet(sheet_name)
-    except Exception as e:
-        raise WorksheetError(f"Failed to create initial worksheet: {e}") from e
-
-
 def create_workbook(
     filename: str | Path, sheet_name: str = "Sheet1", data_only: bool = False
 ) -> WorkbookResult:
@@ -131,28 +83,6 @@ def create_workbook(
     finally:
         if wb is not None:
             wb.close()
-
-
-def _load_existing_workbook(filepath: Path, read_only: bool = False) -> Workbook:
-    """Load an existing Excel workbook from the specified path.
-
-    This is a helper function that wraps openpyxl's load_workbook with
-    consistent error handling and type hints.
-
-    Args:
-        filepath: Path to the Excel file to load.
-        read_only: Whether to open the workbook in read-only mode.
-            This is more memory-efficient for large files. Defaults to False.
-
-    Returns:
-        Workbook: An openpyxl Workbook object.
-    """
-    try:
-        return load_workbook(str(filepath), read_only=read_only, data_only=True)
-    except PermissionError as e:
-        raise PermissionError(f"Cannot access {filepath}: {e}") from e
-    except Exception as e:
-        raise WorkbookError(f"Error loading workbook {filepath}: {e}") from e
 
 
 # * Get or create workbook
@@ -272,21 +202,6 @@ def create_sheet(filename: str | Path, sheet_name: str) -> WorkbookResult:
             wb.close()
 
 
-def _get_worksheet_range(worksheet: Any) -> str | None:
-    """Get the used range of a worksheet as a string (e.g., 'A1:D10').
-
-    Args:
-        worksheet: The openpyxl worksheet to analyze.
-
-    Returns:
-        A string representing the used range (e.g., 'A1:D10') or None if the
-        worksheet is empty.
-    """
-    if worksheet.max_row > 0 and worksheet.max_column > 0:
-        return f"A1:{get_column_letter(worksheet.max_column)}{worksheet.max_row}"
-    return None
-
-
 # * Get workbook info
 def get_workbook_info(
     filename: str | Path, include_ranges: bool = False
@@ -350,3 +265,87 @@ def get_workbook_info(
     finally:
         if wb is not None:
             wb.close()
+
+
+def _validate_sheet_name(sheet_name: str) -> None:
+    """Validate that the sheet name is valid according to Excel's rules.
+
+    Args:
+        sheet_name: Name of the sheet to validate.
+
+    Raises:
+        ValidationError: If the sheet name is invalid.
+            Possible reasons:
+            - Empty or None value
+            - Not a string
+            - Exceeds 31 characters
+            - Contains invalid characters ([]:*?/\\')
+            - Starts with a single quote
+    """
+    if not sheet_name or not isinstance(sheet_name, str):
+        raise ValidationError("Sheet name must be a non-empty string")
+    if len(sheet_name) > 31:
+        raise ValidationError("Sheet name cannot exceed 31 characters")
+    if any(char in sheet_name for char in "[]:*?/\\"):
+        raise ValidationError(
+            "Sheet name cannot contain any of these characters: []:*?/\\"
+        )
+    if sheet_name.startswith("'"):
+        raise ValidationError("Sheet name cannot start with a single quote")
+
+
+def _create_initial_worksheet(workbook: Workbook, sheet_name: str) -> None:
+    """Create the initial worksheet with the specified name.
+
+    This function removes the default worksheet that comes with a new workbook
+    and creates a new one with the specified name.
+
+    Args:
+        workbook: The workbook to add the sheet to.
+        sheet_name: Name for the new worksheet.
+    """
+    try:
+        # Remove default sheet and create a new one with the specified name
+        default_sheet = workbook.active
+
+        if isinstance(default_sheet, Worksheet):
+            workbook.remove(default_sheet)
+        workbook.create_sheet(sheet_name)
+    except Exception as e:
+        raise WorksheetError(f"Failed to create initial worksheet: {e}") from e
+
+def _load_existing_workbook(filepath: Path, read_only: bool = False) -> Workbook:
+    """Load an existing Excel workbook from the specified path.
+
+    This is a helper function that wraps openpyxl's load_workbook with
+    consistent error handling and type hints.
+
+    Args:
+        filepath: Path to the Excel file to load.
+        read_only: Whether to open the workbook in read-only mode.
+            This is more memory-efficient for large files. Defaults to False.
+
+    Returns:
+        Workbook: An openpyxl Workbook object.
+    """
+    try:
+        return load_workbook(str(filepath), read_only=read_only, data_only=True)
+    except PermissionError as e:
+        raise PermissionError(f"Cannot access {filepath}: {e}") from e
+    except Exception as e:
+        raise WorkbookError(f"Error loading workbook {filepath}: {e}") from e
+
+
+def _get_worksheet_range(worksheet: Any) -> str | None:
+    """Get the used range of a worksheet as a string (e.g., 'A1:D10').
+
+    Args:
+        worksheet: The openpyxl worksheet to analyze.
+
+    Returns:
+        A string representing the used range (e.g., 'A1:D10') or None if the
+        worksheet is empty.
+    """
+    if worksheet.max_row > 0 and worksheet.max_column > 0:
+        return f"A1:{get_column_letter(worksheet.max_column)}{worksheet.max_row}"
+    return None

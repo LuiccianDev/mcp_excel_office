@@ -16,63 +16,6 @@ class DatabaseError(Exception):
     pass
 
 
-# Context manager for database connections
-@contextmanager
-def _get_db_connection(
-    connection_string: str,
-) -> Generator[connection, None, None]:
-    """Context manager for database connections.
-
-    Args:
-        connection_string: Database connection string.
-
-    Yields:
-        connection: psycopg2 connection object with DictCursor.
-
-    Raises:
-        DatabaseError: If connection cannot be established.
-    """
-    conn: connection | None = None
-    try:
-        conn = psycopg2.connect(connection_string, cursor_factory=DictCursor)
-        conn.autocommit = False
-        yield conn
-    except psycopg2.Error as e:
-        raise DatabaseError(f"Failed to connect to database: {e}") from e
-    finally:
-        if conn is not None:
-            conn.close()
-
-
-# Execute a query and return results
-def _execute_query(
-    conn: connection, query: str, params: tuple | None = None
-) -> tuple[list[dict[str, Any]], list[str]]:
-    """Execute a query and return results.
-
-    Args:
-        conn: Database connection
-        query: SQL query to execute
-        params: Query parameters
-
-    Returns:
-        Tuple of (rows as dictionaries, column names)
-    """
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute(query, params or ())
-            if cursor.description:
-                columns = [desc[0] for desc in cursor.description]
-                rows = [
-                    dict(zip(columns, row, strict=False)) for row in cursor.fetchall()
-                ]
-                return rows, columns
-            return [], []
-    except psycopg2.Error as e:
-        conn.rollback()
-        raise DatabaseError(f"Query execution failed: {e}") from e
-
-
 # * Fetch data from database with proper connection handling
 def fetch_data_from_db(
     connection_string: str, query: str, params: tuple | None = None
@@ -267,3 +210,59 @@ def insert_data_to_db(
         return {"status": "error", "message": str(e)}
     except Exception as e:
         return {"status": "error", "message": f"An unexpected error occurred: {str(e)}"}
+
+# Context manager for database connections
+@contextmanager
+def _get_db_connection(
+    connection_string: str,
+) -> Generator[connection, None, None]:
+    """Context manager for database connections.
+
+    Args:
+        connection_string: Database connection string.
+
+    Yields:
+        connection: psycopg2 connection object with DictCursor.
+
+    Raises:
+        DatabaseError: If connection cannot be established.
+    """
+    conn: connection | None = None
+    try:
+        conn = psycopg2.connect(connection_string, cursor_factory=DictCursor)
+        conn.autocommit = False
+        yield conn
+    except psycopg2.Error as e:
+        raise DatabaseError(f"Failed to connect to database: {e}") from e
+    finally:
+        if conn is not None:
+            conn.close()
+
+
+# Execute a query and return results
+def _execute_query(
+    conn: connection, query: str, params: tuple | None = None
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """Execute a query and return results.
+
+    Args:
+        conn: Database connection
+        query: SQL query to execute
+        params: Query parameters
+
+    Returns:
+        Tuple of (rows as dictionaries, column names)
+    """
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query, params or ())
+            if cursor.description:
+                columns = [desc[0] for desc in cursor.description]
+                rows = [
+                    dict(zip(columns, row, strict=False)) for row in cursor.fetchall()
+                ]
+                return rows, columns
+            return [], []
+    except psycopg2.Error as e:
+        conn.rollback()
+        raise DatabaseError(f"Query execution failed: {e}") from e

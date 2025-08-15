@@ -18,40 +18,6 @@ from mcp_excel.utils.validation_utils import validate_formula
 FORMULA_PREFIX: Final[str] = "="
 
 
-def _validate_worksheet_exists(workbook: Any, sheet_name: str) -> None:
-    """Validate if the specified worksheet exists in the workbook."""
-    if sheet_name not in workbook.sheetnames:
-        raise ValidationError(f"Sheet '{sheet_name}' not found")
-
-
-def _ensure_formula_format(formula: str) -> str:
-    """Ensure the formula starts with '='."""
-    return formula if formula.startswith(FORMULA_PREFIX) else f"={formula}"
-
-
-def _validate_formula_syntax(formula: str) -> None:
-    """Validate the syntax of the formula."""
-    is_valid, message = validate_formula(formula)
-    if not is_valid:
-        raise FormulaError(f"Invalid formula syntax: {message}")
-
-
-def _apply_formula_to_cell(worksheet: Worksheet, cell_ref: str, formula: str) -> None:
-    """Apply formula to the specified cell in the worksheet."""
-    try:
-        worksheet[cell_ref].value = formula
-    except Exception as e:
-        raise FormulaError(f"Failed to apply formula to cell: {str(e)}") from e
-
-
-def _save_workbook(workbook: Any, filename: str) -> None:
-    """Save the workbook to the specified file."""
-    try:
-        workbook.save(filename)
-    except Exception as e:
-        raise FormulaError(f"Failed to save workbook: {str(e)}") from e
-
-
 def apply_formula(
     filename: str | Path,
     sheet_name: str,
@@ -99,3 +65,36 @@ def apply_formula(
         "formula": formula,
     }
     return result
+
+def _validate_worksheet_exists(workbook: Any, sheet_name: str) -> None:
+    """Validate if the specified worksheet exists in the workbook."""
+    if sheet_name not in workbook.sheetnames:
+        raise ValidationError(f"Sheet '{sheet_name}' not found")
+
+
+def _ensure_formula_format(formula: str) -> str:
+    """Ensure the formula starts with '='."""
+    return formula if formula.startswith(FORMULA_PREFIX) else f"={formula}"
+
+
+def _validate_formula_syntax(formula: str) -> None:
+    """Validate the syntax of the formula."""
+    is_valid, message = validate_formula(formula)
+    if not is_valid:
+        raise FormulaError(f"Invalid formula syntax: {message}")
+
+
+def _apply_formula_to_cell(worksheet: Worksheet, cell_ref: str, formula: str) -> None:
+    """Apply formula to the specified cell in the worksheet."""
+    try:
+        worksheet[cell_ref].value = formula
+    except Exception as e:
+        raise FormulaError(f"Failed to apply formula to cell: {str(e)}") from e
+
+
+def _save_workbook(workbook: Any, filename: str) -> None:
+    """Save the workbook to the specified file."""
+    try:
+        workbook.save(filename)
+    except Exception as e:
+        raise FormulaError(f"Failed to save workbook: {str(e)}") from e
