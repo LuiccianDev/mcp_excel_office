@@ -1,0 +1,49 @@
+{
+  "dxt_version": "0.1",
+  "name": "excelOffice",
+  "version": "1.0.0",
+  "description": "Excel server for processing Excel files",
+  "author": {
+    "name": "LuiccianDev",
+    "email": "LuiccianDev@gmail.com",
+    "url": "https://github.com/LuiccianDev"
+  },
+  "homepage": "https://github.com/LuiccianDev",
+  "documentation": "https://github.com/LuiccianDev",
+  "support": "https://github.com/LuiccianDev",
+  "server": {
+    "type": "python",
+    "entry_point": "src/mcp_excel/server.py",
+    "mcp_config": {
+      "command": "python",
+      "args": [
+        "${__dirname}/src/mcp_excel/server.py"
+      ],
+      "env": {
+        "DIRECTORY": "${user_config.directory}"
+      }
+    }
+  },
+  "tools_generated": true,
+  "user_config": {
+    "directory": {
+      "type": "directory",
+      "title": "Directory",
+      "description": "Dierctory from files",
+      "required": true,
+      "sensitive": false,
+      "multiple": true
+    }
+  },
+  "keywords": [
+    "mcp",
+    "ia",
+    "claude"
+  ],
+  "compatibility": {
+    "platforms": [
+      "win32"
+    ]
+  },
+  "license": "MIT"
+}

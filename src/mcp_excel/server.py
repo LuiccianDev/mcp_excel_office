@@ -1,7 +1,8 @@
+"""Main server implementation for the Git Commit Generator MCP server."""
+
 from mcp.server.fastmcp import FastMCP
 
-from mcp_excel.config import load_config
-from mcp_excel.tools.register_tools import register_all_tools
+from mcp_excel.tools import register_all_tools
 
 
 # This is a FastMCP server that serves as an Excel server.
@@ -12,9 +13,14 @@ def run_server() -> FastMCP:
     """
     Run the FastMCP server.
     """
-    config = load_config()
-    mcp = FastMCP(**config)
+
+    mcp = FastMCP("Mcp Excel Office")
 
     register_all_tools(mcp)
 
     return mcp
+
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(run_server().run(transport="stdio"))

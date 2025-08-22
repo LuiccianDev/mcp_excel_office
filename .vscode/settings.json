@@ -8,7 +8,7 @@
     "**/.env": true,
     "**/checkpoints": true,
     ".ruff_cache": true,
-    ".venv": true,
+    ".venv": false,
     ".mypy_cache": true,
     ".pytest_cache": true,
     "htmlcov": true,

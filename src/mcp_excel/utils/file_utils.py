@@ -16,12 +16,18 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 # Get allowed directories from environment variables
 def _get_allowed_directories() -> list[str]:
-    """Get the list of allowed directories from environment variables."""
-    allowed_dirs_str = os.environ.get("MCP_ALLOWED_DIRECTORIES", "./documents")
-    allowed_dirs = [dir.strip() for dir in allowed_dirs_str.split(",")]
-    return [os.path.abspath(dir) for dir in allowed_dirs]
-
-
+    """
+    Obtiene la lista de directorios permitidos desde la variable de entorno DIRECTORY.
+    Soporta múltiples formatos y normaliza las rutas.
+    """
+    allowed_dirs_str = os.environ.get("DIRECTORY", "").strip()
+    if not allowed_dirs_str:
+        return [os.getcwd()]
+    # Soporta coma y punto y coma como separadores
+    raw_dirs = [d for sep in [",", ";"] for d in allowed_dirs_str.split(sep)]
+    # Elimina duplicados y normaliza rutas
+    allowed_dirs = {os.path.abspath(dir.strip()) for dir in raw_dirs if dir.strip()}
+    return list(allowed_dirs)
 # Check if the given file path is within allowed directories
 def _is_path_in_allowed_directories(file_path: str) -> tuple[bool, str | None]:
     """Check if the given file path is within allowed directories."""
