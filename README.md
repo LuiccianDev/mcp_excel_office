@@ -130,7 +130,7 @@ uv run pre-commit run --all-files
 #### Formatear solo el código modificado:
 ```bash
 # Usando uv directamente
-uv run pre-commit run --files <file>
+uv run pre-commit run <file>
 ```
 
 ### Testing
