@@ -323,7 +323,7 @@ cli = [
 [[package]]
 name = "mcp-office-excel"
 version = "1.0.0"
-source = { editable = "." }
+source = { virtual = "." }
 dependencies = [
     { name = "mcp", extra = ["cli"] },
     { name = "openpyxl" },
