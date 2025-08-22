@@ -46,6 +46,20 @@ test = [
     "pytest-cov>=6.2.1",
 ]
 
+[project.scripts]
+mcp-mcp_excel_office = "mcp_excel.__main__:main"
+
+[project.entry-points."mcp.servers"]
+mcp-mcp_excel_office = "mcp_excel.__main__:main"
+
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_excel"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 # Configuración de MyPy (verificador de tipos)
 [tool.mypy]
 python_version = "3.11"
@@ -64,6 +78,7 @@ strict_equality = true
 show_error_codes = true
 ignore_missing_imports = true
 exclude = ["tests/", "build", ".venv"]
+explicit_package_bases = true
 files = ["src"]
 
 
