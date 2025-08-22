@@ -88,3 +88,6 @@ documents/
 # Archivos de paquetes
 *.whl
 *.tar.gz
+
+*.dxt
+dist/
