@@ -176,7 +176,11 @@ Añade la siguiente configuración a tu `mcp_config.json` para la integración c
     "mcpServers": {
         "officeExcel": {
             "command": "uv",
-            "args": ["run", "mcp-office-excel"]
+            "args": ["run", "mcp-office-excel"],
+            "env": {
+                "DIRECTORY": "user/to/path",
+
+            }
         }
     }
 }

@@ -6,11 +6,15 @@
   "author": {
     "name": "LuiccianDev",
     "email": "LuiccianDev@gmail.com",
-    "url": "https://github.com/LuiccianDev"
+    "url": "https://github.com/LuiccianDev/mcp_excel_office"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LuiccianDev/mcp_excel_office"
   },
   "homepage": "https://github.com/LuiccianDev",
-  "documentation": "https://github.com/LuiccianDev",
-  "support": "https://github.com/LuiccianDev",
+  "documentation": "https://github.com/LuiccianDev/mcp_excel_office/blob/master/README.md",
+  "support": "https://github.com/LuiccianDev/mcp_excel_office/issues",
   "server": {
     "type": "python",
     "entry_point": "src/mcp_excel/server.py",
@@ -39,7 +43,11 @@
   "keywords": [
     "mcp",
     "ia",
-    "claude"
+    "automation",
+    "productivity",
+    "excel",
+    "office",
+    "xlsx"
   ],
   "compatibility": {
     "platforms": [
