@@ -1,5 +1,5 @@
 <div align="center">
-  <h1> MCP Office Excel Server</h1>
+  <h1>MCP Office Excel Server</h1>
   <p>
     <em>Potente servidor para la manipulación programática de documentos Excel (.xlsx) mediante MCP</em>
   </p>
@@ -8,17 +8,29 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-brightgreen)](https://modelcontextprotocol.io)
-</Div>
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+</div>
+
+## 📖 Descripción
+
 Servidor MCP (Model Context Protocol) para integración con Microsoft Excel que permite crear, modificar y gestionar archivos de Excel de manera programática a través de herramientas MCP estandarizadas.
 
 ## 📋 Tabla de Contenidos
 
 - [✨ Características Principales](#-características-principales)
 - [🚀 Instalación](#-instalación)
+  - [Requisitos Previos](#-requisitos-previos)
+  - [Instalación con UV (Recomendado)](#-instalación-con-uv-recomendado)
+  - [Instalación con pip](#-instalación-con-pip)
+  - [Entorno Virtual (Opcional)](#-entorno-virtual-opcional)
 - [⚙️ Configuración](#️-configuración)
-- [📚 Uso](#-uso)
+- [🚀 Uso Rápido](#-uso-rápido)
+- [📚 Uso Avanzado](#-uso-avanzado)
 - [🧪 Testing](#-testing)
+- [🧩 Estructura del Proyecto](#-estructura-del-proyecto)
+- [🔧 Herramientas de Desarrollo](#-herramientas-de-desarrollo)
 - [🤝 Contribuyendo](#-contribuyendo)
+- [📄 Licencia](#-licencia)
 
 ## ✨ Características Principales
 
@@ -31,112 +43,155 @@ Servidor MCP (Model Context Protocol) para integración con Microsoft Excel que 
 ## 🚀 Instalación
 
 ### 📋 Requisitos Previos
+
 - Python 3.11 o superior
-- Gestor de paquetes UV (recomendado) o pip
+- [UV](https://github.com/astral-sh/uv) (recomendado) o pip
+- Git (para clonar el repositorio)
+
+### 🔄 Clonar el Repositorio
+
+```bash
+git clone https://github.com/tu-usuario/mcp_excel_office.git
+cd mcp_excel_office
+```
 
 ### ⚡ Instalación con UV (Recomendado)
 
-```bash
-# Instalar dependencias usando uv
-uv sync
+1. **Instalar dependencias básicas**:
+   ```bash
+   uv sync
+   ```
 
-# Instalar en modo desarrollo (incluye dependencias de desarrollo)
-uv sync --dev
+2. **Modo desarrollo** (incluye dependencias de desarrollo y testing):
+   ```bash
+   uv sync --dev
+   ```
 
-# Instalar en modo producción (solo dependencias necesarias)
-uv sync --production
-```
+3. **Modo producción** (solo dependencias necesarias):
+   ```bash
+   uv sync --production
+   ```
 
 ### 🐍 Instalación con pip
 
+1. **Instalar el paquete**:
+   ```bash
+   pip install .
+   ```
+
+2. **Modo desarrollo** (instalación editable):
+   ```bash
+   pip install -e ".[dev]"
+   ```
+
+### 🌐 Entorno Virtual (Opcional)
+
+Se recomienda usar un entorno virtual para aislar las dependencias:
+
 ```bash
+# Crear entorno virtual
+uv venv
+
+# Activar en Windows
+.venv\Scripts\activate
+
 # Instalar dependencias
-pip install .
+uv sync
 
-# Instalar en modo desarrollo
-pip install -e ".[dev]"
+uv sync --all--groups
+# Desactivar entorno virtual
+deactivate
 ```
 
-### 🛠️ Scripts de Ayuda
+### 🏗️ Construir el Módulo
+
+Para crear un paquete instalable del proyecto usando `uv build`:
 
 ```bash
-# Usar el script helper para instalación
-python scripts.py install
+# Construir el paquete
+uv build
+
+# Instalar desde el paquete construido
+uv pip install dist/mcp_excel_office-*.whl
+
 ```
 
-
-
-Este proyecto usa `black` como formateador de código Python.
+Para ver todas las opciones disponibles:
+```bash
+uv build --help
+```
 
 #### Formatear todo el código:
 ```bash
 # Usando uv directamente
-uv run black .
-
-# Usando el script helper
-python scripts.py format
-
-# Usando el script específico
-python format.py
+uv run pre-commit run --all-files
 ```
 
-#### Verificar formato del código:
+#### Formatear solo el código modificado:
 ```bash
 # Usando uv directamente
-uv run black --check .
-
-# Usando el script helper
-python scripts.py check
-
-# Usando el script específico
-python format.py --check
+uv run pre-commit run --files <file>
 ```
 
-## 🚀 Ejecutar el servidor
-```bash
-# Usando uv
-uv run python main.py
+### Testing
 
-# Usando el script helper
-python scripts.py run
+Ejecuta las pruebas unitarias con:
+
+```bash
+uv run pytest
 ```
 
 ## ⚙️ Configuración
 
-### 🔧 VS Code
+### 🔧 Configuración del Entorno de Desarrollo
+
+#### VS Code
 El proyecto incluye configuración automática para VS Code que:
 - Formatea automáticamente al guardar
 - Usa black como formateador
 - Organiza imports automáticamente
 
-### ⚡ Configuración de Black
-La configuración de black está en `pyproject.toml`:
-- Longitud de línea: 88 caracteres
-- Target Python: 3.11+
-- Excluye directorios estándar (cache, git, etc.)
+#### Configuración de MCP (Model Context Protocol)
 
-## 🛠️ Scripts Disponibles
 
-### Básicos
-- `python scripts.py format` - Formatear código automáticamente
-- `python scripts.py check` - Verificar formato del código
-- `python scripts.py run` - Iniciar el servidor MCP
-- `python scripts.py install` - Instalar dependencias
+1. Construir con UV
+Para crear un paquete instalable:
 
-### Herramientas MCP
-- `mcp_server_excel` - Inicia el servidor MCP para Excel
-  ```bash
-  mcp_server_excel
-  ```
-
-### Pruebas
 ```bash
-# Ejecutar pruebas unitarias
-pytest
+# Construir el paquete
+uv build
 
-# Ejecutar pruebas con cobertura
-pytest --cov=mcp_excel_server tests/
+# Instalar el paquete localmente
+uv pip install dist/mcp_excel_office-*.whl
+
+
 ```
+
+
+2. Claude Desktop Git
+Añade la siguiente configuración a tu `mcp_config.json` para la integración con Git:
+
+```json
+{
+    "mcpServers": {
+        "officeExcel": {
+            "command": "uv",
+            "args": ["run", "mcp-office-excel"]
+        }
+    }
+}
+```
+
+#### DXT Pack
+Para empaquetar el proyecto con DXT:
+
+```bash
+# Empaquetar el proyecto
+dxt pack
+```
+
+Para más información sobre DXT, visita: [DXT en GitHub](https://github.com/anthropics/dxt)
+
 
 ## 🗂 Estructura del Proyecto
 
@@ -191,3 +246,37 @@ Este proyecto está bajo la licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 ## 🤝 Contribuir
 
 Las contribuciones son bienvenidas. Por favor, lea las [pautas de contribución](CONTRIBUTING.md) antes de enviar cambios.
+
+### 📋 Pautas de Contribución
+
+1. Haz un fork del repositorio
+2. Crea una rama para tu característica (`git checkout -b feature/AmazingFeature`)
+3. Haz commit de tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Haz push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+### 📋 Pautas de Código
+
+- Sigue el estilo de código existente
+- Incluye pruebas para nuevas funcionalidades
+- Actualiza la documentación según sea necesario
+- Asegúrate de que todas las pruebas pasen
+
+## 🐛 Reportar Errores
+
+Si encuentras algún error o tienes sugerencias, por favor [abre un issue](https://github.com/tu-usuario/mcp_excel_office/issues) en GitHub.
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más información.
+
+---
+
+<div align="center">
+  <p>Creado con por LuiccianDev</p>
+  <p>
+    <a href="https://github.com/tu-usuario/mcp_excel_office">GitHub</a> |
+    <a href="https://modelcontextprotocol.io">MCP</a> |
+    <a href="https://pypi.org/project/mcp-excel">PyPI</a>
+  </p>
+</div>
