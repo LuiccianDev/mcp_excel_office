@@ -20,7 +20,8 @@
         "${__dirname}/src/mcp_excel/server.py"
       ],
       "env": {
-        "DIRECTORY": "${user_config.directory}"
+        "DIRECTORY": "${user_config.directory}",
+        "PYTHONPATH": "${__dirname}/src"
       }
     }
   },
