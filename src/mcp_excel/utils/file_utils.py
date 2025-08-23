@@ -15,16 +15,23 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any, TypeVar, cast
 
+from mcp_excel.config import ConfigurationError, get_directory
+
 
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-# Get allowed directories from environment variables
+# Get allowed directories from configuration system
 def _get_allowed_directories() -> list[str]:
-    """Get the list of allowed directories from environment variables."""
-    allowed_dirs_str = os.environ.get("DIRECTORY", "./documents")
-    allowed_dirs = [dir.strip() for dir in allowed_dirs_str.split(",")]
-    return [os.path.abspath(dir) for dir in allowed_dirs]
+    """Get the list of allowed directories from configuration system."""
+    try:
+        directory = get_directory()
+        return [os.path.abspath(directory)]
+    except Exception:
+        # Fallback to environment variable for backward compatibility
+        allowed_dirs_str = os.environ.get("DIRECTORY", "./documents")
+        allowed_dirs = [dir.strip() for dir in allowed_dirs_str.split(",")]
+        return [os.path.abspath(dir) for dir in allowed_dirs]
 
 
 # Check if the given file path is within allowed directories
@@ -176,10 +183,7 @@ def ensure_xlsx_extension(filename: str) -> str:
 # * Retrieve metadata for all Excel (.xlsx) files in the specified directory
 def list_excel_files_in_directory() -> list[dict]:
     """
-    Retrieve metadata for all Excel (.xlsx) files in the specified directory.
-
-    Args:
-        directory: Path to the directory to search for Excel files
+    Retrieve metadata for all Excel (.xlsx) files in the configured directory.
 
     Returns:
         list[dict]: List of dictionaries containing file metadata with keys:
@@ -189,17 +193,22 @@ def list_excel_files_in_directory() -> list[dict]:
             - path (str): Full absolute path to the file
 
     Raises:
-        FileNotFoundError: If the specified directory does not exist
+        FileNotFoundError: If the configured directory does not exist
         NotADirectoryError: If the path exists but is not a directory
         OSError: For other filesystem-related errors
+        ConfigurationError: If directory configuration is invalid
     """
-    directory = os.environ.get("DIRECTORY", "./documents")
+    try:
+        directory = get_directory()
+    except Exception as e:
+        raise ConfigurationError(f"Failed to get configured directory: {e}") from e
+
     try:
         # Validate directory exists and is accessible
         if not os.path.exists(directory):
-            raise FileNotFoundError(f"Directory not found: {directory}")
+            raise FileNotFoundError(f"Configured directory not found: {directory}")
         if not os.path.isdir(directory):
-            raise NotADirectoryError(f"Not a directory: {directory}")
+            raise NotADirectoryError(f"Configured path is not a directory: {directory}")
 
         excel_files = []
 
@@ -225,7 +234,9 @@ def list_excel_files_in_directory() -> list[dict]:
 
     except OSError as e:
         # Re-raise with more context
-        raise OSError(f"Error accessing directory '{directory}': {str(e)}") from e
+        raise OSError(
+            f"Error accessing configured directory '{directory}': {str(e)}"
+        ) from e
 
 
 # * Decorator to validate file access

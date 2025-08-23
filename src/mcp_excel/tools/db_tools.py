@@ -1,6 +1,11 @@
 import asyncio
 from typing import Any
 
+from mcp_excel.config import (
+    ConfigurationError,
+    is_database_configured,
+    validate_file_path,
+)
 from mcp_excel.core.db_conection import (
     clean_data,
     fetch_data_from_db,
@@ -45,39 +50,69 @@ async def fetch_and_insert_db_to_excel(
         • Data is cleaned for Excel compatibility before insertion.
         • Blocking I/O is handled in threads for async compatibility.
     """
-    filename = ensure_xlsx_extension(filename)
-    if not validate_sql_query(query):
+    try:
+        # Check if database is configured
+        if not connection_string and not is_database_configured():
+            return {
+                "status": "error",
+                "message": "Database is not configured. Please set POSTGRES_CONNECTION_STRING environment variable or provide connection_string parameter.",
+            }
+
+        # Validate and secure file path
+        try:
+            filename = ensure_xlsx_extension(filename)
+            validated_filename = validate_file_path(filename)
+        except ConfigurationError as e:
+            return {
+                "status": "error",
+                "message": f"File path validation failed: {e}",
+            }
+
+        # Validate SQL query for security
+        if not validate_sql_query(query):
+            return {
+                "status": "error",
+                "message": "Invalid or potentially unsafe SQL query. Only SELECT queries are allowed.",
+            }
+
+        # Execute the query and get results
+        result = await asyncio.to_thread(
+            fetch_data_from_db, query=query, connection_string=connection_string
+        )
+
+        if result.get("status") == "error":
+            return {
+                "status": "error",
+                "message": f"Database query failed: {result.get('message', 'Unknown error')}",
+            }
+
+        columns = result.get("columns", [])
+        rows = result.get("rows", [])
+
+        # clean_data is CPU-bound but likely fast enough to not need a thread
+        cleaned_rows = clean_data(rows, columns)
+
+        # Run blocking Excel call in a separate thread
+        excel_result = await asyncio.to_thread(
+            insert_data_to_excel, validated_filename, sheet_name, columns, cleaned_rows
+        )
+
+        if excel_result.get("status") == "error":
+            return {
+                "status": "error",
+                "message": f"Excel operation failed: {excel_result.get('message', 'Unknown error')}",
+            }
+
         return {
-            "status": "error",
-            "message": "Invalid or potentially unsafe SQL query.",
+            "status": "success",
+            "message": excel_result.get("message", "Data inserted successfully."),
         }
 
-    # Execute the query and get results
-    result = await asyncio.to_thread(
-        fetch_data_from_db, query=query, connection_string=connection_string
-    )
-
-    if "error" in result:
-        return {"status": "error", "message": f"Error: {result['error']}"}
-
-    columns = result.get("columns", [])
-    rows = result.get("rows", [])
-
-    # clean_data is CPU-bound but likely fast enough to not need a thread
-    cleaned_rows = clean_data(rows, columns)
-
-    # Run blocking Excel call in a separate thread
-    excel_result = await asyncio.to_thread(
-        insert_data_to_excel, filename, sheet_name, columns, cleaned_rows
-    )
-
-    if "error" in excel_result:
-        return {"status": "error", "message": f"Error: {excel_result['error']}"}
-
-    return {
-        "status": "success",
-        "message": excel_result.get("message", "Data inserted successfully."),
-    }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Unexpected error during database to Excel operation: {e}",
+        }
 
 
 async def insert_calculated_data_to_db(
@@ -117,22 +152,60 @@ async def insert_calculated_data_to_db(
         • On error, returns descriptive message and error details.
     """
     try:
+        # Check if database is configured
+        if not connection_string and not is_database_configured():
+            return {
+                "status": "error",
+                "message": "Database is not configured. Please set POSTGRES_CONNECTION_STRING environment variable or provide connection_string parameter.",
+                "table": table,
+            }
+
+        # Validate input parameters
+        if not table or not isinstance(table, str):
+            return {
+                "status": "error",
+                "message": "Table name must be a non-empty string.",
+                "table": table,
+            }
+
+        if not columns or not all(isinstance(col, str) for col in columns):
+            return {
+                "status": "error",
+                "message": "Columns must be a non-empty list of strings.",
+                "table": table,
+            }
+
+        if not rows:
+            return {
+                "status": "error",
+                "message": "No data rows provided for insertion.",
+                "table": table,
+            }
+
         # Clean input rows
-        cleaned_rows = clean_data(rows, columns)
+        try:
+            cleaned_rows = clean_data(rows, columns)
+        except ValueError as e:
+            return {
+                "status": "error",
+                "message": f"Data validation failed: {e}",
+                "table": table,
+            }
 
         # Insert data into the database
         result = await asyncio.to_thread(
             insert_data_to_db,
             table=table,
             columns=columns,
-            rows=rows,
+            rows=cleaned_rows,
             connection_string=connection_string,
         )
 
         if result.get("status") == "error":
             return {
                 "status": "error",
-                "message": f"Database insert failed: {result['error']}",
+                "message": f"Database insert failed: {result.get('message', 'Unknown error')}",
+                "table": table,
                 "details": result,
             }
 
@@ -146,7 +219,7 @@ async def insert_calculated_data_to_db(
     except Exception as e:
         return {
             "status": "error",
-            "message": str(e),
-            "error": repr(e),
+            "message": f"Unexpected error during database insert: {e}",
             "table": table,
+            "error": repr(e),
         }

@@ -1,49 +1,54 @@
-"""Configuration management for the application."""
+"""
+Configuration management for database operations.
 
-import os
+This module provides backward compatibility with the old configuration system
+while delegating to the new centralized configuration management.
+"""
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+import logging
+from typing import cast
+
+from mcp_excel.config import (
+    get_postgres_connection_string,
+    is_database_configured,
+)
 
 
-class Settings(BaseSettings):
-    """Application settings with environment variable support."""
+logger = logging.getLogger(__name__)
 
-    # Database connection - made optional to allow graceful degradation
-    POSTGRES_CONNECTION_STRING: str | None = None
+
+class Settings:
+    """
+    Legacy settings class for backward compatibility.
+
+    This class maintains the same interface as the original Settings class
+    but delegates to the new configuration system.
+    """
+
+    @property
+    def postgres_connection_string(self) -> str | None:
+        """Return the database connection string."""
+        return cast(str | None, get_postgres_connection_string())
 
     @property
     def database_uri(self) -> str | None:
         """Return the database connection string."""
-        return self.POSTGRES_CONNECTION_STRING
+        return self.postgres_connection_string
 
     @property
     def has_database_config(self) -> bool:
         """Check if database configuration is available."""
-        return self.POSTGRES_CONNECTION_STRING is not None
-
-    model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", case_sensitive=True, extra="ignore"
-    )
+        return cast(bool, is_database_configured())
 
 
 def get_settings() -> Settings:
     """
     Get application settings instance.
 
-    This function creates a new Settings instance each time it's called,
-    allowing for dynamic configuration updates during runtime.
+    This function maintains backward compatibility with the original interface
+    while using the new configuration system internally.
     """
     return Settings()
-
-
-def get_postgres_connection_string() -> str | None:
-    """
-    Get PostgreSQL connection string from environment variables.
-
-    Returns:
-        Connection string if available, None otherwise
-    """
-    return os.environ.get("POSTGRES_CONNECTION_STRING")
 
 
 def validate_postgres_connection_string(connection_string: str) -> bool:
@@ -62,5 +67,5 @@ def validate_postgres_connection_string(connection_string: str) -> bool:
     return connection_string.startswith(("postgresql://", "postgres://"))
 
 
-# Create settings instance - this will not fail if POSTGRES_CONNECTION_STRING is missing
+# Create settings instance for backward compatibility
 settings = Settings()

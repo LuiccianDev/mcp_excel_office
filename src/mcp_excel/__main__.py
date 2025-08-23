@@ -20,6 +20,7 @@ from typing import Annotated
 
 import typer
 
+from mcp_excel.config import ConfigurationError, config_manager
 from mcp_excel.server import run_server
 
 
@@ -37,93 +38,55 @@ app = typer.Typer(
 )
 
 
-def validate_environment_variables() -> tuple[str | None, str | None]:
+def validate_and_apply_configuration(
+    postgres: str | None = None, path: str | None = None
+) -> None:
     """
-    Validate and retrieve environment variables for MCP Excel configuration.
+    Validate and apply configuration from command-line arguments and environment variables.
 
-    This function checks the POSTGRES_CONNECTION_STRING and DIRECTORY environment
-    variables, validating their format and accessibility. It provides clear error
-    messages for configuration issues.
+    This function handles configuration validation and applies overrides from command-line
+    arguments. It uses the centralized configuration management system with proper
+    error handling and user feedback.
 
-    Returns:
-        tuple[Optional[str], Optional[str]]: A tuple containing (postgres_connection_string, directory)
+    Args:
+        postgres: PostgreSQL connection string override
+        path: Directory path override
 
     Raises:
-        typer.Exit: If environment variables are invalid or inaccessible
+        typer.Exit: If configuration is invalid or inaccessible
     """
-    postgres_conn = os.environ.get("POSTGRES_CONNECTION_STRING")
-    directory = os.environ.get("DIRECTORY")
+    try:
+        # Prepare configuration overrides
+        overrides = {}
 
-    # Validate directory if provided
-    if directory:
-        try:
-            # Create directory if it doesn't exist
-            os.makedirs(directory, exist_ok=True)
+        if postgres is not None:
+            overrides["postgres_connection_string"] = postgres
 
-            if not os.path.exists(directory):
-                typer.echo(
-                    f"Error: Cannot create directory specified in DIRECTORY environment variable: {directory}",
-                    err=True,
-                )
-                logger.error(f"Directory creation failed: {directory}")
-                raise typer.Exit(1)
+        if path is not None:
+            overrides["directory"] = path
 
-            if not os.path.isdir(directory):
-                typer.echo(
-                    f"Error: Path specified in DIRECTORY environment variable is not a directory: {directory}",
-                    err=True,
-                )
-                logger.error(f"Invalid directory path: {directory}")
-                raise typer.Exit(1)
+        # Reload configuration with overrides
+        config_manager.reload_configuration(**overrides)
 
-            if not os.access(directory, os.R_OK | os.W_OK):
-                typer.echo(
-                    f"Error: Directory specified in DIRECTORY environment variable is not readable/writable: {directory}",
-                    err=True,
-                )
-                logger.error(f"Directory access denied: {directory}")
-                raise typer.Exit(1)
+        # Get validated configuration
+        config = config_manager.config
 
-        except OSError as e:
-            typer.echo(
-                f"Error: Cannot access directory specified in DIRECTORY environment variable: {directory} - {e}",
-                err=True,
-            )
-            logger.error(f"Directory access error: {directory} - {e}")
-            raise typer.Exit(1) from e
+        # Set environment variables for backward compatibility
+        if config.postgres_connection_string:
+            os.environ["POSTGRES_CONNECTION_STRING"] = config.postgres_connection_string
+        if config.directory:
+            os.environ["DIRECTORY"] = config.directory
 
-    # Validate PostgreSQL connection string if provided
-    if postgres_conn:
-        if not (
-            postgres_conn.startswith("postgresql://")
-            or postgres_conn.startswith("postgres://")
-        ):
-            typer.echo(
-                "Error: POSTGRES_CONNECTION_STRING must start with 'postgresql://' or 'postgres://'",
-                err=True,
-            )
-            logger.error("Invalid PostgreSQL connection string format")
-            raise typer.Exit(1)
+        logger.info("Configuration validated and applied successfully")
 
-        # Basic validation of connection string components
-        try:
-            # Simple check for required components
-            if "@" not in postgres_conn or "/" not in postgres_conn.split("@")[1]:
-                typer.echo(
-                    "Error: POSTGRES_CONNECTION_STRING appears to be malformed. Expected format: postgresql://user:password@host:port/database",
-                    err=True,
-                )
-                logger.error("Malformed PostgreSQL connection string")
-                raise typer.Exit(1)
-        except (IndexError, AttributeError) as e:
-            typer.echo(
-                "Error: POSTGRES_CONNECTION_STRING appears to be malformed. Expected format: postgresql://user:password@host:port/database",
-                err=True,
-            )
-            logger.error("Malformed PostgreSQL connection string")
-            raise typer.Exit(1) from e
-
-    return postgres_conn, directory
+    except ConfigurationError as e:
+        typer.echo(f"Configuration error: {e}", err=True)
+        logger.error(f"Configuration validation failed: {e}")
+        raise typer.Exit(1) from e
+    except Exception as e:
+        typer.echo(f"Unexpected configuration error: {e}", err=True)
+        logger.error(f"Unexpected configuration error: {e}")
+        raise typer.Exit(1) from e
 
 
 @app.command("server")  # type: ignore[misc]
@@ -162,62 +125,25 @@ def run_mcp_server(
     try:
         logger.info("Initializing MCP Excel Office Server...")
 
-        # Get and validate environment variables
-        env_postgres, env_directory = validate_environment_variables()
+        # Validate and apply configuration
+        validate_and_apply_configuration(postgres, path)
 
-        # Command-line arguments override environment variables
-        final_postgres = postgres or env_postgres
-        final_directory = path or env_directory or "./documents"
-
-        # Validate command-line provided PostgreSQL connection if given
-        if postgres and not (
-            postgres.startswith("postgresql://") or postgres.startswith("postgres://")
-        ):
-            typer.echo(
-                "Error: --postgres argument must start with 'postgresql://' or 'postgres://'",
-                err=True,
-            )
-            logger.error("Invalid PostgreSQL connection string from command line")
-            raise typer.Exit(1)
-
-        # Validate command-line provided directory if given
-        if path:
-            try:
-                os.makedirs(path, exist_ok=True)
-                if not os.access(path, os.R_OK | os.W_OK):
-                    typer.echo(
-                        f"Error: Directory specified in --path is not readable/writable: {path}",
-                        err=True,
-                    )
-                    logger.error(f"Directory access denied: {path}")
-                    raise typer.Exit(1)
-            except OSError as e:
-                typer.echo(
-                    f"Error: Cannot create or access directory specified in --path: {path} - {e}",
-                    err=True,
-                )
-                logger.error(f"Directory creation failed: {path} - {e}")
-                raise typer.Exit(1) from e
-
-        # Set environment variables for the server to use
-        if final_postgres:
-            os.environ["POSTGRES_CONNECTION_STRING"] = final_postgres
-        if final_directory:
-            os.environ["DIRECTORY"] = final_directory
+        # Get validated configuration
+        config = config_manager.config
 
         # Provide user feedback about configuration
         typer.echo("Starting MCP Excel Office Server...")
         typer.echo("Server Name: MCP Excel Office Server")
 
-        if final_postgres:
+        if config.database_config.is_configured:
             typer.echo("Database: Configured (PostgreSQL)")
             logger.info("PostgreSQL database configured")
         else:
             typer.echo("Database: Not configured (database tools will be unavailable)")
             logger.info("No database configuration - database tools disabled")
 
-        typer.echo(f"File operations directory: {final_directory}")
-        logger.info(f"File operations directory: {final_directory}")
+        typer.echo(f"File operations directory: {config.file_config.directory}")
+        logger.info(f"File operations directory: {config.file_config.directory}")
 
         typer.echo("Server ready. Listening on stdio transport...")
         logger.info("MCP server starting on stdio transport")
@@ -226,6 +152,10 @@ def run_mcp_server(
         try:
             server = run_server()
             asyncio.run(server.run(transport="stdio"))
+        except ConfigurationError as config_error:
+            typer.echo(f"Configuration error: {config_error}", err=True)
+            logger.error(f"MCP server configuration failed: {config_error}")
+            raise typer.Exit(1) from config_error
         except Exception as server_error:
             typer.echo(f"Error initializing MCP server: {server_error}", err=True)
             logger.error(f"MCP server initialization failed: {server_error}")
@@ -260,18 +190,12 @@ def list_excel_files(
     This command provides a standalone way to discover Excel files without starting the MCP server.
     """
     try:
-        # Get directory from argument or environment variable
-        _, env_directory = validate_environment_variables()
-        target_directory = path or env_directory or "./documents"
+        # Validate and apply configuration
+        validate_and_apply_configuration(path=path)
 
-        # Validate directory
-        if not os.path.exists(target_directory):
-            typer.echo(f"Error: Directory does not exist: {target_directory}", err=True)
-            raise typer.Exit(1)
-
-        if not os.path.isdir(target_directory):
-            typer.echo(f"Error: Path is not a directory: {target_directory}", err=True)
-            raise typer.Exit(1)
+        # Get validated configuration
+        config = config_manager.config
+        target_directory = config.file_config.directory
 
         # List Excel files
         excel_files = []
@@ -297,7 +221,7 @@ def list_excel_files(
         else:
             typer.echo(f"Found {len(excel_files)} Excel file(s) in: {target_directory}")
             for file_info in excel_files:
-                size_mb = float(file_info["size"]) / (1024 * 1024)  # type: ignore[arg-type]
+                size_mb = float(file_info["size"]) / (1024 * 1024)
                 typer.echo(f"  - {file_info['name']} ({size_mb:.2f} MB)")
 
     except Exception as e:
