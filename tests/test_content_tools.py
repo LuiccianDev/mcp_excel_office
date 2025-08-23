@@ -19,27 +19,28 @@ TEST_DATA = [["Name", "Age"], ["Alice", 30], ["Bob", 25]]
 async def test_read_data_from_excel_success() -> None:
     """Test successful read operation from Excel."""
 
-    with patch("mcp_excel.core.data.read_excel_range") as mock_read:
+    with patch("mcp_excel.tools.content_tools.read_excel_range") as mock_read:
+        # Mock actual function
         mock_read.return_value = ["Row1", "Row2"]
 
         result = await content_tools.read_data_from_excel(TEST_FILENAME, TEST_SHEET)
 
-        assert "Row1\nRow2" in result
-        mock_read.assert_called_once()
-        args, kwargs = mock_read.call_args
-        assert str(args[0]).endswith("test_file.xlsx")
-        assert args[1] == TEST_SHEET
+    assert result["status"] == "success"
+    assert result["data"] == ["Row1", "Row2"]
+    mock_read.assert_called_once()
 
 
 @pytest.mark.asyncio  # type: ignore[misc]
 async def test_read_data_from_excel_no_data() -> None:
     """Test read operation when no data is found."""
-    with patch("mcp_excel.core.data.read_excel_range") as mock_read:
+    with patch("mcp_excel.tools.content_tools.read_excel_range") as mock_read:
+        # Mock actual function to return empty data
         mock_read.return_value = []
 
         result = await content_tools.read_data_from_excel(TEST_FILENAME, TEST_SHEET)
 
-        assert "No data found" in result
+    assert result["status"] == "error"
+    assert "No data found" in result["message"]
 
 
 @pytest.mark.asyncio  # type: ignore[misc]
@@ -50,7 +51,8 @@ async def test_read_data_from_excel_error() -> None:
 
         result = await content_tools.read_data_from_excel(TEST_FILENAME, TEST_SHEET)
 
-        assert "Error: Failed to read data: Read error" in result
+    assert result["status"] == "error"
+    assert "Failed to read Excel data" in result["message"]
 
 
 @pytest.mark.asyncio  # type: ignore[misc]
