@@ -34,10 +34,9 @@
     "directory": {
       "type": "directory",
       "title": "Directory",
-      "description": "Dierctory from files",
+      "description": "Directory for files",
       "required": true,
-      "sensitive": false,
-      "multiple": true
+      "sensitive": false
     }
   },
   "keywords": [

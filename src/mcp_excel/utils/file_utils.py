@@ -16,18 +16,12 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 # Get allowed directories from environment variables
 def _get_allowed_directories() -> list[str]:
-    """
-    Obtiene la lista de directorios permitidos desde la variable de entorno DIRECTORY.
-    Soporta múltiples formatos y normaliza las rutas.
-    """
-    allowed_dirs_str = os.environ.get("DIRECTORY", "").strip()
-    if not allowed_dirs_str:
-        return [os.getcwd()]
-    # Soporta coma y punto y coma como separadores
-    raw_dirs = [d for sep in [",", ";"] for d in allowed_dirs_str.split(sep)]
-    # Elimina duplicados y normaliza rutas
-    allowed_dirs = {os.path.abspath(dir.strip()) for dir in raw_dirs if dir.strip()}
-    return list(allowed_dirs)
+    """Get the list of allowed directories from environment variables."""
+    allowed_dirs_str = os.environ.get("DIRECTORY", "./documents")
+    allowed_dirs = [dir.strip() for dir in allowed_dirs_str.split(",")]
+    return [os.path.abspath(dir) for dir in allowed_dirs]
+
+
 # Check if the given file path is within allowed directories
 def _is_path_in_allowed_directories(file_path: str) -> tuple[bool, str | None]:
     """Check if the given file path is within allowed directories."""
@@ -175,7 +169,7 @@ def ensure_xlsx_extension(filename: str) -> str:
 
 
 # * Retrieve metadata for all Excel (.xlsx) files in the specified directory
-def list_excel_files_in_directory(directory: str) -> list[dict]:
+def list_excel_files_in_directory() -> list[dict]:
     """
     Retrieve metadata for all Excel (.xlsx) files in the specified directory.
 
@@ -194,6 +188,7 @@ def list_excel_files_in_directory(directory: str) -> list[dict]:
         NotADirectoryError: If the path exists but is not a directory
         OSError: For other filesystem-related errors
     """
+    directory = os.environ.get("DIRECTORY", "./documents")
     try:
         # Validate directory exists and is accessible
         if not os.path.exists(directory):
@@ -226,75 +221,6 @@ def list_excel_files_in_directory(directory: str) -> list[dict]:
     except OSError as e:
         # Re-raise with more context
         raise OSError(f"Error accessing directory '{directory}': {str(e)}") from e
-
-
-# * Decorator to validate directory access
-def validate_directory_access(param: str = "directory") -> Callable[[F], F]:
-    """
-    Decorador para validar el acceso a un directorio.
-
-    Args:
-        param: Nombre del parámetro que contiene la ruta del directorio.
-    """
-
-    def decorator(func: F) -> F:
-        def _validate_dir(
-            args: tuple[Any, ...], kwargs: dict[str, Any]
-        ) -> str | dict[str, str]:
-            sig = inspect.signature(func)
-            bound = sig.bind(*args, **kwargs)
-            bound.apply_defaults()
-
-            if param not in bound.arguments:
-                return {"status": "error", "message": f"'{param}' argument not found."}
-
-            directory: str = os.path.abspath(bound.arguments[param])
-            allowed_dirs = _get_allowed_directories()
-
-            if not any(
-                os.path.commonpath([allowed, directory]) == allowed
-                for allowed in allowed_dirs
-            ):
-                return {
-                    "status": "error",
-                    "message": f"Directory '{directory}' is not allowed.",
-                }
-            if not os.path.exists(directory):
-                return {
-                    "status": "error",
-                    "message": f"Directory '{directory}' does not exist.",
-                }
-            if not os.path.isdir(directory):
-                return {
-                    "status": "error",
-                    "message": f"'{directory}' is not a directory.",
-                }
-
-            return directory
-
-        if inspect.iscoroutinefunction(func):
-
-            @functools.wraps(func)
-            async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
-                result = _validate_dir(args, kwargs)
-                if isinstance(result, dict):
-                    return result
-                return await func(*args, **kwargs)
-
-            return cast(F, async_wrapper)
-
-        else:
-
-            @functools.wraps(func)
-            def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
-                result = _validate_dir(args, kwargs)
-                if isinstance(result, dict):
-                    return result
-                return func(*args, **kwargs)
-
-            return cast(F, sync_wrapper)
-
-    return decorator
 
 
 # * Decorator to validate file access

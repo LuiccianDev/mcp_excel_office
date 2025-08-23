@@ -1,5 +1,4 @@
 # Import exceptions
-import os
 from typing import Any
 
 from mcp_excel.core.workbook import create_sheet, create_workbook
@@ -8,13 +7,11 @@ from mcp_excel.utils.file_utils import (
     ensure_xlsx_extension,
     list_excel_files_in_directory,
     resolve_safe_path,
-    validate_directory_access,
     validate_file_access,
 )
 
 
 # * Create a new Excel workbook
-# @validate_file_access()
 async def create_excel_workbook(filename: str) -> dict[str, Any]:
     """
     Create a new Excel workbook (.xlsx) in a secure, validated path.
@@ -78,11 +75,7 @@ async def create_excel_worksheet(filename: str, sheet_name: str) -> dict[str, An
         return {"status": "error", "message": f"Failed to create worksheet: {str(e)}"}
 
 
-#! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
-@validate_directory_access("directory")  # type: ignore[misc]
-async def list_excel_documents(
-    directory: str = os.environ.get("MCP_ALLOWED_DIRECTORIES", "./documents")
-) -> dict[str, Any]:
+async def list_excel_documents() -> dict[str, Any]:
     """
     List all .xlsx files in the specified directory.
 
@@ -106,16 +99,14 @@ async def list_excel_documents(
         On error, returns a dictionary with status "error" and a descriptive message.
     """
     try:
-        files = list_excel_files_in_directory(directory)
+        files = list_excel_files_in_directory()
         return {
             "status": "success",
             "count": len(files),
-            "directory": directory,
             "files": files,
         }
     except Exception as e:
         return {
             "status": "error",
             "message": f"Failed to list documents: {str(e)}",
-            "directory": directory,
         }
