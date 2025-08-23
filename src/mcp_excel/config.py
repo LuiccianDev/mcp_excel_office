@@ -16,6 +16,15 @@ from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+# Load .env file automatically if available
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except ImportError:
+    pass  # python-dotenv not available, continue without it
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -181,7 +190,11 @@ class MCPExcelConfig(BaseSettings):
     )
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", case_sensitive=True, extra="ignore"
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,  # Cambiar a False para mayor compatibilidad
+        extra="ignore",
+        env_prefix="",  # Sin prefijo para las variables de entorno
     )
 
     def __init__(self, **kwargs: Any) -> None:
@@ -224,15 +237,26 @@ class MCPExcelConfig(BaseSettings):
                             f"${{user_config.{config_key}}}", env_value
                         )
                         processed[key] = processed_value
-                        logger.debug(
-                            f"Resolved user_config.{config_key} from environment"
-                        )
+                        logger.info(f"Resolved user_config.{config_key} = {env_value}")
                     else:
-                        # Set to None if no environment variable found to avoid validation errors
-                        processed[key] = None  # type: ignore[assignment]
-                        logger.warning(
-                            f"Could not resolve user_config.{config_key}, setting to None"
-                        )
+                        # For DXT compatibility, check if we're in a DXT environment
+                        # and use fallback values
+                        if config_key == "directory":
+                            # Use current working directory as fallback for DXT
+                            fallback_dir = os.getcwd()
+                            processed_value = value.replace(
+                                f"${{user_config.{config_key}}}", fallback_dir
+                            )
+                            processed[key] = processed_value
+                            logger.warning(
+                                f"Could not resolve user_config.{config_key}, using fallback: {fallback_dir}"
+                            )
+                        else:
+                            # Set to None if no environment variable found
+                            processed[key] = None  # type: ignore[assignment]
+                            logger.warning(
+                                f"Could not resolve user_config.{config_key}, setting to None"
+                            )
                 else:
                     processed[key] = value
             else:
