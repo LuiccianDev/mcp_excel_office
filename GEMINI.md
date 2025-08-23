@@ -60,7 +60,7 @@ The server can be run in two ways:
         "mcpServers": {
             "officeExcel": {
                 "command": "uv",
-                "args": ["run", "mcp-office-excel"],
+                "args": ["run", "mcp_excel_office"],
                 "env": {
                     "DIRECTORY": "user/to/path"
                 }
