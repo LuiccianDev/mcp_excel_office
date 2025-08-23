@@ -94,6 +94,9 @@ local_settings.py
 .kiro/
 tests/
 .windsurf/
+documents/
+GEMINI.md
+WARP.md
 
 # Configuration files
 pytest.ini
