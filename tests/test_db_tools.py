@@ -50,14 +50,14 @@ async def test_fetch_and_insert_db_to_excel_success() -> None:
     ):
 
         result = await fetch_and_insert_db_to_excel(
-            TEST_CONN_STR, TEST_QUERY, TEST_FILENAME, TEST_SHEET
+            TEST_QUERY, TEST_FILENAME, TEST_SHEET, TEST_CONN_STR
         )
 
         assert isinstance(result, dict)
         assert "success" in result["message"].lower()
 
         mock_validate.assert_called_once_with(TEST_QUERY)
-        mock_fetch.assert_called_once_with(TEST_CONN_STR, TEST_QUERY)
+        mock_fetch.assert_called_once_with(query=TEST_QUERY, connection_string=TEST_CONN_STR)
         mock_insert.assert_called_once()
 
 
@@ -137,7 +137,7 @@ async def test_insert_calculated_data_to_db_success() -> None:
     ):
 
         result = await insert_calculated_data_to_db(
-            TEST_CONN_STR, TEST_TABLE, TEST_COLUMNS, TEST_ROWS
+            TEST_TABLE, TEST_COLUMNS, TEST_ROWS, TEST_CONN_STR
         )
 
         assert isinstance(result, dict)
@@ -147,7 +147,7 @@ async def test_insert_calculated_data_to_db_success() -> None:
 
         mock_clean.assert_called_once_with(TEST_ROWS, TEST_COLUMNS)
         mock_insert.assert_called_once_with(
-            TEST_CONN_STR, TEST_TABLE, TEST_COLUMNS, TEST_ROWS
+            table=TEST_TABLE, columns=TEST_COLUMNS, rows=TEST_ROWS, connection_string=TEST_CONN_STR
         )
 
 

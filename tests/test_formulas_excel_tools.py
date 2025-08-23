@@ -74,7 +74,7 @@ async def test_apply_formula_success() -> None:
         patch("mcp_excel.tools.formulas_excel_tools.apply_formula") as mock_apply,
     ):
 
-        # Simular validación exitosa
+        # Simulate successful validation
         mock_validate.return_value = {
             "status": "success",
             "message": "Formula is valid and matches cell content",
@@ -83,8 +83,8 @@ async def test_apply_formula_success() -> None:
             "cell": TEST_CELL,
             "formula": TEST_FORMULA,
         }
-        print("Mock creado:", mock_validate)
-        # Simular aplicación exitosa
+        print("Mock created:", mock_validate)
+        # Simulate successful application
         mock_apply.return_value = {
             "status": "success",
             "cell": TEST_CELL,
@@ -125,7 +125,7 @@ async def test_apply_formula_validation_failure() -> None:
         "mcp_excel.tools.formulas_excel_tools.validate_formula_in_cell_operation"
     ) as mock_validate:
 
-        # Simular validación exitosa
+        # Simulate successful validation
         mock_validate.return_value = {
             "status": "error",
             "message": "Formula is invalid and doesn't match cell content",

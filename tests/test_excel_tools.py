@@ -80,35 +80,22 @@ async def test_list_excel_documents_success() -> None:
         {"name": "test2.xlsx", "size": 2048, "modified": "2023-01-02"},
     ]
 
-    with (
-        patch("mcp_excel.tools.excel_tools.list_excel_files_in_directory") as mock_list,
-        patch(
-            "mcp_excel.utils.file_utils.validate_directory_access",
-            lambda x: lambda f: f,
-        ),
-    ):
+    with patch("mcp_excel.tools.excel_tools.list_excel_files_in_directory") as mock_list:
         mock_list.return_value = test_files
 
-        result = await excel_tools.list_excel_documents(TEST_DIR)
+        result = await excel_tools.list_excel_documents()
 
         assert result["status"] == "success"
         assert result["count"] == 2
         assert len(result["files"]) == 2
-        assert result["directory"] == TEST_DIR
 
 
 @pytest.mark.asyncio  # type: ignore[misc]
 async def test_list_excel_documents_error() -> None:
     """Test error handling when listing documents."""
-    with (
-        patch("mcp_excel.tools.excel_tools.list_excel_files_in_directory") as mock_list,
-        patch(
-            "mcp_excel.utils.file_utils.validate_directory_access",
-            lambda x: lambda f: f,
-        ),
-    ):
+    with patch("mcp_excel.tools.excel_tools.list_excel_files_in_directory") as mock_list:
         mock_list.side_effect = Exception("Access denied")
 
-        result = await excel_tools.list_excel_documents("/invalid/path")
+        result = await excel_tools.list_excel_documents()
 
         assert result["status"] == "error"
