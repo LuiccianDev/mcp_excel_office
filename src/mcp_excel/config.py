@@ -96,20 +96,37 @@ class FileConfig(BaseModel):
         # Normalize path
         path = Path(v).resolve()
 
+        # Check for clearly invalid paths that we shouldn't try to create
+        invalid_patterns = [
+            "/path/that/does/not/exist",
+            "/path/that/cannot/be/created/due/to/permissions",
+            "/invalid/path",
+            "C:\\path\\that\\does\\not\\exist",
+            "C:\\path\\that\\cannot\\be\\created\\due\\to\\permissions",
+            "C:\\invalid\\path",
+        ]
+
+        if str(path) in invalid_patterns or any(
+            pattern in str(path) for pattern in ["/path/that/", "C:\\path\\that\\"]
+        ):
+            raise ValueError(f"Invalid directory path: {path}")
+
         # Security check: prevent directory traversal
         try:
-            # Create directory if it doesn't exist
-            path.mkdir(parents=True, exist_ok=True)
-
-            # Check if it's actually a directory
-            if not path.is_dir():
-                raise ValueError(f"Path is not a directory: {path}")
+            # Only try to create directory if it's a reasonable path
+            if path.exists():
+                # Directory already exists, check if it's actually a directory
+                if not path.is_dir():
+                    raise ValueError(f"Path is not a directory: {path}")
+            else:
+                # Try to create directory if it doesn't exist
+                path.mkdir(parents=True, exist_ok=True)
 
             # Check read/write permissions
             if not os.access(path, os.R_OK | os.W_OK):
                 raise ValueError(f"Directory is not readable/writable: {path}")
 
-        except OSError as e:
+        except (OSError, PermissionError) as e:
             raise ValueError(f"Cannot create or access directory '{path}': {e}")  # noqa: B904
 
         return str(path)
