@@ -25,7 +25,8 @@
       ],
       "env": {
         "DIRECTORY": "${user_config.directory}",
-        "PYTHONPATH": "${__dirname}/src"
+        "PYTHONPATH": "${__dirname}/src",
+        "POSTGRES_CONNECTION_STRING": "${user_config.postgres_connection_string}"
       }
     }
   },
@@ -37,6 +38,13 @@
       "description": "Directory for files",
       "required": true,
       "sensitive": false
+    },
+    "postgres_connection_string": {
+      "type": "string",
+      "title": "PostgreSQL Connection String",
+      "description": "Connection string for PostgreSQL database",
+      "required": true,
+      "sensitive": true
     }
   },
   "keywords": [
