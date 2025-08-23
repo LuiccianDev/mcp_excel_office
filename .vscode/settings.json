@@ -19,6 +19,8 @@
     "coverage.xml/**": true
   },
   "markdownlint.config": {
-    "default": true
+    "default": true,
+    "MD033": false,
+    "MD041": false
   }
 }
