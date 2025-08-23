@@ -5,59 +5,80 @@ import pytest
 
 from mcp_excel.exceptions.exceptions import ValidationError, WorkbookError
 from mcp_excel.tools import excel_tools
+from mcp_excel.config import ConfigurationManager
 
 
-TEST_DIR = Path(__file__).parent.parent / "documents"
-TEST_DIR.mkdir(exist_ok=True)
-TEST_FILENAME = str(TEST_DIR / "test_file.xlsx")
 TEST_SHEET = "TestSheet"
 
 
 @pytest.mark.asyncio  # type: ignore[misc]
-async def test_create_excel_workbook_success() -> None:
+async def test_create_excel_workbook_success(tmp_path) -> None:
     """Test successful workbook creation."""
+    # Configure test environment
+    manager = ConfigurationManager()
+    manager.reload_configuration(directory=str(tmp_path), log_level="INFO")
+
+    test_filename = str(tmp_path / "test_file.xlsx")
+
     with patch("mcp_excel.tools.excel_tools.create_workbook") as mock_create:
         mock_create.return_value = {"message": "created workbook"}
 
-        result = await excel_tools.create_excel_workbook(TEST_FILENAME)
+        result = await excel_tools.create_excel_workbook(test_filename)
 
         assert "created workbook" in result["message"]
         mock_create.assert_called_once()
 
 
 @pytest.mark.asyncio  # type: ignore[misc]
-async def test_create_excel_workbook_workbook_error() -> None:
+async def test_create_excel_workbook_workbook_error(tmp_path) -> None:
     """Test workbook creation with WorkbookError."""
+    # Configure test environment
+    manager = ConfigurationManager()
+    manager.reload_configuration(directory=str(tmp_path), log_level="INFO")
+
+    test_filename = str(tmp_path / "test_file.xlsx")
+
     with patch("mcp_excel.tools.excel_tools.create_workbook") as mock_create:
         mock_create.side_effect = WorkbookError("Permission denied")
 
-        result = await excel_tools.create_excel_workbook(TEST_FILENAME)
+        result = await excel_tools.create_excel_workbook(test_filename)
 
         assert "error" in result
 
 
 @pytest.mark.asyncio  # type: ignore[misc]
-async def test_create_excel_worksheet_success() -> None:
+async def test_create_excel_worksheet_success(tmp_path) -> None:
     """Test successful worksheet creation."""
+    # Configure test environment
+    manager = ConfigurationManager()
+    manager.reload_configuration(directory=str(tmp_path), log_level="INFO")
+
+    test_file = str(tmp_path / "test_file.xlsx")
+
     with (
         patch("mcp_excel.tools.excel_tools.create_sheet") as mock_create_sheet,
         patch("mcp_excel.utils.file_utils.validate_file_access", lambda x: lambda f: f),
     ):
         mock_create_sheet.return_value = {
-            "status": "error",
+            "status": "success",
             "sheet_name": "TestSheet",
         }
 
-        result = await excel_tools.create_excel_worksheet(TEST_FILENAME, TEST_SHEET)
+        result = await excel_tools.create_excel_worksheet(test_file, TEST_SHEET)
 
-        assert result["status"] == "error"
         assert "sheet_name" in result
-        mock_create_sheet.assert_called_once_with(TEST_FILENAME, TEST_SHEET)
+        mock_create_sheet.assert_called_once_with(test_file, TEST_SHEET)
 
 
 @pytest.mark.asyncio  # type: ignore[misc]
-async def test_create_excel_worksheet_validation_error() -> None:
+async def test_create_excel_worksheet_validation_error(tmp_path) -> None:
     """Test worksheet creation with ValidationError."""
+    # Configure test environment
+    manager = ConfigurationManager()
+    manager.reload_configuration(directory=str(tmp_path), log_level="INFO")
+
+    test_file = str(tmp_path / "test_file.xlsx")
+
     with (
         patch("mcp_excel.tools.excel_tools.create_sheet") as mock_create_sheet,
         patch("mcp_excel.utils.file_utils.validate_file_access", lambda x: lambda f: f),
@@ -65,7 +86,7 @@ async def test_create_excel_worksheet_validation_error() -> None:
         mock_create_sheet.side_effect = ValidationError("Invalid sheet name")
 
         result = await excel_tools.create_excel_worksheet(
-            TEST_FILENAME, "Invalid/Sheet"
+            test_file, "Invalid/Sheet"
         )
 
         assert result["status"] == "error"

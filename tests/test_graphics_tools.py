@@ -5,12 +5,10 @@ import pytest
 
 from mcp_excel.exceptions.exceptions import ChartError, PivotError, ValidationError
 from mcp_excel.tools import graphics_tools
+from mcp_excel.config import ConfigurationManager
 
 
 # Test data
-TEST_DIR = Path(__file__).parent.parent / "documents"
-TEST_DIR.mkdir(exist_ok=True)
-TEST_FILENAME = str(TEST_DIR / "test_workbook.xlsx")
 TEST_SHEET = "Sheet1"
 TEST_DATA_RANGE = "A1:C10"
 TEST_TARGET_CELL = "E5"
@@ -18,8 +16,14 @@ TEST_TARGET_CELL = "E5"
 
 # Test for create_chart
 @pytest.mark.asyncio  # type: ignore[misc]
-async def test_create_chart_success() -> None:
+async def test_create_chart_success(tmp_path) -> None:
     """Test successful chart creation."""
+    # Configure test environment
+    manager = ConfigurationManager()
+    manager.reload_configuration(directory=str(tmp_path), log_level="INFO")
+
+    test_file = str(tmp_path / "test_workbook.xlsx")
+
     with patch("mcp_excel.tools.graphics_tools.create_chart_impl") as mock_create_chart:
         # Mock successful chart creation
         mock_create_chart.return_value = {
@@ -29,7 +33,7 @@ async def test_create_chart_success() -> None:
         }
 
         result = await graphics_tools.create_chart(
-            filename=TEST_FILENAME,
+            filename=test_file,
             sheet_name=TEST_SHEET,
             data_range=TEST_DATA_RANGE,
             chart_type="bar",
@@ -42,7 +46,7 @@ async def test_create_chart_success() -> None:
         assert result["status"] == "success"
         assert result["chart_type"] == "bar"
         mock_create_chart.assert_called_once_with(
-            filename=TEST_FILENAME,
+            filename=test_file,
             sheet_name=TEST_SHEET,
             data_range=TEST_DATA_RANGE,
             chart_type="bar",
@@ -54,14 +58,20 @@ async def test_create_chart_success() -> None:
 
 
 @pytest.mark.asyncio  # type: ignore[misc]
-async def test_create_chart_validation_error() -> None:
+async def test_create_chart_validation_error(tmp_path) -> None:
     """Test chart creation with validation error."""
+    # Configure test environment
+    manager = ConfigurationManager()
+    manager.reload_configuration(directory=str(tmp_path), log_level="INFO")
+
+    test_file = str(tmp_path / "test_workbook.xlsx")
+
     with patch("mcp_excel.tools.graphics_tools.create_chart_impl") as mock_create_chart:
         # Mock validation error
         mock_create_chart.side_effect = ValidationError("Invalid chart type")
 
         result = await graphics_tools.create_chart(
-            filename=TEST_FILENAME,
+            filename=test_file,
             sheet_name=TEST_SHEET,
             data_range=TEST_DATA_RANGE,
             chart_type="invalid_type",
@@ -73,14 +83,20 @@ async def test_create_chart_validation_error() -> None:
 
 
 @pytest.mark.asyncio  # type: ignore[misc]
-async def test_create_chart_chart_error() -> None:
+async def test_create_chart_chart_error(tmp_path) -> None:
     """Test chart creation with chart-specific error."""
+    # Configure test environment
+    manager = ConfigurationManager()
+    manager.reload_configuration(directory=str(tmp_path), log_level="INFO")
+
+    test_file = str(tmp_path / "test_workbook.xlsx")
+
     with patch("mcp_excel.tools.graphics_tools.create_chart_impl") as mock_create_chart:
         # Mock chart error
         mock_create_chart.side_effect = ChartError("Data range is empty")
 
         result = await graphics_tools.create_chart(
-            filename=TEST_FILENAME,
+            filename=test_file,
             sheet_name=TEST_SHEET,
             data_range="A1:A1",  # Empty range
             chart_type="bar",
@@ -93,8 +109,14 @@ async def test_create_chart_chart_error() -> None:
 
 # Test for create_pivot_table
 @pytest.mark.asyncio  # type: ignore[misc]
-async def test_create_pivot_table_success() -> None:
+async def test_create_pivot_table_success(tmp_path) -> None:
     """Test successful pivot table creation."""
+    # Configure test environment
+    manager = ConfigurationManager()
+    manager.reload_configuration(directory=str(tmp_path), log_level="INFO")
+
+    test_file = str(tmp_path / "test_workbook.xlsx")
+
     with patch(
         "mcp_excel.tools.graphics_tools.create_pivot_table_impl"
     ) as mock_create_pivot:
@@ -105,7 +127,7 @@ async def test_create_pivot_table_success() -> None:
         }
 
         result = await graphics_tools.create_pivot_table(
-            filename=TEST_FILENAME,
+            filename=test_file,
             sheet_name=TEST_SHEET,
             data_range=TEST_DATA_RANGE,
             rows=["Category"],
@@ -117,7 +139,7 @@ async def test_create_pivot_table_success() -> None:
         assert result["status"] == "success"
         assert "pivot_range" in result
         mock_create_pivot.assert_called_once_with(
-            filename=TEST_FILENAME,
+            filename=test_file,
             sheet_name=TEST_SHEET,
             data_range=TEST_DATA_RANGE,
             rows=["Category"],
@@ -128,8 +150,14 @@ async def test_create_pivot_table_success() -> None:
 
 
 @pytest.mark.asyncio  # type: ignore[misc]
-async def test_create_pivot_table_validation_error() -> None:
+async def test_create_pivot_table_validation_error(tmp_path) -> None:
     """Test pivot table creation with validation error."""
+    # Configure test environment
+    manager = ConfigurationManager()
+    manager.reload_configuration(directory=str(tmp_path), log_level="INFO")
+
+    test_file = str(tmp_path / "test_workbook.xlsx")
+
     with patch(
         "mcp_excel.tools.graphics_tools.create_pivot_table_impl"
     ) as mock_create_pivot:
@@ -137,7 +165,7 @@ async def test_create_pivot_table_validation_error() -> None:
         mock_create_pivot.side_effect = ValidationError("Invalid data range")
 
         result = await graphics_tools.create_pivot_table(
-            filename=TEST_FILENAME,
+            filename=test_file,
             sheet_name=TEST_SHEET,
             data_range="invalid_range",
             rows=["Category"],
@@ -149,8 +177,14 @@ async def test_create_pivot_table_validation_error() -> None:
 
 
 @pytest.mark.asyncio  # type: ignore[misc]
-async def test_create_pivot_table_pivot_error() -> None:
+async def test_create_pivot_table_pivot_error(tmp_path) -> None:
     """Test pivot table creation with pivot-specific error."""
+    # Configure test environment
+    manager = ConfigurationManager()
+    manager.reload_configuration(directory=str(tmp_path), log_level="INFO")
+
+    test_file = str(tmp_path / "test_workbook.xlsx")
+
     with patch(
         "mcp_excel.tools.graphics_tools.create_pivot_table_impl"
     ) as mock_create_pivot:
@@ -158,7 +192,7 @@ async def test_create_pivot_table_pivot_error() -> None:
         mock_create_pivot.side_effect = PivotError("No numeric data in specified range")
 
         result = await graphics_tools.create_pivot_table(
-            filename=TEST_FILENAME,
+            filename=test_file,
             sheet_name=TEST_SHEET,
             data_range=TEST_DATA_RANGE,
             rows=["Category"],

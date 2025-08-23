@@ -7,19 +7,15 @@ from mcp_excel.tools.db_tools import (
     fetch_and_insert_db_to_excel,
     insert_calculated_data_to_db,
 )
+from mcp_excel.config import ConfigurationManager
 
 
 # Mock the database connection at the module level
 pytestmark = pytest.mark.asyncio
 
-# Test data
-TEST_DIR = Path(__file__).parent.parent / "documents"
-TEST_DIR.mkdir(exist_ok=True)
-
 # Using a dummy connection string that matches PostgreSQL format since that's what the code expects
 TEST_CONN_STR = "postgresql://user:pass@localhost:5432/testdb"
 TEST_QUERY = "SELECT id, name FROM users WHERE active = true"
-TEST_FILENAME = str(TEST_DIR / "test_output.xlsx")
 TEST_SHEET = "Data"
 TEST_TABLE = "users"
 TEST_COLUMNS = ["id", "name", "email"]
@@ -34,8 +30,14 @@ MOCK_DB_RESULT = {
 
 
 @pytest.mark.asyncio  # type: ignore[misc]
-async def test_fetch_and_insert_db_to_excel_success() -> None:
+async def test_fetch_and_insert_db_to_excel_success(tmp_path) -> None:
     """Test successful database fetch and Excel insert."""
+    # Configure test environment
+    manager = ConfigurationManager()
+    manager.reload_configuration(directory=str(tmp_path), log_level="INFO")
+
+    test_filename = str(tmp_path / "test_output.xlsx")
+
     with (
         patch(
             "mcp_excel.tools.db_tools.validate_sql_query", return_value=True
@@ -50,7 +52,7 @@ async def test_fetch_and_insert_db_to_excel_success() -> None:
     ):
 
         result = await fetch_and_insert_db_to_excel(
-            TEST_QUERY, TEST_FILENAME, TEST_SHEET, TEST_CONN_STR
+            TEST_QUERY, test_filename, TEST_SHEET, TEST_CONN_STR
         )
 
         assert isinstance(result, dict)
@@ -62,11 +64,17 @@ async def test_fetch_and_insert_db_to_excel_success() -> None:
 
 
 @pytest.mark.asyncio  # type: ignore[misc]
-async def test_fetch_and_insert_db_to_excel_invalid_query() -> None:
+async def test_fetch_and_insert_db_to_excel_invalid_query(tmp_path) -> None:
     """Test with invalid SQL query."""
+    # Configure test environment
+    manager = ConfigurationManager()
+    manager.reload_configuration(directory=str(tmp_path), log_level="INFO")
+
+    test_filename = str(tmp_path / "DROP_TABLE_users.xlsx")
+
     with patch("mcp_excel.tools.db_tools.validate_sql_query", return_value=False):
         result = await fetch_and_insert_db_to_excel(
-            TEST_CONN_STR, "DROP TABLE users", TEST_FILENAME, TEST_SHEET
+            "DROP TABLE users", test_filename, TEST_SHEET, TEST_CONN_STR
         )
         assert isinstance(result, dict)
         assert result["status"] == "error"
@@ -74,18 +82,24 @@ async def test_fetch_and_insert_db_to_excel_invalid_query() -> None:
 
 
 @pytest.mark.asyncio  # type: ignore[misc]
-async def test_fetch_and_insert_db_to_excel_db_error() -> None:
+async def test_fetch_and_insert_db_to_excel_db_error(tmp_path) -> None:
     """Test database error handling."""
+    # Configure test environment
+    manager = ConfigurationManager()
+    manager.reload_configuration(directory=str(tmp_path), log_level="INFO")
+
+    test_filename = str(tmp_path / "test_output.xlsx")
+
     with (
         patch("mcp_excel.tools.db_tools.validate_sql_query", return_value=True),
         patch(
             "mcp_excel.tools.db_tools.fetch_data_from_db",
-            return_value={"error": "Connection failed"},
+            return_value={"status": "error", "message": "Connection failed"},
         ),
     ):
 
         result = await fetch_and_insert_db_to_excel(
-            TEST_CONN_STR, TEST_QUERY, TEST_FILENAME, TEST_SHEET
+            TEST_QUERY, test_filename, TEST_SHEET, TEST_CONN_STR
         )
 
         assert isinstance(result, dict)
@@ -94,8 +108,14 @@ async def test_fetch_and_insert_db_to_excel_db_error() -> None:
 
 
 @pytest.mark.asyncio  # type: ignore[misc]
-async def test_fetch_and_insert_db_to_excel_excel_error() -> None:
+async def test_fetch_and_insert_db_to_excel_excel_error(tmp_path) -> None:
     """Test Excel insertion error handling."""
+    # Configure test environment
+    manager = ConfigurationManager()
+    manager.reload_configuration(directory=str(tmp_path), log_level="INFO")
+
+    test_filename = str(tmp_path / "test_output.xlsx")
+
     with (
         patch("mcp_excel.tools.db_tools.validate_sql_query", return_value=True),
         patch(
@@ -103,12 +123,12 @@ async def test_fetch_and_insert_db_to_excel_excel_error() -> None:
         ),
         patch(
             "mcp_excel.tools.db_tools.insert_data_to_excel",
-            return_value={"error": "Excel error"},
+            return_value={"status": "error", "message": "Excel error"},
         ),
     ):
 
         result = await fetch_and_insert_db_to_excel(
-            TEST_CONN_STR, TEST_QUERY, TEST_FILENAME, TEST_SHEET
+            TEST_QUERY, test_filename, TEST_SHEET, TEST_CONN_STR
         )
 
         assert isinstance(result, dict)
