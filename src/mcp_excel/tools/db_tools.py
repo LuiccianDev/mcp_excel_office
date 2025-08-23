@@ -12,7 +12,10 @@ from mcp_excel.utils.file_utils import ensure_xlsx_extension
 
 
 async def fetch_and_insert_db_to_excel(
-    connection_string: str, query: str, filename: str, sheet_name: str
+    query: str,
+    filename: str,
+    sheet_name: str,
+    connection_string: str | None = None,
 ) -> dict[str, Any]:
     """
     Fetch tabular data from a database using a validated SELECT query, clean the results, and insert them into a specified Excel worksheet.
@@ -49,14 +52,16 @@ async def fetch_and_insert_db_to_excel(
             "message": "Invalid or potentially unsafe SQL query.",
         }
 
-    # Run blocking DB call in a separate thread
-    db_result = await asyncio.to_thread(fetch_data_from_db, connection_string, query)
+    # Execute the query and get results
+    result = await asyncio.to_thread(
+        fetch_data_from_db, query=query, connection_string=connection_string
+    )
 
-    if "error" in db_result:
-        return {"status": "error", "message": f"Error: {db_result['error']}"}
+    if "error" in result:
+        return {"status": "error", "message": f"Error: {result['error']}"}
 
-    columns = db_result.get("columns", [])
-    rows = db_result.get("rows", [])
+    columns = result.get("columns", [])
+    rows = result.get("rows", [])
 
     # clean_data is CPU-bound but likely fast enough to not need a thread
     cleaned_rows = clean_data(rows, columns)
@@ -76,7 +81,10 @@ async def fetch_and_insert_db_to_excel(
 
 
 async def insert_calculated_data_to_db(
-    connection_string: str, table: str, columns: list, rows: list
+    table: str,
+    columns: list[str],
+    rows: list[tuple],
+    connection_string: str | None = None,
 ) -> dict[str, Any]:
     """
     Insert calculated or cleaned tabular data into a database table.
@@ -92,16 +100,16 @@ async def insert_calculated_data_to_db(
     Args:
         connection_string (str): Database connection string.
         table (str): Target table name for data insertion.
-        columns (list): List of column names corresponding to the data.
-        rows (list): List of tuples or lists, each representing a row to insert.
+        columns (List): List of column names corresponding to the data.
+        rows (List): List of tuples or lists, each representing a row to insert.
 
     Returns:
-        dict[str, Any]:
+        Dict[str, Any]:
             - status (str): "success" or "error".
             - message (str): Details of the operation or error encountered.
             - rows_inserted (int, optional): Number of rows successfully inserted (on success).
             - table (str): Target table name.
-            - details (dict, optional): Additional error details (on failure).
+            - details (Dict, optional): Additional error details (on failure).
 
     Notes:
         • Input data is cleaned before insertion to match DB schema.
@@ -112,9 +120,13 @@ async def insert_calculated_data_to_db(
         # Clean input rows
         cleaned_rows = clean_data(rows, columns)
 
-        # Perform DB insert in a separate thread
+        # Insert data into the database
         result = await asyncio.to_thread(
-            insert_data_to_db, connection_string, table, columns, cleaned_rows
+            insert_data_to_db,
+            table=table,
+            columns=columns,
+            rows=rows,
+            connection_string=connection_string,
         )
 
         if result.get("status") == "error":

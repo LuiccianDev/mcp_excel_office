@@ -9,6 +9,8 @@ from psycopg2 import sql
 from psycopg2.extensions import connection
 from psycopg2.extras import DictCursor
 
+from mcp_excel.utils.db_config_utils import settings
+
 
 class DatabaseError(Exception):
     """Custom exception for database-related errors."""
@@ -18,8 +20,23 @@ class DatabaseError(Exception):
 
 # * Fetch data from database with proper connection handling
 def fetch_data_from_db(
-    connection_string: str, query: str, params: tuple | None = None
+    connection_string: str | None = None, query: str = "", params: tuple | None = None
 ) -> dict[str, Any]:
+    """Fetch data from database with proper connection handling.
+
+    Args:
+        connection_string: Optional database connection string. If not provided,
+                         uses the default connection from settings.
+        query: SQL query to execute
+        params: Optional query parameters
+
+    Returns:
+        Dictionary with 'columns' and 'rows' keys, or 'error' key if failed
+    """
+    if not query:
+        return {"status": "error", "message": "No query provided"}
+
+    conn_str = connection_string or settings.database_uri
     """Fetch data from database with proper connection handling.
 
     Args:
@@ -31,7 +48,7 @@ def fetch_data_from_db(
         Dictionary with 'columns' and 'rows' keys, or 'error' key if failed
     """
     try:
-        with _get_db_connection(connection_string) as conn:
+        with _get_db_connection(conn_str) as conn:
             rows, columns = _execute_query(conn, query, params)
             return {
                 "status": "success",
@@ -147,10 +164,10 @@ def clean_data(rows: list, columns: list) -> list:
 
 # * Insert data into the database with batch processing.
 def insert_data_to_db(
-    connection_string: str,
     table: str,
     columns: list[str],
     rows: list[tuple],
+    connection_string: str | None = None,
     batch_size: int = 1000,
 ) -> dict[str, Any]:
     """
@@ -173,39 +190,39 @@ def insert_data_to_db(
         return {"status": "error", "message": "Row length must match number of columns"}
 
     try:
-        with _get_db_connection(connection_string) as conn:
-            with conn.cursor() as cursor:
-                # Use sql.SQL and sql.Identifier for safe SQL composition
-                query = sql.SQL(
-                    """
-                    INSERT INTO {table} ({fields})
-                    VALUES %s
-                    ON CONFLICT DO NOTHING
+        conn_str = connection_string or settings.database_uri
+        with _get_db_connection(conn_str) as conn, conn.cursor() as cursor:
+            # Use sql.SQL and sql.Identifier for safe SQL composition
+            query = sql.SQL(
                 """
-                ).format(
-                    table=sql.Identifier(table),
-                    fields=sql.SQL(", ").join(map(sql.Identifier, columns)),
-                )
+                INSERT INTO {table} ({fields})
+                VALUES %s
+                ON CONFLICT DO NOTHING
+            """
+            ).format(
+                table=sql.Identifier(table),
+                fields=sql.SQL(", ").join(map(sql.Identifier, columns)),
+            )
 
-                # Process in batches
-                total_inserted = 0
-                for i in range(0, len(rows), batch_size):
-                    batch = rows[i : i + batch_size]
-                    try:
-                        psycopg2.extras.execute_values(
-                            cursor, query, batch, template=None, page_size=batch_size
-                        )
-                        total_inserted += cursor.rowcount
-                        conn.commit()
-                    except psycopg2.Error as e:
-                        conn.rollback()
+            # Process in batches
+            total_inserted = 0
+            for i in range(0, len(rows), batch_size):
+                batch = rows[i : i + batch_size]
+                try:
+                    psycopg2.extras.execute_values(
+                        cursor, query, batch, template=None, page_size=batch_size
+                    )
+                    total_inserted += cursor.rowcount
+                    conn.commit()
+                except psycopg2.Error as e:
+                    conn.rollback()
 
-                        raise DatabaseError(f"Batch insert failed: {e}") from e
+                    raise DatabaseError(f"Batch insert failed: {e}") from e
 
-                return {
-                    "   status": "success",
-                    "message": f"Successfully inserted {total_inserted} rows into '{table}'",
-                }
+            return {
+                "status": "success",
+                "message": f"Successfully inserted {total_inserted} rows into '{table}'",
+            }
     except DatabaseError as e:
         return {"status": "error", "message": str(e)}
     except Exception as e:
@@ -214,7 +231,7 @@ def insert_data_to_db(
 # Context manager for database connections
 @contextmanager
 def _get_db_connection(
-    connection_string: str,
+    connection_string: str | None = None,
 ) -> Generator[connection, None, None]:
     """Context manager for database connections.
 
@@ -228,8 +245,11 @@ def _get_db_connection(
         DatabaseError: If connection cannot be established.
     """
     conn: connection | None = None
+    conn_str = connection_string or settings.database_uri
     try:
-        conn = psycopg2.connect(connection_string, cursor_factory=DictCursor)
+        conn = psycopg2.connect(
+            conn_str, cursor_factory=DictCursor, connect_timeout=10
+        )
         conn.autocommit = False
         yield conn
     except psycopg2.Error as e:
