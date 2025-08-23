@@ -16,11 +16,12 @@ from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-# Load .env file automatically if available
+# Load .env file automatically if available, but don't override existing env vars
 try:
     from dotenv import load_dotenv
 
-    load_dotenv()
+    # Use override=False to prioritize existing environment variables (from DXT)
+    load_dotenv(override=False)
 except ImportError:
     pass  # python-dotenv not available, continue without it
 
@@ -89,7 +90,7 @@ class FileConfig(BaseModel):
         default=100 * 1024 * 1024, gt=0, description="Maximum file size in bytes"
     )
     allowed_extensions: list[str] = Field(
-        default=[".xlsx", ".xls"], description="Allowed file extensions"
+        default=[".xlsx"], description="Allowed file extensions"
     )
 
     @field_validator("directory")  # type: ignore[misc]
@@ -267,12 +268,25 @@ class MCPExcelConfig(BaseSettings):
     def _validate_configuration(self) -> None:
         """Validate the complete configuration."""
         try:
-            # Validate database configuration
-            if self.postgres_connection_string:
+            # Validate database configuration only if it's properly resolved
+            if (
+                self.postgres_connection_string
+                and not self.postgres_connection_string.startswith("${")
+            ):
                 db_config = DatabaseConfig(  # noqa: F841
                     connection_string=self.postgres_connection_string
                 )
                 logger.info("Database configuration validated successfully")
+            elif (
+                self.postgres_connection_string
+                and self.postgres_connection_string.startswith("${")
+            ):
+                logger.warning(
+                    f"Database configuration contains unresolved variable: {self.postgres_connection_string}"
+                )
+                logger.info(
+                    "Database tools will be unavailable due to unresolved configuration"
+                )
             else:
                 logger.info(
                     "No database configuration provided - database tools will be unavailable"
@@ -288,6 +302,12 @@ class MCPExcelConfig(BaseSettings):
     @property
     def database_config(self) -> DatabaseConfig:
         """Get validated database configuration."""
+        # Return empty config if connection string is unresolved or None
+        if (
+            not self.postgres_connection_string
+            or self.postgres_connection_string.startswith("${")
+        ):
+            return DatabaseConfig(connection_string=None)
         return DatabaseConfig(connection_string=self.postgres_connection_string)
 
     @property
