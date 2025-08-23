@@ -1,14 +1,14 @@
 [project]
-name = "mcp-office-excel"
+name = "mcp_excel"
 version = "1.0.0"
-description = "Excel server for processing Excel files."
+description = "MCP Excel Office Server - Excel manipulation through Model Context Protocol"
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [
     {name = "LuiccianDev", email = "luicciandev@gmail.com"}
 ]
 license = {text = "MIT"}
-keywords = ["mcp", "excel", "office", "document-processing", "xlsx", "automation"]
+keywords = ["mcp", "excel", "office", "document-processing", "xlsx", "automation", "model-context-protocol"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -33,7 +33,6 @@ Changelog = "https://github.com/LuiccianDev/mcp_excel_office/blob/master/CHANGEL
 
 
 
-# uv add --dev modulo
 [dependency-groups]
 dev = [
     "mypy>=1.17.0",
@@ -47,10 +46,10 @@ test = [
 ]
 
 [project.scripts]
-mcp-mcp_excel_office = "mcp_excel.__main__:main"
+mcp_excel_office = "mcp_excel.__main__:main"
 
 [project.entry-points."mcp.servers"]
-mcp-mcp_excel_office = "mcp_excel.__main__:main"
+mcp_excel_office = "mcp_excel.__main__:main"
 
 
 [tool.hatch.build.targets.wheel]
@@ -60,7 +59,7 @@ packages = ["src/mcp_excel"]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-# Configuración de MyPy (verificador de tipos)
+# MyPy Configuration (Type Checker)
 [tool.mypy]
 python_version = "3.11"
 warn_return_any = true
@@ -82,7 +81,7 @@ explicit_package_bases = true
 files = ["src"]
 
 
-# configuarcionde pytest
+# Pytest Configuration
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
@@ -90,43 +89,43 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 pythonpath = ["src"]
 asyncio_mode = "auto"
-# Configuración de cobertura (pytest-cov)
+# Coverage Configuration (pytest-cov)
 addopts = [
-    "--cov=src/mcp_excel/tools",     # Directorio a cubrir
-    "--cov-report=term-missing",     # Mostrar líneas no cubiertas en terminal
-    "--cov-report=html:htmlcov",     # Generar reporte HTML
-    "--cov-report=xml:coverage.xml", # Generar reporte XML
-    "--cov-fail-under=20",           # Fallar si cobertura < 80%
-    "--strict-markers",              # Requerir markers definidos
-    "--disable-warnings",            # Deshabilitar warnings por defecto
-    "-v",                            # Modo verbose
-    "--tb=short"                     # Formato corto de tracebacks
+    "--cov=src/mcp_excel/tools",     # Directory to cover
+    "--cov-report=term-missing",     # Show uncovered lines in terminal
+    "--cov-report=html:htmlcov",     # Generate HTML report
+    "--cov-report=xml:coverage.xml", # Generate XML report
+    "--cov-fail-under=20",           # Fail if coverage < 20%
+    "--strict-markers",              # Require defined markers
+    "--disable-warnings",            # Disable warnings by default
+    "-v",                            # Verbose mode
+    "--tb=short"                     # Short traceback format
 ]
 
-# Markers personalizados
+# Custom markers
 markers = [
-    "slow: marca tests que tardan mucho en ejecutarse",
-    "integration: marca tests de integración",
-    "unit: marca tests unitarios",
-    "asyncio: marca tests asíncronos",
-    "excel: marca tests relacionados con Excel",
-    "mcp: marca tests relacionados con MCP"
+    "slow: marks tests that take a long time to run",
+    "integration: marks integration tests",
+    "unit: marks unit tests",
+    "asyncio: marks asynchronous tests",
+    "excel: marks Excel-related tests",
+    "mcp: marks MCP-related tests"
 ]
 
-# Filtros de warnings
+# Warning filters
 filterwarnings = [
     "ignore::UserWarning",
     "ignore::DeprecationWarning",
-    # Agregar warnings específicos si es necesario
+    # Add specific warnings if needed
 ]
 
-# Configuración de logging durante tests
+# Logging configuration during tests
 log_cli = true
 log_cli_level = "INFO"
 log_cli_format = "%(asctime)s [%(levelname)8s] %(name)s: %(message)s"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 
-# Archivos y directorios a ignorar
+# Files and directories to ignore
 norecursedirs = [
     "*.egg",
     ".eggs",
@@ -138,7 +137,7 @@ norecursedirs = [
     "__pycache__"
 ]
 [tool.coverage.run]
-# Configuración adicional de cobertura
+# Additional coverage configuration
 source = ["src/mcp_excel/tools"]
 omit = [
     "*/tests/*",
@@ -150,7 +149,7 @@ omit = [
 ]
 
 [tool.coverage.report]
-# Configuración del reporte de cobertura
+# Coverage report configuration
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",
@@ -163,5 +162,5 @@ exclude_lines = [
 ]
 
 [tool.coverage.html]
-# Configuración del reporte HTML
+# HTML report configuration
 directory = "htmlcov"

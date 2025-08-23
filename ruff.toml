@@ -1,5 +1,5 @@
 # ==============================
-# Configuración principal Ruff
+# Main Ruff Configuration
 # ==============================
 line-length = 88
 target-version = "py311"
@@ -9,7 +9,7 @@ select = [
     "E",  # pycodestyle errors
     "W",  # pycodestyle warnings
     "F",  # pyflakes
-    "I",  # isort (ordenar imports)
+    "I",  # isort (import sorting)
     "B",  # flake8-bugbear
     "C4", # flake8-comprehensions
     "UP", # pyupgrade
@@ -29,17 +29,17 @@ ignore = [
 "tests/*" = ["S101", "S106", "S108"]
 
 # ==============================
-# Configuración de isort dentro de Ruff
+# isort Configuration within Ruff
 # ==============================
 [lint.isort]
-known-first-party = ["src"]   # Código propio
-combine-as-imports = true     # Une imports con "as"
-order-by-type = true          # Ordena por tipo de import
-case-sensitive = false        # Orden insensible a mayúsculas
-lines-after-imports = 2       # Línea extra tras imports
+known-first-party = ["mcp_excel"]   # Own code
+combine-as-imports = true            # Combine imports with "as"
+order-by-type = true                 # Order by import type
+case-sensitive = false               # Case-insensitive ordering
+lines-after-imports = 2              # Extra line after imports
 
 # ==============================
-# Configuración de formateo
+# Formatting Configuration
 # ==============================
 [format]
 quote-style = "double"
