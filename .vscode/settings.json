@@ -17,5 +17,8 @@
     ".coverage/**": true,
     "coverage.xml": true,
     "coverage.xml/**": true
+  },
+  "markdownlint.config": {
+    "default": true
   }
 }
