@@ -42,7 +42,7 @@ async def create_excel_workbook(filename: str) -> dict[str, Any]:
 
 
 # * Create new worksheet in workbook
-#! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
+# NOTE: Do not remove the type: ignore[misc] comment on the next line, otherwise remove disallow_untyped_decorators = true from pyproject.toml
 @validate_file_access("filename")  # type: ignore[misc]
 async def create_excel_worksheet(filename: str, sheet_name: str) -> dict[str, Any]:
     """

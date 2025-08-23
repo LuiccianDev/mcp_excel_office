@@ -1,5 +1,10 @@
 """
-File utility functions for Word Document Server.
+File utility functions for MCP Excel Office Server.
+
+This module provides secure file path validation, directory access control,
+and file operation utilities for Excel file manipulation. It ensures that
+all file operations are performed within authorized directories and with
+proper security validation.
 """
 
 import functools
@@ -226,15 +231,15 @@ def list_excel_files_in_directory() -> list[dict]:
 # * Decorator to validate file access
 def validate_file_access(param: str = "filename") -> Callable[[F], F]:
     """
-    Decorador para validar el acceso a un archivo antes de ejecutar la función decorada.
-    - Verifica que el archivo esté en un directorio permitido.
-    - Verifica que tenga permisos de escritura.
+    Decorator to validate file access before executing the decorated function.
+    - Verifies that the file is in an allowed directory.
+    - Verifies that it has write permissions.
 
     Args:
-        param: Nombre del parámetro que contiene la ruta del archivo.
+        param: Name of the parameter that contains the file path.
 
     Returns:
-        Una función decoradora que puede aplicarse a funciones sync o async.
+        A decorator function that can be applied to sync or async functions.
     """
 
     def decorator(func: F) -> F:
@@ -254,7 +259,7 @@ def validate_file_access(param: str = "filename") -> Callable[[F], F]:
 
                 file_path: str = os.path.abspath(bound.arguments[param])
 
-                # Validar directorio permitido
+                # Validate allowed directory
                 is_allowed, dir_error = _is_path_in_allowed_directories(file_path)
                 if not is_allowed:
                     return {
@@ -263,7 +268,7 @@ def validate_file_access(param: str = "filename") -> Callable[[F], F]:
                         "path": file_path,
                     }
 
-                # Validar permisos de escritura
+                # Validate write permissions
                 is_writable, write_error = _check_file_writeable(file_path)
                 if not is_writable:
                     return {

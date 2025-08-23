@@ -9,7 +9,7 @@ from psycopg2 import sql
 from psycopg2.extensions import connection
 from psycopg2.extras import DictCursor
 
-from mcp_excel.utils.db_config_utils import settings
+from mcp_excel.utils.db_config_utils import get_postgres_connection_string
 
 
 class DatabaseError(Exception):
@@ -26,7 +26,7 @@ def fetch_data_from_db(
 
     Args:
         connection_string: Optional database connection string. If not provided,
-                         uses the default connection from settings.
+                         uses the default connection from environment variables.
         query: SQL query to execute
         params: Optional query parameters
 
@@ -36,17 +36,14 @@ def fetch_data_from_db(
     if not query:
         return {"status": "error", "message": "No query provided"}
 
-    conn_str = connection_string or settings.database_uri
-    """Fetch data from database with proper connection handling.
+    conn_str = connection_string or get_postgres_connection_string()
 
-    Args:
-        connection_string: Database connection string
-        query: SQL query to execute
-        params: Optional query parameters
+    if not conn_str:
+        return {
+            "status": "error",
+            "message": "No database connection string provided. Set POSTGRES_CONNECTION_STRING environment variable or provide connection_string parameter.",
+        }
 
-    Returns:
-        Dictionary with 'columns' and 'rows' keys, or 'error' key if failed
-    """
     try:
         with _get_db_connection(conn_str) as conn:
             rows, columns = _execute_query(conn, query, params)
@@ -66,10 +63,10 @@ def insert_data_to_excel(
     try:
         wb = load_workbook(filename)
         ws = wb[sheet_name]
-        # Escribir encabezados
+        # Write headers
         for col_num, col_name in enumerate(columns, 1):
             ws.cell(row=1, column=col_num, value=col_name)
-        # Escribir datos
+        # Write data
         for row_num, row_data in enumerate(rows, 2):
             for col_num, value in enumerate(row_data, 1):
                 ws.cell(row=row_num, column=col_num, value=value)
@@ -190,7 +187,14 @@ def insert_data_to_db(
         return {"status": "error", "message": "Row length must match number of columns"}
 
     try:
-        conn_str = connection_string or settings.database_uri
+        conn_str = connection_string or get_postgres_connection_string()
+
+        if not conn_str:
+            return {
+                "status": "error",
+                "message": "No database connection string provided. Set POSTGRES_CONNECTION_STRING environment variable or provide connection_string parameter.",
+            }
+
         with _get_db_connection(conn_str) as conn, conn.cursor() as cursor:
             # Use sql.SQL and sql.Identifier for safe SQL composition
             query = sql.SQL(
@@ -228,6 +232,7 @@ def insert_data_to_db(
     except Exception as e:
         return {"status": "error", "message": f"An unexpected error occurred: {str(e)}"}
 
+
 # Context manager for database connections
 @contextmanager
 def _get_db_connection(
@@ -245,11 +250,14 @@ def _get_db_connection(
         DatabaseError: If connection cannot be established.
     """
     conn: connection | None = None
-    conn_str = connection_string or settings.database_uri
-    try:
-        conn = psycopg2.connect(
-            conn_str, cursor_factory=DictCursor, connect_timeout=10
+    conn_str = connection_string or get_postgres_connection_string()
+
+    if not conn_str:
+        raise DatabaseError(
+            "No database connection string provided. Set POSTGRES_CONNECTION_STRING environment variable or provide connection_string parameter."
         )
+    try:
+        conn = psycopg2.connect(conn_str, cursor_factory=DictCursor, connect_timeout=10)
         conn.autocommit = False
         yield conn
     except psycopg2.Error as e:

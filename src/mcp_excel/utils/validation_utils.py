@@ -11,19 +11,19 @@ from mcp_excel.utils.cell_utils import parse_cell_range, validate_cell_reference
 def validate_formula_in_cell_operation(
     filepath: str, sheet_name: str, cell: str, formula: str
 ) -> dict[str, Any]:
-    # Validaciones rápidas
+    # Quick validations
     if not validate_cell_reference(cell):
         return {"status": "error", "message": f"Invalid cell reference: {cell}"}
     try:
         wb = load_workbook(filepath)
         if sheet_name not in wb.sheetnames:
             return {"status": "error", "message": f"Sheet '{sheet_name}' not found"}
-        # Validar sintaxis de fórmula
+        # Validate formula syntax
         result: tuple[bool, str] = validate_formula(formula)
         is_valid, message = result
         if not is_valid:
             return {"status": "error", "message": f"Invalid formula syntax: {message}"}
-        # Validar referencias de celda en la fórmula
+        # Validate cell references in the formula
         cell_refs = re.findall(r"[A-Z]+[0-9]+(?::[A-Z]+[0-9]+)?", formula)
         for ref in cell_refs:
             if ":" in ref:
@@ -41,7 +41,7 @@ def validate_formula_in_cell_operation(
                         "status": "error",
                         "message": f"Invalid cell reference in formula: {ref}",
                     }
-        # Comparar con el contenido actual de la celda
+        # Compare with current cell content
         sheet = wb[sheet_name]
         cell_obj = sheet[cell]
         current_formula = cell_obj.value
@@ -90,7 +90,7 @@ def validate_formula_in_cell_operation(
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-    # Fallback de seguridad si ningún return anterior se ejecutó usando mypy or ruff
+    # Safety fallback if no previous return was executed using mypy or ruff
     return {
         "status": "error",
         "message": "Unknown error: no result was returned from the function logic",

@@ -41,7 +41,7 @@ async def validate_formula_syntax(
         return {"status": "error", "message": f"Failed to validate formula: {str(e)}"}
 
 
-#! No borrar el type: ignore[misc] que se encuentra en la linea siguiente en caso contraio eliminar disallow_untyped_decorators = true de pyproject.toml
+# NOTE: Do not remove the type: ignore[misc] comment on the next line, otherwise remove disallow_untyped_decorators = true from pyproject.toml
 @validate_file_access("filename")  # type: ignore[misc]
 async def apply_formula_excel(
     filename: str,

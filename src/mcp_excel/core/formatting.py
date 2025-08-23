@@ -74,7 +74,7 @@ def format_range(
     protection: dict[str, Any] | None = None,
     conditional_format: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    # Validación de celdas
+    # Cell validation
     if not validate_cell_reference(start_cell):
         return {
             "status": "error",

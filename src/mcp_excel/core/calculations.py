@@ -66,6 +66,7 @@ def apply_formula(
     }
     return result
 
+
 def _validate_worksheet_exists(workbook: Any, sheet_name: str) -> None:
     """Validate if the specified worksheet exists in the workbook."""
     if sheet_name not in workbook.sheetnames:
