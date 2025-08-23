@@ -24,9 +24,9 @@ env.bak/
 
 # IDEs y editores
 .ruff_cache/
-.vscode/
 .idea/
 .kiro/
+.windsurf/
 *.swp
 *.swo
 *~
@@ -78,6 +78,8 @@ docs/api/
 
 # Directorio de documentos
 documents/
+GEMINI.md
+WARP.md
 
 # Archivos de Jupyter Notebook
 .ipynb_checkpoints/
