@@ -1,286 +1,414 @@
 <div align="center">
-  <h1>MCP Office Excel Server</h1>
+  <h1>MCP Excel Office Server</h1>
   <p>
-    <em>Potente servidor para la manipulación programática de documentos Excel (.xlsx) mediante MCP</em>
+    <em>Powerful MCP server for programmatic Excel (.xlsx) manipulation and automation</em>
   </p>
 
 [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-brightgreen)](https://modelcontextprotocol.io)
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Type Checked: mypy](https://img.shields.io/badge/type%20checked-mypy-blue.svg)](https://mypy-lang.org/)
 </div>
 
-## 📖 Descripción
+## 📖 Description
 
-Servidor MCP (Model Context Protocol) para integración con Microsoft Excel que permite crear, modificar y gestionar archivos de Excel de manera programática a través de herramientas MCP estandarizadas.
+A comprehensive MCP (Model Context Protocol) server that provides AI assistants with powerful Excel manipulation capabilities. This server enables programmatic creation, modification, and management of Excel files through standardized MCP tools, supporting data operations, formatting, formulas, charts, and PostgreSQL database integration.
 
-## 📋 Tabla de Contenidos
+## 📋 Table of Contents
 
-- [✨ Características Principales](#-características-principales)
-- [🚀 Instalación](#-instalación)
-  - [Requisitos Previos](#-requisitos-previos)
-  - [Instalación con UV (Recomendado)](#-instalación-con-uv-recomendado)
-  - [Instalación con pip](#-instalación-con-pip)
-  - [Entorno Virtual (Opcional)](#-entorno-virtual-opcional)
-- [⚙️ Configuración](#️-configuración)
-- [🚀 Uso Rápido](#-uso-rápido)
-- [📚 Uso Avanzado](#-uso-avanzado)
+- [✨ Key Features](#-key-features)
+- [🚀 Installation](#-installation)
+- [⚙️ Deployment Modes](#️-deployment-modes)
+  - [DXT Package Deployment](#dxt-package-deployment)
+  - [Traditional MCP Server](#traditional-mcp-server)
+  - [Standalone CLI](#standalone-cli)
+- [🔧 Configuration](#-configuration)
+- [🚀 Quick Start](#-quick-start)
+- [📚 Available Tools](#-available-tools)
 - [🧪 Testing](#-testing)
-- [🧩 Estructura del Proyecto](#-estructura-del-proyecto)
-- [🔧 Herramientas de Desarrollo](#-herramientas-de-desarrollo)
-- [🤝 Contribuyendo](#-contribuyendo)
-- [📄 Licencia](#-licencia)
+- [🧩 Project Structure](#-project-structure)
+- [🔧 Development](#-development)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
 
-## ✨ Características Principales
+## ✨ Key Features
 
-- **Procesamiento de Hojas de Cálculo**: Creación, lectura y modificación de archivos Excel (.xlsx)
-- **Operaciones de Formato**: Aplicación de estilos, formatos y fórmulas
-- **Integración MCP**: Compatible con el Modelo de Contexto de Protocolo para integración con otros servicios
-- **Alto Rendimiento**: Optimizado para manejar archivos grandes de manera eficiente
-- **Seguro**: Validación de acceso a archivos y manejo de errores robusto
+- **📊 Comprehensive Excel Operations**: Create, read, modify workbooks and worksheets with full data manipulation support
+- **🎨 Advanced Formatting**: Apply styles, fonts, colors, borders, and cell formatting with precision
+- **📈 Data Visualization**: Generate charts, pivot tables, and graphics programmatically
+- **🗄️ Database Integration**: Direct PostgreSQL integration for seamless data import/export
+- **⚡ Formula Support**: Apply and validate Excel formulas with error handling
+- **🔒 Security First**: File path validation, access control, and robust error handling
+- **🚀 Multiple Deployment Modes**: DXT package, traditional MCP server, or standalone CLI
+- **🤖 AI-Ready**: Optimized for AI assistant integration via Model Context Protocol
 
-## 🚀 Instalación
+## 🚀 Installation
 
-### 📋 Requisitos Previos
+### 📋 Prerequisites
 
-- Python 3.11 o superior
-- [UV](https://github.com/astral-sh/uv) (recomendado) o pip
-- Git (para clonar el repositorio)
+- **Python 3.11+**: Modern Python with type hints support
+- **UV Package Manager**: [Install UV](https://docs.astral.sh/uv/getting-started/installation/) (recommended) or use pip
+- **Git**: For cloning the repository
 
-### 🔄 Clonar el Repositorio
+### 🔄 Clone the Repository
 
 ```bash
-git clone https://github.com/tu-usuario/mcp_excel_office.git
+git clone https://github.com/LuiccianDev/mcp_excel_office.git
 cd mcp_excel_office
 ```
 
-### ⚡ Instalación con UV (Recomendado)
-
-1. **Instalar dependencias básicas**:
-   ```bash
-   uv sync
-   ```
-
-2. **Modo desarrollo** (incluye dependencias de desarrollo y testing):
-   ```bash
-   uv sync --dev
-   ```
-
-3. **Modo producción** (solo dependencias necesarias):
-   ```bash
-   uv sync --production
-   ```
-
-### 🐍 Instalación con pip
-
-1. **Instalar el paquete**:
-   ```bash
-   pip install .
-   ```
-
-2. **Modo desarrollo** (instalación editable):
-   ```bash
-   pip install -e ".[dev]"
-   ```
-
-### 🌐 Entorno Virtual (Opcional)
-
-Se recomienda usar un entorno virtual para aislar las dependencias:
+### ⚡ Installation with UV (Recommended)
 
 ```bash
-# Crear entorno virtual
-uv venv
-
-# Activar en Windows
-.venv\Scripts\activate
-
-# Instalar dependencias
+# Install production dependencies
 uv sync
 
-uv sync --all--groups
-# Desactivar entorno virtual
-deactivate
+# Install with development dependencies
+uv sync --dev
+
+# Install all dependency groups (dev + test)
+uv sync --all-groups
 ```
 
-### 🏗️ Construir el Módulo
-
-Para crear un paquete instalable del proyecto usando `uv build`:
+### 🐍 Alternative: Installation with pip
 
 ```bash
-# Construir el paquete
+# Install the package
+pip install .
+
+# Development installation (editable)
+pip install -e ".[dev,test]"
+```
+
+### 🏗️ Build and Package
+
+```bash
+# Build distributable package
 uv build
 
-# Instalar desde el paquete construido
-uv pip install dist/mcp_excel_office-*.whl
-
+# Install from built package
+uv pip install dist/mcp_excel-*.whl
 ```
 
-Para ver todas las opciones disponibles:
-```bash
-uv build --help
-```
+## ⚙️ Deployment Modes
 
-#### Formatear todo el código:
-```bash
-# Usando uv directamente
-uv run pre-commit run --all-files
-```
+The MCP Excel Office Server supports three deployment modes to fit different workflows and environments:
 
-#### Formatear solo el código modificado:
-```bash
-# Usando uv directamente
-uv run pre-commit run <file>
-```
+### DXT Package Deployment
 
-### Testing
+**Best for**: Integrated DXT ecosystem users who want seamless configuration management.
 
-Ejecuta las pruebas unitarias con:
+1. **Package the project**:
+   ```bash
+   dxt pack
+   ```
 
-```bash
-uv run pytest
-```
+2. **Configuration**: The DXT package automatically handles dependencies and provides user-friendly configuration through the manifest.json:
+   - `directory`: Base directory for file operations
+   - `postgres_connection_string`: PostgreSQL database connection (marked as sensitive)
 
-## ⚙️ Configuración
+3. **Usage**: Once packaged, the tool integrates directly with DXT-compatible clients with automatic user configuration variable substitution.
 
-### 🔧 Configuración del Entorno de Desarrollo
+### Traditional MCP Server
 
-#### VS Code
-El proyecto incluye configuración automática para VS Code que:
-- Formatea automáticamente al guardar
-- Usa black como formateador
-- Organiza imports automáticamente
+**Best for**: Standard MCP server deployments with existing MCP infrastructure.
 
-#### Configuración de MCP (Model Context Protocol)
-
-
-1. Construir con UV
-Para crear un paquete instalable:
-
-```bash
-# Construir el paquete
-uv build
-
-# Instalar el paquete localmente
-uv pip install dist/mcp_excel_office-*.whl
-
-
-```
-
-
-2. Claude Desktop Git
-Añade la siguiente configuración a tu `mcp_config.json` para la integración con Git:
+Add to your MCP configuration file (e.g., Claude Desktop's `mcp_config.json`):
 
 ```json
 {
-    "mcpServers": {
-        "officeExcel": {
-            "command": "uv",
-            "args": ["run", "mcp-office-excel"],
-            "env": {
-                "DIRECTORY": "user/to/path",
-
-            }
-        }
+  "mcpServers": {
+    "mcp_excel": {
+      "command": "uv",
+      "args": ["run", "mcp_excel_office"],
+      "env": {
+        "DIRECTORY": "${user_config.directory}",
+        "POSTGRES_CONNECTION_STRING": "${user_config.postgres_connection_string}"
+      }
     }
+  }
 }
 ```
 
-#### DXT Pack
-Para empaquetar el proyecto con DXT:
+**Alternative configuration with CLI arguments**:
+```json
+{
+  "mcpServers": {
+    "mcp_excel": {
+      "command": "uv",
+      "args": [
+        "run", "-m", "mcp_excel",
+        "--path", "${user_config.directory}",
+        "--postgres", "${user_config.postgres}"
+      ]
+    }
+  }
+}
+```
+
+### Standalone CLI
+
+**Best for**: Direct command-line usage, scripting, and automation without MCP protocol overhead.
 
 ```bash
-# Empaquetar el proyecto
-dxt pack
+# Run with environment variables
+export DIRECTORY="/path/to/your/files"
+export POSTGRES_CONNECTION_STRING="postgresql://user:pass@localhost/db"
+python -m mcp_excel
+
+# Or run with command-line arguments
+python -m mcp_excel --path "/path/to/files" --postgres "postgresql://user:pass@localhost/db"
+
+# Using UV
+uv run mcp_excel_office --help
 ```
 
-Para más información sobre DXT, visita: [DXT en GitHub](https://github.com/anthropics/dxt)
+## 🔧 Configuration
+
+### Environment Variables
+
+- **`DIRECTORY`**: Base directory for file operations (required for security)
+- **`POSTGRES_CONNECTION_STRING`**: PostgreSQL connection string for database operations (optional)
+
+### Configuration Validation
+
+The server validates all configuration on startup and provides clear error messages for:
+- Missing required environment variables
+- Invalid directory paths
+- Malformed database connection strings
+- File access permissions
 
 
-## 🗂 Estructura del Proyecto
+## 🚀 Quick Start
+
+### 1. Basic Setup
+
+```bash
+# Clone and install
+git clone https://github.com/LuiccianDev/mcp_excel_office.git
+cd mcp_excel_office
+uv sync --dev
+
+# Set up environment
+export DIRECTORY="/path/to/your/excel/files"
+export POSTGRES_CONNECTION_STRING="postgresql://user:pass@localhost/db"  # Optional
+```
+
+### 2. Test the Installation
+
+```bash
+# Run tests to verify installation
+uv run pytest
+
+# Check code quality
+uv run ruff check
+uv run mypy src/
+```
+
+### 3. Start the MCP Server
+
+```bash
+# Start MCP server
+uv run mcp_excel_office
+
+# Or use CLI mode
+python -m mcp_excel --help
+```
+
+## 📚 Available Tools
+
+The server provides comprehensive Excel manipulation through these MCP tool categories:
+
+### 📊 Data Operations
+- **`write_data_to_excel`**: Write data to spreadsheet ranges with type validation
+- **`read_data_from_excel`**: Read data from spreadsheet ranges with flexible formatting
+- **`append_data_to_excel`**: Append data to existing sheets with automatic range detection
+
+### 📋 Workbook Management
+- **`create_workbook`**: Create new Excel workbooks with customizable settings
+- **`create_worksheet`**: Add worksheets to existing workbooks with naming validation
+- **`get_workbook_metadata`**: Retrieve comprehensive workbook information and statistics
+
+### 🎨 Formatting Operations
+- **`format_range`**: Apply comprehensive cell formatting (fonts, colors, borders, alignment)
+- **`set_column_width`**: Adjust column dimensions with validation
+- **`set_row_height`**: Adjust row dimensions with validation
+
+### 🧮 Formula Operations
+- **`apply_formula`**: Apply Excel formulas to cells or ranges with validation
+- **`validate_formula`**: Validate formula syntax before application
+- **`calculate_range`**: Perform calculations on data ranges
+
+### 📈 Graphics and Visualization
+- **`create_chart`**: Generate various chart types (bar, line, pie, scatter, etc.)
+- **`create_pivot_table`**: Create pivot tables from data with customizable aggregations
+- **`add_image`**: Insert images into worksheets with positioning control
+
+### 🗄️ Database Integration
+- **`import_from_database`**: Import PostgreSQL data directly into Excel with query support
+- **`export_to_database`**: Export Excel data to PostgreSQL with table creation
+- **`execute_query_to_excel`**: Execute SQL queries and write results to Excel
+
+For detailed documentation of all tools, parameters, and examples, see [TOOLS.md](TOOLS.md).
+
+## 🧩 Project Structure
 
 ```text
-mcp-office-excel/
-├── mcp_excel/               # Código principal del servidor
-│   ├── core/                # Funcionalidades principales
-│   ├── tools/               # Herramientas MCP
-│   ├── utils/               # Utilidades
-│   └── exceptions/          # Excepciones personalizadas
-├── tests/                   # Pruebas unitarias
-├── format.py                # Script de formateo
-├── pyproject.toml           # Configuración del proyecto
-├── TOOLS.md                 # Documentación de herramientas MCP
-└── README.md                # Documentación principal
+mcp_excel_office/
+├── src/mcp_excel/              # Main package
+│   ├── __init__.py            # Package initialization
+│   ├── __main__.py            # CLI entry point
+│   ├── server.py              # MCP server implementation
+│   ├── register_tools.py      # Tool registration
+│   ├── tools/                 # MCP tool implementations
+│   │   ├── content_tools.py   # Data read/write operations
+│   │   ├── excel_tools.py     # Basic workbook operations
+│   │   ├── format_tools.py    # Cell formatting and styling
+│   │   ├── formulas_excel_tools.py  # Formula operations
+│   │   ├── graphics_tools.py  # Charts and visualizations
+│   │   └── db_tools.py        # Database integration
+│   ├── core/                  # Core functionality
+│   ├── utils/                 # Utility functions
+│   └── exceptions/            # Custom exceptions
+├── tests/                     # Test suite
+│   ├── test_content_tools.py  # Content operations tests
+│   ├── test_excel_tools.py    # Basic operations tests
+│   ├── test_format_tools.py   # Formatting tests
+│   ├── test_formulas_excel_tools.py  # Formula tests
+│   ├── test_graphics_tools.py # Graphics tests
+│   └── test_db_tools.py       # Database tests
+├── documents/                 # Test Excel files
+├── .kiro/                     # Kiro configuration
+│   ├── specs/                 # Feature specifications
+│   └── steering/              # Development guidelines
+├── pyproject.toml             # Project configuration
+├── manifest.json              # DXT package configuration
+├── TOOLS.md                   # Detailed tool documentation
+└── README.md                  # This file
 ```
 
-## 🔧 Herramientas MCP Disponibles
+## 🧪 Testing
 
-### Operaciones de Libro de Trabajo
-- `create_workbook`: Crea un nuevo libro de Excel
-- `create_worksheet`: Añade una nueva hoja a un libro existente
-- `get_workbook_metadata`: Obtiene metadatos del libro
+### Run Tests
 
-### Operaciones de Datos
-- `write_data_to_excel`: Escribe datos en una hoja de cálculo
-- `read_data_from_excel`: Lee datos de una hoja de cálculo
+```bash
+# Run all tests
+uv run pytest
 
-### Operaciones de Formato
-- `format_range`: Aplica formato a un rango de celdas
-- `set_column_width`: Ajusta el ancho de columnas
-- `set_row_height`: Ajusta la altura de filas
+# Run with coverage report
+uv run pytest --cov=src/mcp_excel/tools --cov-report=html
 
-Para una documentación detallada de todas las herramientas MCP, consulte [TOOLS.md](TOOLS.md).
+# Run specific test categories
+uv run pytest -m unit          # Unit tests only
+uv run pytest -m integration   # Integration tests only
+uv run pytest -m excel         # Excel-specific tests
+```
 
-## 🌟 Características MCP
+### Test Categories
 
-### Protocolo de Contexto
-- Integración con el ecosistema MCP
-- Interfaz estandarizada para operaciones de Excel
-- Manejo de errores consistente
+- **Unit Tests**: Individual function and method testing
+- **Integration Tests**: Component interaction testing
+- **Excel Tests**: Excel file manipulation testing
+- **MCP Tests**: MCP protocol compliance testing
 
-### Seguridad
-- Validación de rutas de archivos
-- Manejo seguro de memoria
-- Protección contra inyección de fórmulas
+### Coverage Requirements
 
-## 📄 Licencia
+- Minimum 20% test coverage (configured in pyproject.toml)
+- Coverage reports generated in `htmlcov/` directory
+- XML coverage reports for CI/CD integration
 
-Este proyecto está bajo la licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
+## 🔧 Development
 
-## 🤝 Contribuir
+### Development Setup
 
-Las contribuciones son bienvenidas. Por favor, lea las [pautas de contribución](CONTRIBUTING.md) antes de enviar cambios.
+```bash
+# Install development dependencies
+uv sync --dev
 
-### 📋 Pautas de Contribución
+# Install pre-commit hooks
+uv run pre-commit install
 
-1. Haz un fork del repositorio
-2. Crea una rama para tu característica (`git checkout -b feature/AmazingFeature`)
-3. Haz commit de tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Haz push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+# Run quality checks
+uv run pre-commit run --all-files
+```
 
-### 📋 Pautas de Código
+### Code Quality Standards
 
-- Sigue el estilo de código existente
-- Incluye pruebas para nuevas funcionalidades
-- Actualiza la documentación según sea necesario
-- Asegúrate de que todas las pruebas pasen
+```bash
+# Format code with Ruff
+uv run ruff format
 
-## 🐛 Reportar Errores
+# Check code style
+uv run ruff check
 
-Si encuentras algún error o tienes sugerencias, por favor [abre un issue](https://github.com/tu-usuario/mcp_excel_office/issues) en GitHub.
+# Type checking with MyPy
+uv run mypy src/
 
-## 📄 Licencia
+# Run all quality checks
+uv run pre-commit run --all-files
+```
 
-Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más información.
+### Development Commands
+
+- **`uv sync --dev`**: Install development dependencies
+- **`uv run ruff check`**: Code style and quality checks
+- **`uv run mypy src/`**: Type checking with strict configuration
+- **`uv run pytest`**: Run test suite with coverage
+- **`uv build`**: Build distributable package
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these guidelines:
+
+### Getting Started
+
+1. **Fork the repository** and clone your fork
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Install development dependencies**: `uv sync --dev`
+4. **Install pre-commit hooks**: `uv run pre-commit install`
+
+### Development Workflow
+
+1. **Make your changes** following the code standards
+2. **Add tests** for new functionality
+3. **Run quality checks**: `uv run pre-commit run --all-files`
+4. **Ensure tests pass**: `uv run pytest`
+5. **Update documentation** as needed
+
+### Code Standards
+
+- **Python 3.11+** with complete type hints
+- **88-character line limit** (enforced by Ruff)
+- **Double quotes, snake_case naming**
+- **MyPy strict mode compliance**
+- **Minimum 20% test coverage**
+
+### Submitting Changes
+
+1. **Commit your changes**: `git commit -m 'Add amazing feature'`
+2. **Push to your fork**: `git push origin feature/amazing-feature`
+3. **Open a Pull Request** with a clear description
+
+## 🐛 Issues and Support
+
+- **Bug Reports**: [Open an issue](https://github.com/LuiccianDev/mcp_excel_office/issues) with detailed reproduction steps
+- **Feature Requests**: Describe your use case and proposed solution
+- **Questions**: Check existing issues or start a discussion
+
+## 📄 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
 <div align="center">
-  <p>Creado con por LuiccianDev</p>
+  <p><strong>MCP Excel Office Server</strong></p>
+  <p>Empowering AI assistants with comprehensive Excel manipulation capabilities</p>
   <p>
-    <a href="https://github.com/tu-usuario/mcp_excel_office">GitHub</a> |
-    <a href="https://modelcontextprotocol.io">MCP</a> |
-    <a href="https://pypi.org/project/mcp-excel">PyPI</a>
+    <a href="https://github.com/LuiccianDev/mcp_excel_office">🏠 GitHub</a> •
+    <a href="https://modelcontextprotocol.io">🔗 MCP Protocol</a> •
+    <a href="https://github.com/LuiccianDev/mcp_excel_office/blob/main/TOOLS.md">📚 Tool Documentation</a>
   </p>
+  <p><em>Created with ❤️ by LuiccianDev</em></p>
 </div>
