@@ -3,6 +3,7 @@
 This document provides detailed information about all available tools in the Excel MCP server, organized by functional categories.
 
 ## Table of Contents
+
 - [Workbook Operations](#workbook-operations)
 - [Worksheet Operations](#worksheet-operations)
 - [Data Operations](#data-operations)

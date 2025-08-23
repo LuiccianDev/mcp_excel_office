@@ -100,6 +100,7 @@ The MCP Excel Office Server supports three deployment modes to fit different wor
 **Best for**: Integrated DXT ecosystem users who want seamless configuration management.
 
 1. **Package the project**:
+
    ```bash
    dxt pack
    ```
@@ -109,6 +110,28 @@ The MCP Excel Office Server supports three deployment modes to fit different wor
    - `postgres_connection_string`: PostgreSQL database connection (marked as sensitive)
 
 3. **Usage**: Once packaged, the tool integrates directly with DXT-compatible clients with automatic user configuration variable substitution.
+
+4. **Server Configuration**: The DXT package includes a default server configuration in the manifest.json:
+
+```json
+"server": {
+    "type": "python",
+    "entry_point": "src/mcp_excel/server.py",
+    "mcp_config": {
+      "command": "python",
+      "args": [
+        "${__dirname}/src/mcp_excel/server.py"
+      ],
+      "env": {
+        "DIRECTORY": "${user_config.directory}",
+        "PYTHONPATH": "${__dirname}/src",
+        "POSTGRES_CONNECTION_STRING": "${user_config.postgres_connection_string}"
+      }
+    }
+}
+```
+
+for more details see [DXT Package Documentation](https://github.com/anthropics/dxt).
 
 ### Traditional MCP Server
 
@@ -123,8 +146,8 @@ Add to your MCP configuration file (e.g., Claude Desktop's `mcp_config.json`):
       "command": "uv",
       "args": ["run", "mcp_excel_office"],
       "env": {
-        "DIRECTORY": "${user_config.directory}",
-        "POSTGRES_CONNECTION_STRING": "${user_config.postgres_connection_string}"
+        "DIRECTORY": "user/to/path/directory",
+        "POSTGRES_CONNECTION_STRING": "postgres_connection_string"
       }
     }
   }
@@ -132,6 +155,7 @@ Add to your MCP configuration file (e.g., Claude Desktop's `mcp_config.json`):
 ```
 
 **Alternative configuration with CLI arguments**:
+
 ```json
 {
   "mcpServers": {
@@ -139,8 +163,8 @@ Add to your MCP configuration file (e.g., Claude Desktop's `mcp_config.json`):
       "command": "uv",
       "args": [
         "run", "-m", "mcp_excel",
-        "--path", "${user_config.directory}",
-        "--postgres", "${user_config.postgres}"
+        "--path", "user/to/path/directory",
+        "--postgres", "postgres_connection_string"
       ]
     }
   }
@@ -162,7 +186,10 @@ python -m mcp_excel --path "/path/to/files" --postgres "postgresql://user:pass@l
 
 # Using UV
 uv run mcp_excel_office --help
+
 ```
+
+for more details see [DXT Package Documentation](https://github.com/anthropics/dxt).
 
 ## 🔧 Configuration
 
@@ -174,11 +201,11 @@ uv run mcp_excel_office --help
 ### Configuration Validation
 
 The server validates all configuration on startup and provides clear error messages for:
+
 - Missing required environment variables
 - Invalid directory paths
 - Malformed database connection strings
 - File access permissions
-
 
 ## 🚀 Quick Start
 
@@ -221,31 +248,37 @@ python -m mcp_excel --help
 The server provides comprehensive Excel manipulation through these MCP tool categories:
 
 ### 📊 Data Operations
+
 - **`write_data_to_excel`**: Write data to spreadsheet ranges with type validation
 - **`read_data_from_excel`**: Read data from spreadsheet ranges with flexible formatting
 - **`append_data_to_excel`**: Append data to existing sheets with automatic range detection
 
 ### 📋 Workbook Management
+
 - **`create_workbook`**: Create new Excel workbooks with customizable settings
 - **`create_worksheet`**: Add worksheets to existing workbooks with naming validation
 - **`get_workbook_metadata`**: Retrieve comprehensive workbook information and statistics
 
 ### 🎨 Formatting Operations
+
 - **`format_range`**: Apply comprehensive cell formatting (fonts, colors, borders, alignment)
 - **`set_column_width`**: Adjust column dimensions with validation
 - **`set_row_height`**: Adjust row dimensions with validation
 
 ### 🧮 Formula Operations
+
 - **`apply_formula`**: Apply Excel formulas to cells or ranges with validation
 - **`validate_formula`**: Validate formula syntax before application
 - **`calculate_range`**: Perform calculations on data ranges
 
 ### 📈 Graphics and Visualization
+
 - **`create_chart`**: Generate various chart types (bar, line, pie, scatter, etc.)
 - **`create_pivot_table`**: Create pivot tables from data with customizable aggregations
 - **`add_image`**: Insert images into worksheets with positioning control
 
 ### 🗄️ Database Integration
+
 - **`import_from_database`**: Import PostgreSQL data directly into Excel with query support
 - **`export_to_database`**: Export Excel data to PostgreSQL with table creation
 - **`execute_query_to_excel`**: Execute SQL queries and write results to Excel
@@ -410,5 +443,5 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
     <a href="https://modelcontextprotocol.io">🔗 MCP Protocol</a> •
     <a href="https://github.com/LuiccianDev/mcp_excel_office/blob/main/TOOLS.md">📚 Tool Documentation</a>
   </p>
-  <p><em>Created with ❤️ by LuiccianDev</em></p>
+  <p><em>Created with by LuiccianDev</em></p>
 </div>
