@@ -311,10 +311,6 @@ mcp_excel_office/
 │   ├── test_formulas_excel_tools.py  # Formula tests
 │   ├── test_graphics_tools.py # Graphics tests
 │   └── test_db_tools.py       # Database tests
-├── documents/                 # Test Excel files
-├── .kiro/                     # Kiro configuration
-│   ├── specs/                 # Feature specifications
-│   └── steering/              # Development guidelines
 ├── pyproject.toml             # Project configuration
 ├── manifest.json              # DXT package configuration
 ├── TOOLS.md                   # Detailed tool documentation
