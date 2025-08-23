@@ -1,9 +1,12 @@
 repos:
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
+  - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.12.9
     hooks:
       - id: ruff
-        args: ["--fix"]  # Usa config del pyproject.toml
+        args: ["--fix"]  # Uses config from pyproject.toml
+        language_version: python3.11
+        files: ^src/.*\.py$
+      - id: ruff-format
         language_version: python3.11
         files: ^src/.*\.py$
 
@@ -11,7 +14,7 @@ repos:
     rev: v1.17.1
     hooks:
       - id: mypy
-        additional_dependencies: ["types-openpyxl", "types-requests"]
+        additional_dependencies: ["types-openpyxl", "types-requests", "types-psycopg2"]
         language_version: python3.11
         files: ^src/.*\.py$
 
@@ -21,4 +24,6 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-json
-      - id: trailing-whitespace # Puedes ajustar esto
+      - id: trailing-whitespace
+      - id: check-merge-conflict
+      - id: check-added-large-files
