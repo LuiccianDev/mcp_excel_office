@@ -1,6 +1,6 @@
 {
   "dxt_version": "0.1",
-  "name": "excelOffice",
+  "name": "mcp_excel",
   "version": "1.0.0",
   "description": "Excel server for processing Excel files",
   "author": {
