@@ -1,112 +1,68 @@
-# Python
-__pycache__/
-*.py[oc]
-*.so
-.Python
-*.pyd
-*.pyc
-*.pyo
-*.pdb
-*.pyw
-*.pyz
-*.pyx
-*.pyd
-
 # Build and distribution
 build/
 develop-eggs/
 dist/
 downloads/
-eggs/
 .eggs/
+eggs/
 lib/
 lib64/
 parts/
 sdist/
 var/
 wheels/
-*.egg-info/
-.installed.cfg
 *.egg
+*.egg-info/
+*.installed.cfg
 *.manifest
 *.spec
 
-# Virtual Environment
-.venv
-venv/
-ENV/
-.env
-.env.local
-.env.*.local
-.env.example
+# Configuration files
+.markdownlint.json
+.pre-commit-config.yaml
+pytest.ini
+ruff.toml
+mypy.ini
 
-# IDE and Editor
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-*.sublime-*
-*.code-workspace
-.project
-.pydevproject
-*.sublime-project
-*.sublime-workspace
+# Database
+*.db
+*.sql
+*.sqlite3
+*.sqlite3-journal
 
-# Testing and coverage
-.coverage
-.coverage.*
-htmlcov/
-.pytest_cache/
-.tox/
-.nox/
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.mypy_cache/
-.ruff_cache/
-
-# Type checkers and linters
-.dmypy.json
-dmypy.json
-.pyre/
-.pytype/
-.ruff_cache/
+# Development tools
+.ropeproject/
+.spyderproject
+.spyproject
 
 # Documentation
 docs/_build/
-/site
+site/
 
-# Database
-*.sqlite3
-*.sqlite3-journal
-*.db
-*.sql
+# IDE and Editor
+.idea/
+.project
+.pydevproject
+.vscode/
+*.code-workspace
+*.sublime-*
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Jupyter Notebook
+.ipynb_checkpoints
 
 # Logs and local settings
 *.log
 local_settings.py
 
-# Project specific
-.kiro/
-tests/
-.windsurf/
-documents/
-GEMINI.md
-WARP.md
-
-# Configuration files
-pytest.ini
-.markdownlint.json
-.pre-commit-config.yaml
-ruff.toml
-mypy.ini
-
-# Jupyter Notebook
-.ipynb_checkpoints
+# Misc
+celerybeat-schedule
+*.sage.py
+cython_debug/
 
 # OS generated files
 .DS_Store
@@ -117,6 +73,64 @@ mypy.ini
 ehthumbs.db
 Thumbs.db
 
+# Project specific
+.kiro/
+documents/
+GEMINI.md
+tests/
+WARP.md
+.windsurf/
+ruff.toml
+pytest.ini
+mypy.ini
+.pre-commit-config.yaml
+
+# Python
+.Python
+__pycache__/
+*.pdb
+*.pyc
+*.py,cover
+*.pydevproject
+*.pyd
+*.pyw
+*.pyx
+*.pyz
+*.so
+
+# Testing and coverage
+.cache
+.coverage
+.coverage.*
+.cover
+.htmlcov/
+.hypothesis/
+.mypy_cache/
+.nox/
+.pytest_cache/
+.ruff_cache/
+.tox/
+nosetests.xml
+coverage.xml
+
+# Type checkers and linters
+.dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+dmypy.json
+htmlcov/
+manifest.json
+
+# Virtual Environment
+.env
+.env.*
+.env.example
+.env.local
+.venv
+ENV/
+venv/
+
 # Windows Installer files
 *.cab
 *.msi
@@ -126,14 +140,5 @@ Thumbs.db
 # Windows shortcuts
 *.lnk
 
-# Development tools
-.ropeproject/
-.spyderproject
-.spyproject
-
-# Misc
-celerybeat-schedule
-*.sage.py
-cython_debug/
-
+# Project specific (add any project-specific patterns below)
 # Project specific (add any project-specific patterns below)
