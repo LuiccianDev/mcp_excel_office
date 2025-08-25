@@ -8,7 +8,7 @@
     "**/.env": true,
     "**/checkpoints": true,
     ".ruff_cache": true,
-    ".venv": false,
+    ".venv": true,
     ".mypy_cache": true,
     ".pytest_cache": true,
     "htmlcov": true,
@@ -16,7 +16,9 @@
     ".coverage": true,
     ".coverage/**": true,
     "coverage.xml": true,
-    "coverage.xml/**": true
+    "coverage.xml/**": true,
+    ".kiro": true,
+    ".windsurf": true
   },
   "markdownlint.config": {
     "default": true,
