@@ -21,7 +21,7 @@ ENV/
 env.bak/
 .uv/
 .python-version
-
+*.dxt
 # IDEs y editores
 .ruff_cache/
 .idea/
