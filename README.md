@@ -24,7 +24,6 @@ A comprehensive MCP (Model Context Protocol) server that provides AI assistants 
   - [Traditional MCP Server](#traditional-mcp-server)
   - [Standalone CLI](#standalone-cli)
 - [🔧 Configuration](#-configuration)
-- [🚀 Quick Start](#-quick-start)
 - [📚 Available Tools](#-available-tools)
 - [🧪 Testing](#-testing)
 - [🧩 Project Structure](#-project-structure)
@@ -50,6 +49,7 @@ A comprehensive MCP (Model Context Protocol) server that provides AI assistants 
 - **Python 3.11+**: Modern Python with type hints support
 - **UV Package Manager**: [Install UV](https://docs.astral.sh/uv/getting-started/installation/) (recommended) or use pip
 - **Git**: For cloning the repository
+- **Desktop Extensions (DXT)** : for create packages .dxt for claude desktop [Install DXT](https://github.com/anthropics/dxt)
 
 ### 🔄 Clone the Repository
 
@@ -111,25 +111,7 @@ The MCP Excel Office Server supports three deployment modes to fit different wor
 
 3. **Usage**: Once packaged, the tool integrates directly with DXT-compatible clients with automatic user configuration variable substitution.
 
-4. **Server Configuration**: The DXT package includes a default server configuration in the manifest.json:
-
-```json
-"server": {
-    "type": "python",
-    "entry_point": "src/mcp_excel/server.py",
-    "mcp_config": {
-      "command": "python",
-      "args": [
-        "${__dirname}/src/mcp_excel/server.py"
-      ],
-      "env": {
-        "DIRECTORY": "${user_config.directory}",
-        "PYTHONPATH": "${__dirname}/src",
-        "POSTGRES_CONNECTION_STRING": "${user_config.postgres_connection_string}"
-      }
-    }
-}
-```
+4. **Server Configuration**: this proyect include the files [manifest.json](./manifest.json)  for building package .dxt
 
 for more details see [DXT Package Documentation](https://github.com/anthropics/dxt).
 
@@ -139,12 +121,21 @@ for more details see [DXT Package Documentation](https://github.com/anthropics/d
 
 Add to your MCP configuration file (e.g., Claude Desktop's `mcp_config.json`):
 
+```bash
+# create packages
+uv build
+#install packages
+pip install dist/archivo*.whl
+```
+
+The next steps is configuractiosn en mcp
+
 ```json
 {
   "mcpServers": {
     "mcp_excel": {
       "command": "uv",
-      "args": ["run", "mcp_excel_office"],
+      "args": ["run", "mcp_excel"],
       "env": {
         "DIRECTORY": "user/to/path/directory",
         "POSTGRES_CONNECTION_STRING": "postgres_connection_string"
@@ -189,8 +180,6 @@ uv run mcp_excel_office --help
 
 ```
 
-for more details see [DXT Package Documentation](https://github.com/anthropics/dxt).
-
 ## 🔧 Configuration
 
 ### Environment Variables
@@ -207,83 +196,9 @@ The server validates all configuration on startup and provides clear error messa
 - Malformed database connection strings
 - File access permissions
 
-## 🚀 Quick Start
-
-### 1. Basic Setup
-
-```bash
-# Clone and install
-git clone https://github.com/LuiccianDev/mcp_excel_office.git
-cd mcp_excel_office
-uv sync --dev
-
-# Set up environment
-export DIRECTORY="/path/to/your/excel/files"
-export POSTGRES_CONNECTION_STRING="postgresql://user:pass@localhost/db"  # Optional
-```
-
-### 2. Test the Installation
-
-```bash
-# Run tests to verify installation
-uv run pytest
-
-# Check code quality
-uv run ruff check
-uv run mypy src/
-```
-
-### 3. Start the MCP Server
-
-```bash
-# Start MCP server
-uv run mcp_excel_office
-
-# Or use CLI mode
-python -m mcp_excel --help
-```
-
 ## 📚 Available Tools
 
-The server provides comprehensive Excel manipulation through these MCP tool categories:
-
-### 📊 Data Operations
-
-- **`write_data_to_excel`**: Write data to spreadsheet ranges with type validation
-- **`read_data_from_excel`**: Read data from spreadsheet ranges with flexible formatting
-- **`append_data_to_excel`**: Append data to existing sheets with automatic range detection
-
-### 📋 Workbook Management
-
-- **`create_workbook`**: Create new Excel workbooks with customizable settings
-- **`create_worksheet`**: Add worksheets to existing workbooks with naming validation
-- **`get_workbook_metadata`**: Retrieve comprehensive workbook information and statistics
-
-### 🎨 Formatting Operations
-
-- **`format_range`**: Apply comprehensive cell formatting (fonts, colors, borders, alignment)
-- **`set_column_width`**: Adjust column dimensions with validation
-- **`set_row_height`**: Adjust row dimensions with validation
-
-### 🧮 Formula Operations
-
-- **`apply_formula`**: Apply Excel formulas to cells or ranges with validation
-- **`validate_formula`**: Validate formula syntax before application
-- **`calculate_range`**: Perform calculations on data ranges
-
-### 📈 Graphics and Visualization
-
-- **`create_chart`**: Generate various chart types (bar, line, pie, scatter, etc.)
-- **`create_pivot_table`**: Create pivot tables from data with customizable aggregations
-- **`add_image`**: Insert images into worksheets with positioning control
-
-### 🗄️ Database Integration
-
-- **`import_from_database`**: Import PostgreSQL data directly into Excel with query support
-- **`export_to_database`**: Export Excel data to PostgreSQL with table creation
-- **`execute_query_to_excel`**: Execute SQL queries and write results to Excel
-
-For detailed documentation of all tools, parameters, and examples, see [TOOLS.md](TOOLS.md).
+Todas las herramientas disponibles para manipulación de Excel, operaciones de datos, formato, fórmulas, gráficos y base de datos están documentadas en detalle en el archivo [`TOOLS.md`](TOOLS.md). Consulta ese archivo para ver la lista completa de herramientas, sus parámetros y ejemplos de uso.
 
 ## 🧩 Project Structure
 
@@ -324,28 +239,7 @@ mcp_excel_office/
 ```bash
 # Run all tests
 uv run pytest
-
-# Run with coverage report
-uv run pytest --cov=src/mcp_excel/tools --cov-report=html
-
-# Run specific test categories
-uv run pytest -m unit          # Unit tests only
-uv run pytest -m integration   # Integration tests only
-uv run pytest -m excel         # Excel-specific tests
 ```
-
-### Test Categories
-
-- **Unit Tests**: Individual function and method testing
-- **Integration Tests**: Component interaction testing
-- **Excel Tests**: Excel file manipulation testing
-- **MCP Tests**: MCP protocol compliance testing
-
-### Coverage Requirements
-
-- Minimum 20% test coverage (configured in pyproject.toml)
-- Coverage reports generated in `htmlcov/` directory
-- XML coverage reports for CI/CD integration
 
 ## 🔧 Development
 
@@ -389,35 +283,6 @@ uv run pre-commit run --all-files
 ## 🤝 Contributing
 
 We welcome contributions! Please follow these guidelines:
-
-### Getting Started
-
-1. **Fork the repository** and clone your fork
-2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
-3. **Install development dependencies**: `uv sync --dev`
-4. **Install pre-commit hooks**: `uv run pre-commit install`
-
-### Development Workflow
-
-1. **Make your changes** following the code standards
-2. **Add tests** for new functionality
-3. **Run quality checks**: `uv run pre-commit run --all-files`
-4. **Ensure tests pass**: `uv run pytest`
-5. **Update documentation** as needed
-
-### Code Standards
-
-- **Python 3.11+** with complete type hints
-- **88-character line limit** (enforced by Ruff)
-- **Double quotes, snake_case naming**
-- **MyPy strict mode compliance**
-- **Minimum 20% test coverage**
-
-### Submitting Changes
-
-1. **Commit your changes**: `git commit -m 'Add amazing feature'`
-2. **Push to your fork**: `git push origin feature/amazing-feature`
-3. **Open a Pull Request** with a clear description
 
 ## 🐛 Issues and Support
 
