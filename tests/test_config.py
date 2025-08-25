@@ -88,7 +88,7 @@ class TestFileConfig:
             with patch('pathlib.Path.cwd', return_value=Path(temp_dir)):
                 config = FileConfig()
                 assert config.max_file_size == 100 * 1024 * 1024
-                assert config.allowed_extensions == ['.xlsx', '.xls']
+                assert config.allowed_extensions == ['.xlsx']
 
 
 class TestMCPExcelConfig:
