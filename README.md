@@ -180,6 +180,12 @@ uv run mcp_excel_office --help
 
 ```
 
+## 🐳 Instalación con Docker
+
+Puedes instalar y ejecutar el servidor MCP Excel Office fácilmente usando Docker. Esto garantiza un entorno aislado y reproducible.
+
+Para más detalles y opciones avanzadas de configuración con Docker, consulta el archivo [`Docker.md`](./Docker.md).
+
 ## 🔧 Configuration
 
 ### Environment Variables
