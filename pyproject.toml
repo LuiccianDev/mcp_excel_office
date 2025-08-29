@@ -46,10 +46,10 @@ test = [
 ]
 
 [project.scripts]
-mcp_excel_office = "mcp_excel.__main__:main"
+mcp_excel = "mcp_excel.__main__:main"
 
 [project.entry-points."mcp.servers"]
-mcp_excel_office = "mcp_excel.__main__:main"
+mcp_excel = "mcp_excel.__main__:main"
 
 
 [tool.hatch.build.targets.wheel]
