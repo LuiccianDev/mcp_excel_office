@@ -1,7 +1,7 @@
 from typing import Any
 
 from mcp_excel.core.data import read_excel_range
-from mcp_excel.exceptions.exceptions import DataError, ValidationError
+from mcp_excel.tools.exceptions import DataError, ValidationError
 from mcp_excel.utils.file_utils import ensure_xlsx_extension, validate_file_access
 
 
