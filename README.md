@@ -223,8 +223,7 @@ mcp_excel_office/
 │   │   ├── graphics_tools.py  # Charts and visualizations
 │   │   └── db_tools.py        # Database integration
 │   ├── core/                  # Core functionality
-│   ├── utils/                 # Utility functions
-│   └── exceptions/            # Custom exceptions
+│   └── utils/                 # Utility functions
 ├── tests/                     # Test suite
 │   ├── test_content_tools.py  # Content operations tests
 │   ├── test_excel_tools.py    # Basic operations tests
