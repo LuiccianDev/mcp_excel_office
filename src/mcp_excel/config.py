@@ -6,11 +6,13 @@ deployment modes (DXT, traditional MCP, standalone CLI) with proper validation,
 error handling, and user_config variable substitution.
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import re
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -45,7 +47,7 @@ class DatabaseConfig(BaseModel):
     @field_validator("connection_string")  # type: ignore[misc]
     @classmethod
     def validate_connection_string(
-        cls: type["DatabaseConfig"], v: str | None
+        cls: type[DatabaseConfig], v: str | None
     ) -> str | None:
         """Validate PostgreSQL connection string format."""
         if v is None:
@@ -95,7 +97,7 @@ class FileConfig(BaseModel):
 
     @field_validator("directory")  # type: ignore[misc]
     @classmethod
-    def validate_directory(cls: type["FileConfig"], v: str) -> str:
+    def validate_directory(cls: type[FileConfig], v: str) -> str:
         """Validate and normalize directory path."""
         if not isinstance(v, str):
             raise ValueError("Directory must be a string")
@@ -143,7 +145,7 @@ class FileConfig(BaseModel):
 
     @field_validator("allowed_extensions")  # type: ignore[misc]
     @classmethod
-    def validate_extensions(cls: type["FileConfig"], v: list[str]) -> list[str]:
+    def validate_extensions(cls: type[FileConfig], v: list[str]) -> list[str]:
         """Validate file extensions."""
         if not isinstance(v, list):
             raise ValueError("Allowed extensions must be a list")
@@ -228,8 +230,7 @@ class MCPExcelConfig(BaseSettings):
 
                     # Try to get value from environment variables
                     # Convert user_config key to environment variable format
-                    env_key = config_key.upper()
-                    env_value = os.environ.get(env_key)
+                    env_value = os.environ.get(config_key.upper())
 
                     if env_value:
                         # Replace the user_config variable with actual value
@@ -239,25 +240,24 @@ class MCPExcelConfig(BaseSettings):
                         )
                         processed[key] = processed_value
                         logger.info(f"Resolved user_config.{config_key} = {env_value}")
-                    else:
+
                         # For DXT compatibility, check if we're in a DXT environment
                         # and use fallback values
-                        if config_key == "directory":
-                            # Use current working directory as fallback for DXT
-                            fallback_dir = os.getcwd()
-                            processed_value = value.replace(
-                                f"${{user_config.{config_key}}}", fallback_dir
-                            )
-                            processed[key] = processed_value
-                            logger.warning(
-                                f"Could not resolve user_config.{config_key}, using fallback: {fallback_dir}"
-                            )
-                        else:
-                            # Set to None if no environment variable found
-                            processed[key] = None  # type: ignore[assignment]
-                            logger.warning(
-                                f"Could not resolve user_config.{config_key}, setting to None"
-                            )
+                    elif config_key == "directory":
+                        # Use current working directory as fallback for DXT
+                        fallback_dir = os.getcwd()
+                        processed[key] = value.replace(
+                            f"${{user_config.{config_key}}}", fallback_dir
+                        )
+                        logger.warning(
+                            f"Could not resolve user_config.{config_key}, using fallback: {fallback_dir}"
+                        )
+                    else:
+                        # Set to None if no environment variable found
+                        processed[key] = None  # type: ignore[assignment]
+                        logger.warning(
+                            f"Could not resolve user_config.{config_key}, setting to None"
+                        )
                 else:
                     processed[key] = value
             else:
@@ -333,10 +333,11 @@ class ConfigurationManager:
     of access for all configuration needs across the application.
     """
 
-    _instance: Optional["ConfigurationManager"] = None
+    _instance: ConfigurationManager | None = None
+
     _config: MCPExcelConfig | None = None
 
-    def __new__(cls) -> "ConfigurationManager":
+    def __new__(cls) -> ConfigurationManager:
         """Singleton pattern to ensure single configuration instance."""
         if cls._instance is None:
             cls._instance = super().__new__(cls)
