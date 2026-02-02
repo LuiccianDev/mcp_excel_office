@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
-from mcp_excel.tools.exceptions import ValidationError
+from mcp_excel.exceptions.exception_tools import ValidationError
 from mcp_excel.tools import format_tools
 
 

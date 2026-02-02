@@ -8,10 +8,8 @@ import re
 from pathlib import Path
 from typing import Any, Final
 
-from openpyxl.worksheet.worksheet import Worksheet
-
-from mcp_excel.core.exceptions import FormulaError, ValidationError
 from mcp_excel.core.workbook import get_or_create_workbook
+from mcp_excel.exceptions.exception_core import FormulaError, ValidationError
 from mcp_excel.utils.cell_utils import validate_cell_reference
 from mcp_excel.utils.validation_utils import validate_formula
 
@@ -203,16 +201,29 @@ def apply_formula(
 
     # Load workbook and validate sheet
     workbook = get_or_create_workbook(str(filename))
-    _validate_worksheet_exists(workbook, sheet_name)
+    if sheet_name not in workbook.sheetnames:
+        raise ValidationError(f"Sheet '{sheet_name}' not found")
     worksheet = workbook[sheet_name]
 
-    # Process and validate formula
-    formula = _ensure_formula_format(formula)
-    _validate_formula_syntax(formula)
+    # Process and validate formula - ensure formula starts with '='
+    formula = formula if formula.startswith("=") else f"={formula}"
 
-    # Apply formula and save
-    _apply_formula_to_cell(worksheet, cell, formula)
-    _save_workbook(workbook, str(filename))
+    # Validate formula syntax
+    is_valid, message = validate_formula(formula)
+    if not is_valid:
+        raise FormulaError(f"Invalid formula syntax: {message}")
+
+    # Apply formula to the specified cell in the worksheet
+    try:
+        worksheet[cell].value = formula
+    except Exception as e:
+        raise FormulaError(f"Failed to apply formula to cell: {str(e)}") from e
+
+    # Save the workbook to the specified file
+    try:
+        workbook.save(str(filename))
+    except Exception as e:
+        raise FormulaError(f"Failed to save workbook: {str(e)}") from e
 
     # Return success result
     result = {
@@ -222,37 +233,3 @@ def apply_formula(
         "formula": formula,
     }
     return result
-
-
-def _validate_worksheet_exists(workbook: Any, sheet_name: str) -> None:
-    """Validate if the specified worksheet exists in the workbook."""
-    if sheet_name not in workbook.sheetnames:
-        raise ValidationError(f"Sheet '{sheet_name}' not found")
-
-
-def _ensure_formula_format(formula: str) -> str:
-    """Ensure the formula starts with '='."""
-    return formula if formula.startswith(FORMULA_PREFIX) else f"={formula}"
-
-
-def _validate_formula_syntax(formula: str) -> None:
-    """Validate the syntax of the formula."""
-    is_valid, message = validate_formula(formula)
-    if not is_valid:
-        raise FormulaError(f"Invalid formula syntax: {message}")
-
-
-def _apply_formula_to_cell(worksheet: Worksheet, cell_ref: str, formula: str) -> None:
-    """Apply formula to the specified cell in the worksheet."""
-    try:
-        worksheet[cell_ref].value = formula
-    except Exception as e:
-        raise FormulaError(f"Failed to apply formula to cell: {str(e)}") from e
-
-
-def _save_workbook(workbook: Any, filename: str) -> None:
-    """Save the workbook to the specified file."""
-    try:
-        workbook.save(filename)
-    except Exception as e:
-        raise FormulaError(f"Failed to save workbook: {str(e)}") from e

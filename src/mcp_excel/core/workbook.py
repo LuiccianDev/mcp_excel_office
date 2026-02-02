@@ -7,13 +7,13 @@ following the Model Context Protocol (MCP) standards.
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import Any
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
-from mcp_excel.core.exceptions import (
+from mcp_excel.exceptions.exception_core import (
     SheetExistsError,
     SheetNotFoundError,
     ValidationError,
@@ -22,32 +22,9 @@ from mcp_excel.core.exceptions import (
 )
 
 
-# Type aliases
-WorkbookResult = dict[str, Any]  # Type alias for workbook operation results
-SheetName = str  # Type alias for Excel sheet names
-
-
-class WorkbookInfo(TypedDict, total=False):
-    """Type definition for workbook information dictionary.
-
-    Attributes:
-        filename: Name of the Excel file.
-        sheets: List of sheet names in the workbook.
-        size: Size of the file in bytes.
-        modified: Timestamp of last modification (seconds since epoch).
-        used_ranges: Optional dictionary mapping sheet names to their used ranges.
-    """
-
-    filename: str
-    sheets: list[SheetName]
-    size: int
-    modified: float
-    used_ranges: dict[SheetName, str] | None
-
-
 def create_workbook(
     filename: str | Path, sheet_name: str = "Sheet1", data_only: bool = False
-) -> WorkbookResult:
+) -> dict[str, Any]:
     """Create a new Excel workbook with an optional custom sheet name.
 
     Args:
@@ -155,7 +132,7 @@ def _create_new_sheet(workbook: Workbook, sheet_name: str) -> None:
 
 
 # * Create sheet
-def create_sheet(filename: str | Path, sheet_name: str) -> WorkbookResult:
+def create_sheet(filename: str | Path, sheet_name: str) -> dict[str, Any]:
     """Create a new sheet in the specified Excel workbook.
 
     If the specified file doesn't exist, a new workbook will be created with the sheet.
@@ -213,7 +190,7 @@ def create_sheet(filename: str | Path, sheet_name: str) -> WorkbookResult:
 # * Get workbook info
 def get_workbook_info(
     filename: str | Path, include_ranges: bool = False
-) -> WorkbookInfo:
+) -> dict[str, Any]:
     """Get metadata about an Excel workbook including sheets, file info, and ranges.
 
     This function provides comprehensive information about an Excel workbook,
@@ -246,7 +223,7 @@ def get_workbook_info(
         wb = load_workbook(str(path), read_only=True, data_only=True)
 
         # Basic file information
-        info: WorkbookInfo = {
+        info: dict[str, Any] = {
             "filename": path.name,
             "sheets": wb.sheetnames,
             "size": path.stat().st_size,

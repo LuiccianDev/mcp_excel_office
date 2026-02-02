@@ -1,4 +1,8 @@
-"""Custom exceptions for the core module."""
+"""Core exceptions for the MCP Excel Office core module.
+
+These exceptions are used by the core layer (core/*.py) for handling
+errors related to workbooks, sheets, data, formulas, and validation.
+"""
 
 
 class CoreError(Exception):
@@ -29,7 +33,7 @@ class WorkbookNotFoundError(WorkbookError):
 # * --- Sheet Exceptions ---
 class SheetError(WorkbookError):
     """Base exception for sheet-related errors.
-    Used in core/sheet.py
+    Used in core/workbook.py, core/data.py
     """
 
     pass
@@ -37,7 +41,7 @@ class SheetError(WorkbookError):
 
 class SheetNotFoundError(SheetError):
     """Raised when a specified sheet is not found.
-    Used in core/sheet.py
+    Used in core/workbook.py, core/data.py
     """
 
     pass
@@ -45,7 +49,7 @@ class SheetNotFoundError(SheetError):
 
 class SheetExistsError(SheetError):
     """Raised when trying to create a sheet that already exists.
-    Used in core/sheet.py
+    Used in core/workbook.py
     """
 
     pass
@@ -53,7 +57,7 @@ class SheetExistsError(SheetError):
 
 class WorksheetError(CoreError):
     """Raised when a worksheet operation fails.
-    Used in core/worksheet.py
+    Used in core/workbook.py
     """
 
     pass
@@ -103,7 +107,7 @@ class RangeError(DataError):
 # * --- Formula Exceptions ---
 class FormulaError(CoreError):
     """Raised when there's an error with formula operations.
-    Used in core/formula.py
+    Used in core/calculations.py
     """
 
     pass
@@ -121,7 +125,7 @@ class PivotError(CoreError):
 # * --- Validation Exceptions ---
 class ValidationError(CoreError):
     """Raised when validation fails.
-    Used in core/validation.py
+    Used across core/*.py files.
     """
 
     pass

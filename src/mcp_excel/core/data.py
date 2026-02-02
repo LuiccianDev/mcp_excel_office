@@ -14,7 +14,7 @@ from openpyxl.worksheet._read_only import ReadOnlyWorksheet
 from openpyxl.worksheet._write_only import WriteOnlyWorksheet
 from openpyxl.worksheet.worksheet import Worksheet
 
-from mcp_excel.core.exceptions import (
+from mcp_excel.exceptions.exception_core import (
     DataError,
     InvalidCellReferenceError,
     InvalidDataError,

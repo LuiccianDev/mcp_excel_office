@@ -10,6 +10,9 @@ def parse_cell_range(
     if end_ref:
         start_cell = cell_ref
         end_cell = end_ref
+    elif ":" in cell_ref:
+        # Handle range format like "A1:B2"
+        start_cell, end_cell = cell_ref.split(":", 1)
     else:
         start_cell = cell_ref
         end_cell = None

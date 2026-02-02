@@ -6,9 +6,33 @@ from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.table import Table, TableStyleInfo
 
-from mcp_excel.core.data import read_excel_range
-from mcp_excel.core.exceptions import PivotError, ValidationError
+from mcp_excel.core.data import SheetData, read_excel_range
+from mcp_excel.exceptions.exception_core import PivotError, ValidationError
 from mcp_excel.utils.cell_utils import parse_cell_range
+
+
+def _convert_sheetdata_to_dicts(sheet_data: SheetData) -> list[dict[str, Any]]:
+    """Convert SheetData (list of lists) to list of dictionaries.
+
+    The first row is treated as headers, and subsequent rows become dictionaries
+    with headers as keys.
+    """
+    if not sheet_data or len(sheet_data) < 1:
+        return []
+
+    headers = [
+        str(h) if h is not None else f"Column_{i}" for i, h in enumerate(sheet_data[0])
+    ]
+    result = []
+
+    for row in sheet_data[1:]:
+        record: dict[str, Any] = {}
+        for i, value in enumerate(row):
+            if i < len(headers):
+                record[headers[i]] = value
+        result.append(record)
+
+    return result
 
 
 def create_pivot_table(
@@ -38,9 +62,12 @@ def create_pivot_table(
             raise ValidationError("Invalid data range format: missing end coordinates")
         data_range_str = f"{get_column_letter(start_col)}{start_row}:{get_column_letter(end_col)}{end_row}"
         try:
-            data = read_excel_range(filename, sheet_name, start_cell, end_cell)
-            if not data:
+            sheet_data = read_excel_range(filename, sheet_name, start_cell, end_cell)
+            if not sheet_data:
                 raise PivotError("No data found in range")
+            data = _convert_sheetdata_to_dicts(sheet_data)
+            if not data:
+                raise PivotError("No data found after converting to dictionary format")
         except Exception as e:
             raise PivotError(f"Failed to read source data: {str(e)}") from e
         valid_agg_funcs = ["sum", "average", "count", "min", "max"]
@@ -205,9 +232,9 @@ def create_pivot_table(
         raise PivotError(str(e)) from e
 
 
-def _get_combinations(field_values: dict[str, list[str]]) -> list[dict]:
+def _get_combinations(field_values: dict[str, list[str]]) -> list[dict[str, str]]:
     """Get all combinations of field values."""
-    result: list[dict] = [{}]
+    result: list[dict[str, str]] = [{}]
     for field, values in list(
         field_values.items()
     ):  # Convert to list to avoid runtime changes
@@ -221,9 +248,11 @@ def _get_combinations(field_values: dict[str, list[str]]) -> list[dict]:
     return result
 
 
-def _filter_data(data: list[dict], row_filters: dict, col_filters: dict) -> list[dict]:
+def _filter_data(
+    data: list[dict[str, Any]], row_filters: dict[str, str], col_filters: dict[str, str]
+) -> list[dict[str, Any]]:
     """Filter data based on row and column filters."""
-    result = []
+    result: list[dict[str, Any]] = []
     for record in data:
         matches = True
         for field, value in row_filters.items():
@@ -239,7 +268,7 @@ def _filter_data(data: list[dict], row_filters: dict, col_filters: dict) -> list
     return result
 
 
-def _aggregate_values(data: list[dict], field: str, agg_func: str) -> float:
+def _aggregate_values(data: list[dict[str, Any]], field: str, agg_func: str) -> float:
     """Aggregate values using the specified function."""
     values = [
         record[field]

@@ -1,6 +1,13 @@
+"""Tools exceptions for the MCP Excel Office tools module.
+
+These exceptions are used by the tools layer (tools/*.py) for handling
+errors related to Excel operations at the tool/interface level.
+"""
+
+
 class ExcelMCPError(Exception):
     """Base exception for Excel MCP errors.
-    Used across src/mcp_excel/tools/*.py and server.py
+    Used across src/mcp_excel/tools/*.py
     """
 
     pass
@@ -8,7 +15,7 @@ class ExcelMCPError(Exception):
 
 class WorkbookError(ExcelMCPError):
     """Raised when workbook operations fail.
-    Used in tools/excel_tools.py, tools/content_tools.py
+    Used in tools/excel_tools.py, tools/format_tools.py
     """
 
     pass
@@ -16,7 +23,7 @@ class WorkbookError(ExcelMCPError):
 
 class SheetError(ExcelMCPError):
     """Raised when sheet operations fail.
-    Used in tools/excel_tools.py, tools/content_tools.py
+    Used in tools/format_tools.py
     """
 
     pass
@@ -32,7 +39,8 @@ class DataError(ExcelMCPError):
 
 class ValidationError(ExcelMCPError):
     """Raised when validation fails.
-    Used in tools/excel_tools.py, tools/format_tools.py, config.py
+    Used in tools/excel_tools.py, tools/format_tools.py,
+    tools/formulas_excel_tools.py, tools/graphics_tools.py, tools/content_tools.py
     """
 
     pass
