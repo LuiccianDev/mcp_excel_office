@@ -34,12 +34,14 @@ async def read_data_from_excel(
 Use this tool to retrieve data from Excel files when you need to analyze, process, or present information to users. This is ideal for data extraction, reporting, or preparing information for further processing. The tool supports reading specific ranges and can return a preview for large datasets.
 
 **When to use:**
+
 - When you need to extract data from Excel for analysis or display
 - When building reports that require Excel data
 - When preparing data for further processing by other tools
 - When users need to see the contents of specific cells or ranges
 
 **Args:**
+
 - `filename` (str): Path to the Excel file. Example: "reports/monthly_data.xlsx"
 - `sheet_name` (str): Name of the worksheet to read from. Example: "SalesData"
 - `start_cell` (str): Starting cell reference (default: "A1"). Example: "B2"
@@ -48,11 +50,13 @@ Use this tool to retrieve data from Excel files when you need to analyze, proces
 
 **Returns:**
 `dict[str, Any]` containing:
+
 - `status` (str): "success" or "error"
 - `data` (list[list[Any]]): 2D array of cell values
 - `message` (str): Operation result message
 
 **Example:**
+
 ```json
 {
   "status": "success",
@@ -80,12 +84,14 @@ async def write_data_to_excel(
 Use this tool to write or update data in Excel files. This is essential for creating reports, populating templates, or saving processed data. The tool handles data type preservation and automatically expands the worksheet as needed.
 
 **When to use:**
+
 - When creating new Excel files with data
 - When updating existing data in workbooks
 - When populating Excel templates programmatically
 - When saving processed or generated data to Excel format
 
 **Args:**
+
 - `filename` (str): Path to the Excel file. Example: "output/report.xlsx"
 - `sheet_name` (str): Target worksheet name. Example: "Results"
 - `data` (list[list[Any]]): 2D array of data to write. Example: [["Name", "Score"], ["Alice", 95]]
@@ -93,6 +99,7 @@ Use this tool to write or update data in Excel files. This is essential for crea
 
 **Returns:**
 `dict[str, Any]` containing:
+
 - `status` (str): "success" or "error"
 - `cells_written` (int): Number of cells written
 - `message` (str): Operation result message
@@ -115,15 +122,18 @@ async def create_excel_workbook(filename: str) -> dict[str, Any]
 Use this tool when you need to programmatically generate a new Excel workbook file as the starting point for a reporting, data collection, or automation workflow. This is typically used to initialize new datasets or reports, ensuring that the file is created only within authorized directories for security and compliance.
 
 **When to use:**
+
 - When starting a new workflow that requires a fresh Excel file
 - When an automated agent needs to ensure the file is created securely
 - When the filename or path may be user-supplied and must be validated for safety
 
 **Args:**
+
 - `filename` (str): Name or path of the workbook to create. Example: "data/reporte_diario"
 
 **Returns:**
 `dict[str, Any]` containing:
+
 - `status` (str): "success" or "error"
 - `filename` (str): Full path to the created file
 - `message` (str): Operation result message
@@ -142,16 +152,19 @@ async def create_excel_worksheet(filename: str, sheet_name: str) -> dict[str, An
 Use this tool to organize or extend data in an existing Excel file by adding a new worksheet. This is ideal when you want to segment data by category, time period, or any logical grouping (e.g., adding a new month to a financial report or a new department to a tracking file).
 
 **When to use:**
+
 - When augmenting an existing Excel file with additional data sections
 - When automating workflows that require dynamic worksheet creation
 - When you need to ensure that sheet names remain unique and valid
 
 **Args:**
+
 - `filename` (str): Path to the existing Excel workbook. Example: "reports/monthly_report.xlsx"
 - `sheet_name` (str): Name of the new worksheet to add. Must be unique and valid per Excel rules
 
 **Returns:**
 `dict[str, Any]` containing:
+
 - `status` (str): "success" or "error"
 - `sheet_name` (str): Name of the created sheet
 - `message` (str): Operation result message
@@ -170,15 +183,18 @@ async def list_excel_documents() -> dict[str, Any]
 Use this tool to discover and enumerate all Excel files in a specific directory, which is helpful for inventory, audit, batch processing, or automated data discovery scenarios. The tool validates the directory for security, ensuring only authorized locations are scanned.
 
 **When to use:**
+
 - When an AI needs to present the user with available Excel files for further action
 - When preparing to process, analyze, or summarize multiple Excel documents in a folder
 - When auditing or verifying the presence and properties of .xlsx files in a given path
 
 **Args:**
+
 - None (uses configured directory)
 
 **Returns:**
 `dict[str, Any]` containing:
+
 - `status` (str): "success" or "error"
 - `count` (int): Number of Excel files found
 - `files` (list[dict]): List of file metadata with name, size, modified date
@@ -199,6 +215,7 @@ async def copy_worksheet(
 ```
 
 **Args:**
+
 - `filename` (str): Path to the Excel workbook
 - `source_sheet` (str): Name of the sheet to copy
 - `target_sheet` (str): Name for the new copy
@@ -217,6 +234,7 @@ async def delete_worksheet(filename: str, sheet_name: str) -> dict[str, Any]
 ```
 
 **Args:**
+
 - `filename` (str): Path to the Excel workbook
 - `sheet_name` (str): Name of the worksheet to delete
 
@@ -238,6 +256,7 @@ async def rename_worksheet(
 ```
 
 **Args:**
+
 - `filename` (str): Path to the Excel workbook
 - `old_name` (str): Current name of the sheet
 - `new_name` (str): New name for the sheet
@@ -259,11 +278,13 @@ async def get_workbook_metadata(
 ```
 
 **Args:**
+
 - `filename` (str): Path to the Excel file
 - `include_ranges` (bool): Include used ranges for each sheet (default: False)
 
 **Returns:**
 `dict[str, Any]` containing:
+
 - `status` (str): "success" or "error"
 - `filename` (str): Name of the file
 - `sheets` (list[str]): List of sheet names
@@ -305,6 +326,7 @@ async def format_range_excel(
 ```
 
 **Args:**
+
 - `filename` (str): Path to the Excel file
 - `sheet_name` (str): Target worksheet name
 - `start_cell` (str): Starting cell of range
@@ -343,6 +365,7 @@ async def merge_cells(
 ```
 
 **Args:**
+
 - `filename` (str): Path to the Excel file
 - `sheet_name` (str): Target worksheet name
 - `start_cell` (str): Starting cell of range
@@ -367,6 +390,7 @@ async def unmerge_cells(
 ```
 
 **Args:**
+
 - `filename` (str): Path to the Excel file
 - `sheet_name` (str): Target worksheet name
 - `start_cell` (str): Starting cell of merged range
@@ -394,6 +418,7 @@ async def copy_range(
 ```
 
 **Args:**
+
 - `filename` (str): Path to the Excel file
 - `sheet_name` (str): Source worksheet name
 - `source_start` (str): Starting cell of source range
@@ -422,6 +447,7 @@ async def delete_range(
 ```
 
 **Args:**
+
 - `filename` (str): Path to the Excel file
 - `sheet_name` (str): Worksheet name
 - `start_cell` (str): Starting cell of range
@@ -447,6 +473,7 @@ async def validate_excel_range(
 ```
 
 **Args:**
+
 - `filename` (str): Path to the Excel file
 - `sheet_name` (str): Worksheet name
 - `start_cell` (str): Starting cell to validate
@@ -454,6 +481,7 @@ async def validate_excel_range(
 
 **Returns:**
 `dict[str, Any]` containing:
+
 - `status` (str): "valid" or "error"
 - `is_valid` (bool): Whether the range is valid
 - `message` (str): Validation result message
@@ -481,12 +509,14 @@ async def apply_formula_excel(
 Use this tool when you need to add calculations to Excel files. This is essential for financial modeling, data analysis, or creating calculated fields. The tool supports standard Excel formulas and handles formula syntax validation.
 
 **When to use:**
+
 - When adding calculations to Excel reports
 - When creating computed columns or fields
 - When building financial or scientific models
 - When automating spreadsheet calculations
 
 **Args:**
+
 - `filename` (str): Path to the Excel file. Example: "financials/budget.xlsx"
 - `sheet_name` (str): Target worksheet name. Example: "Summary"
 - `cell` (str): Target cell reference. Example: "E2"
@@ -494,6 +524,7 @@ Use this tool when you need to add calculations to Excel files. This is essentia
 
 **Returns:**
 `dict[str, Any]` containing:
+
 - `status` (str): "success" or "error"
 - `cell` (str): Cell where formula was applied
 - `formula` (str): The formula that was applied
@@ -518,12 +549,14 @@ async def validate_formula_syntax(
 Use this tool to verify that a formula is valid before applying it. This helps prevent errors in automated workflows and ensures formula correctness. The tool checks syntax and references without modifying the spreadsheet.
 
 **When to use:**
+
 - Before applying formulas in automated workflows
 - When users want to verify formula correctness
 - When debugging formula issues
 - When validating user-provided formulas
 
 **Args:**
+
 - `filename` (str): Path to the Excel file
 - `sheet_name` (str): Target worksheet name
 - `cell` (str): Cell where formula would be placed
@@ -531,6 +564,7 @@ Use this tool to verify that a formula is valid before applying it. This helps p
 
 **Returns:**
 `dict[str, Any]` containing:
+
 - `status` (str): "valid", "invalid", or "error"
 - `is_valid` (bool): Whether the formula is valid
 - `message` (str): Validation result and any error details
@@ -562,12 +596,14 @@ async def create_chart(
 Use this tool to generate visualizations from Excel data. Charts help users understand data trends, comparisons, and distributions at a glance. The tool supports various chart types for different data visualization needs.
 
 **When to use:**
+
 - When creating data visualizations from spreadsheet data
 - When generating reports with charts
 - When analyzing trends or patterns in data
 - When presenting data in a more digestible visual format
 
 **Args:**
+
 - `filename` (str): Path to the Excel file. Example: "sales/report.xlsx"
 - `sheet_name` (str): Target worksheet name. Example: "Data"
 - `data_range` (str): Range containing chart data. Example: "A1:B10"
@@ -579,6 +615,7 @@ Use this tool to generate visualizations from Excel data. Charts help users unde
 
 **Returns:**
 `dict[str, Any]` containing:
+
 - `status` (str): "success" or "error"
 - `chart_type` (str): Type of chart created
 - `message` (str): Operation result message
@@ -605,12 +642,14 @@ async def create_pivot_table(
 Use this tool to create pivot tables for data analysis and summarization. Pivot tables are powerful for summarizing large datasets, performing aggregations, and gaining insights from structured data.
 
 **When to use:**
+
 - When summarizing large datasets
 - When performing group-by aggregations
 - When creating cross-tabulations
 - When analyzing data from multiple perspectives
 
 **Args:**
+
 - `filename` (str): Path to the Excel file
 - `sheet_name` (str): Name of the sheet for pivot table
 - `data_range` (str): Source data range. Example: "A1:D100"
@@ -621,6 +660,7 @@ Use this tool to create pivot tables for data analysis and summarization. Pivot 
 
 **Returns:**
 `dict[str, Any]` containing:
+
 - `status` (str): "success" or "error"
 - `pivot_table_name` (str): Name of created pivot table
 - `message` (str): Operation result message
@@ -632,6 +672,7 @@ Use this tool to create pivot tables for data analysis and summarization. Pivot 
 All MCP tool functions return `dict[str, Any]` with consistent structure:
 
 **Success Response:**
+
 ```json
 {
   "status": "success",
@@ -641,6 +682,7 @@ All MCP tool functions return `dict[str, Any]` with consistent structure:
 ```
 
 **Error Response:**
+
 ```json
 {
   "status": "error",

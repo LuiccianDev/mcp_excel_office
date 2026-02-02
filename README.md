@@ -92,6 +92,7 @@ The MCP Excel Office Server supports three deployment modes:
 Best for: Integrated DXT ecosystem users who want seamless configuration management.
 
 1. **Package the project**:
+
    ```bash
    dxt pack
    ```
@@ -170,7 +171,7 @@ See [Docker.md](./Docker.md) for details and advanced configuration options.
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `DIRECTORY` | Base directory for file operations | Yes |
-| `LOG_LEVEL` | Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL) | No (default: INFO) |
+| `LOG_LEVEL` | Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL) | No (default: INFO) | 
 
 ### Configuration Validation
 
@@ -194,10 +195,12 @@ Configuration is loaded with the following precedence (highest to lowest):
 The MCP Excel Office Server provides **19 tools** organized into 5 categories:
 
 ### Content Tools (2)
+
 - `read_data_from_excel` - Read data from Excel worksheets
 - `write_data_to_excel` - Write data to Excel worksheets
 
 ### Excel Tools (5)
+
 - `create_excel_workbook` - Create new Excel workbooks
 - `create_excel_worksheet` - Add worksheets to workbooks
 - `list_excel_documents` - List Excel files in directory
@@ -207,6 +210,7 @@ The MCP Excel Office Server provides **19 tools** organized into 5 categories:
 - `get_workbook_metadata` - Get workbook information
 
 ### Format Tools (6)
+
 - `format_range_excel` - Apply comprehensive cell formatting
 - `merge_cells` - Merge cell ranges
 - `unmerge_cells` - Unmerge cell ranges
@@ -215,10 +219,12 @@ The MCP Excel Office Server provides **19 tools** organized into 5 categories:
 - `validate_excel_range` - Validate range references
 
 ### Formula Tools (2)
+
 - `apply_formula_excel` - Apply Excel formulas
 - `validate_formula_syntax` - Validate formula syntax
 
 ### Graphics Tools (2)
+
 - `create_chart` - Create charts
 - `create_pivot_table` - Create pivot tables
 
@@ -314,6 +320,7 @@ uv run pytest -v --tb=short
 ### Test Coverage
 
 The test suite includes coverage reporting. Coverage reports are generated in:
+
 - `htmlcov/` - HTML coverage report
 - `coverage.xml` - XML coverage report
 
