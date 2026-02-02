@@ -200,7 +200,8 @@ def apply_formula(
         raise ValidationError(f"Invalid cell reference: {cell}")
 
     # Load workbook and validate sheet
-    workbook = get_or_create_workbook(str(filename))
+    # Use data_only=False to preserve existing formulas when modifying the file
+    workbook = get_or_create_workbook(str(filename), data_only=False)
     if sheet_name not in workbook.sheetnames:
         raise ValidationError(f"Sheet '{sheet_name}' not found")
     worksheet = workbook[sheet_name]

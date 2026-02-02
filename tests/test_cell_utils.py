@@ -116,7 +116,9 @@ class TestValidateCellReference:
         """Test validating cell with special characters."""
         invalid_refs = ["A-1", "A_1", "A+1", "@1", "#REF!", "$A$1"]
         for ref in invalid_refs:
-            assert validate_cell_reference(ref) is False, f"Expected {ref} to be invalid"
+            assert validate_cell_reference(ref) is False, (
+                f"Expected {ref} to be invalid"
+            )
 
     def test_invalid_only_letters(self) -> None:
         """Test validating reference with only letters."""
@@ -132,7 +134,9 @@ class TestValidateCellReference:
         """Test validating various invalid formats."""
         invalid_refs = ["A1B2", "12A34", "A 1", "A-1:C2"]
         for ref in invalid_refs:
-            assert validate_cell_reference(ref) is False, f"Expected {ref} to be invalid"
+            assert validate_cell_reference(ref) is False, (
+                f"Expected {ref} to be invalid"
+            )
 
     def test_valid_lowercase(self) -> None:
         """Test validating lowercase cell reference."""

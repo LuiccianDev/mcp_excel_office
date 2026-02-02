@@ -71,7 +71,9 @@ def create_workbook(
 
 
 # * Get or create workbook
-def get_or_create_workbook(filename: str | Path, read_only: bool = False) -> Workbook:
+def get_or_create_workbook(
+    filename: str | Path, read_only: bool = False, data_only: bool = False
+) -> Workbook:
     """Get an existing workbook or create a new one if it doesn't exist.
 
     This is a convenience function that combines loading an existing workbook
@@ -82,6 +84,9 @@ def get_or_create_workbook(filename: str | Path, read_only: bool = False) -> Wor
         read_only: If True, opens the workbook in read-only mode.
             If the file doesn't exist and read_only is True, raises FileNotFoundError.
             Defaults to False.
+        data_only: If True, loads only data values without formulas.
+            Use False when you need to preserve or modify formulas.
+            Defaults to False.
 
     Returns:
         Workbook: An openpyxl Workbook object.
@@ -90,7 +95,7 @@ def get_or_create_workbook(filename: str | Path, read_only: bool = False) -> Wor
 
     # If file exists, load it
     if path.exists():
-        return _load_existing_workbook(path, read_only)
+        return _load_existing_workbook(path, read_only, data_only)
 
     # If file doesn't exist and read_only is True, raise error
     if read_only:
@@ -300,7 +305,9 @@ def _create_initial_worksheet(workbook: Workbook, sheet_name: str) -> None:
         raise WorksheetError(f"Failed to create initial worksheet: {e}") from e
 
 
-def _load_existing_workbook(filepath: Path, read_only: bool = False) -> Workbook:
+def _load_existing_workbook(
+    filepath: Path, read_only: bool = False, data_only: bool = False
+) -> Workbook:
     """Load an existing Excel workbook from the specified path.
 
     This is a helper function that wraps openpyxl's load_workbook with
@@ -310,12 +317,15 @@ def _load_existing_workbook(filepath: Path, read_only: bool = False) -> Workbook
         filepath: Path to the Excel file to load.
         read_only: Whether to open the workbook in read-only mode.
             This is more memory-efficient for large files. Defaults to False.
+        data_only: Whether to load only data values, not formulas.
+            When True, formulas are discarded and only calculated values are loaded.
+            When False, formulas are preserved. Defaults to False.
 
     Returns:
         Workbook: An openpyxl Workbook object.
     """
     try:
-        return load_workbook(str(filepath), read_only=read_only, data_only=True)
+        return load_workbook(str(filepath), read_only=read_only, data_only=data_only)
     except PermissionError as e:
         raise PermissionError(f"Cannot access {filepath}: {e}") from e
     except Exception as e:

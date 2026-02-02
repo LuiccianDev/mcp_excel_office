@@ -56,7 +56,11 @@ class TestCreateWorkbook:
             create_workbook(test_file, "Invalid/Name")
 
         error_msg = str(exc_info.value)
-        assert "character" in error_msg or "cannot contain" in error_msg or "Failed to create" in error_msg
+        assert (
+            "character" in error_msg
+            or "cannot contain" in error_msg
+            or "Failed to create" in error_msg
+        )
 
 
 class TestGetOrCreateWorkbook:
@@ -234,7 +238,13 @@ class TestValidateSheetName:
 
     def test_invalid_characters(self) -> None:
         """Test sheet name with invalid characters raises error."""
-        invalid_names = ["Sheet/Name", "Sheet\\Name", "Sheet*Name", "Sheet?Name", "Sheet:Name"]
+        invalid_names = [
+            "Sheet/Name",
+            "Sheet\\Name",
+            "Sheet*Name",
+            "Sheet?Name",
+            "Sheet:Name",
+        ]
 
         for name in invalid_names:
             with pytest.raises(ValidationError):

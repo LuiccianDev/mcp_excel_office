@@ -281,6 +281,12 @@ def write_data(
         except Exception as e:
             raise SheetError(f"Failed to access worksheet: {str(e)}") from e
 
+        # Validate worksheet type
+        if ws is None:
+            raise SheetError("No active worksheet available")
+        if not isinstance(ws, Worksheet):
+            raise SheetError(f"Expected Worksheet, got {type(ws).__name__}")
+
         # Parse start cell
         try:
             start_row, start_col = _parse_cell_reference(start_cell)

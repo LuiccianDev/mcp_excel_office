@@ -43,9 +43,6 @@ def run_server() -> FastMCP:
 
         # Log configuration summary
         logger.info("Server configuration:")
-        logger.info(
-            f"  Database: {'Configured' if config.database_config.is_configured else 'Not configured'}"
-        )
         logger.info(f"  File Directory: {config.file_config.directory}")
         logger.info(f"  Log Level: {config.log_level}")
 

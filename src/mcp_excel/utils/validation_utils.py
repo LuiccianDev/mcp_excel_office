@@ -41,60 +41,17 @@ def validate_formula_in_cell_operation(
                         "status": "error",
                         "message": f"Invalid cell reference in formula: {ref}",
                     }
-        # Compare with current cell content
-        sheet = wb[sheet_name]
-        cell_obj = sheet[cell]
-        current_formula = cell_obj.value
-        if isinstance(current_formula, str) and current_formula.startswith("="):
-            if formula.startswith("="):
-                if current_formula != formula:
-                    return {
-                        "status": "error",
-                        "message": "Formula is valid but doesn't match cell content",
-                        "valid": True,
-                        "matches": False,
-                        "cell": cell,
-                        "provided_formula": formula,
-                        "current_formula": current_formula,
-                    }
-            else:
-                if current_formula != f"={formula}":
-                    return {
-                        "status": "error",
-                        "message": "Formula is valid but doesn't match cell content",
-                        "valid": True,
-                        "matches": False,
-                        "cell": cell,
-                        "provided_formula": formula,
-                        "current_formula": current_formula,
-                    }
-                else:
-                    return {
-                        "status": "success",
-                        "message": "Formula is valid and matches cell content",
-                        "valid": True,
-                        "matches": True,
-                        "cell": cell,
-                        "formula": formula,
-                    }
-        else:
-            return {
-                "status": "error",
-                "message": "Formula is valid but cell contains no formula",
-                "valid": True,
-                "matches": False,
-                "cell": cell,
-                "provided_formula": formula,
-                "current_content": str(current_formula) if current_formula else "",
-            }
+
+        # All validations passed - formula is valid and can be applied
+        return {
+            "status": "success",
+            "message": f"Formula '{formula}' is valid and ready to be applied to cell {cell}",
+            "valid": True,
+            "cell": cell,
+            "formula": formula,
+        }
     except Exception as e:
         return {"status": "error", "message": str(e)}
-
-    # Safety fallback if no previous return was executed using mypy or ruff
-    return {
-        "status": "error",
-        "message": "Unknown error: no result was returned from the function logic",
-    }
 
 
 def validate_range_in_sheet_operation(
