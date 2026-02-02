@@ -89,7 +89,6 @@ async def test_apply_formula_success(tmp_path) -> None:
         ) as mock_validate,
         patch("mcp_excel.tools.formulas_excel_tools.apply_formula") as mock_apply,
     ):
-
         # Simulate successful validation
         mock_validate.return_value = {
             "status": "success",
@@ -146,7 +145,6 @@ async def test_apply_formula_validation_failure(tmp_path) -> None:
     with patch(
         "mcp_excel.tools.formulas_excel_tools.validate_formula_in_cell_operation"
     ) as mock_validate:
-
         # Simulate successful validation
         mock_validate.return_value = {
             "status": "error",

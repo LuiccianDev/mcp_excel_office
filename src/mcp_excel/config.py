@@ -37,51 +37,6 @@ class ConfigurationError(Exception):
     pass
 
 
-class DatabaseConfig(BaseModel):
-    """Database configuration with validation."""
-
-    connection_string: str | None = Field(
-        None, description="PostgreSQL connection string"
-    )
-
-    @field_validator("connection_string")  # type: ignore[misc]
-    @classmethod
-    def validate_connection_string(
-        cls: type[DatabaseConfig], v: str | None
-    ) -> str | None:
-        """Validate PostgreSQL connection string format."""
-        if v is None:
-            return v
-
-        if not isinstance(v, str):
-            raise ValueError("Connection string must be a string")
-
-        if not (v.startswith("postgresql://") or v.startswith("postgres://")):
-            raise ValueError(
-                "Connection string must start with 'postgresql://' or 'postgres://'"
-            )
-
-        # Basic validation of connection string components
-        try:
-            if "@" not in v or "/" not in v.split("@")[1]:
-                raise ValueError(
-                    "Connection string appears to be malformed. "
-                    "Expected format: postgresql://user:password@host:port/database"
-                )
-        except (IndexError, AttributeError):
-            raise ValueError(  # noqa: B904
-                "Connection string appears to be malformed. "
-                "Expected format: postgresql://user:password@host:port/database"
-            )
-
-        return v
-
-    @property
-    def is_configured(self) -> bool:
-        """Check if database is properly configured."""
-        return self.connection_string is not None
-
-
 class FileConfig(BaseModel):
     """File operations configuration with validation."""
 
@@ -170,13 +125,6 @@ class MCPExcelConfig(BaseSettings):
     4. Default values (lowest priority)
     """
 
-    # Database configuration
-    postgres_connection_string: str | None = Field(
-        None,
-        env="POSTGRES_CONNECTION_STRING",
-        description="PostgreSQL connection string",
-    )
-
     # File operations configuration
     directory: str = Field(
         default="./documents",
@@ -216,7 +164,7 @@ class MCPExcelConfig(BaseSettings):
         Process ${user_config.*} variable substitution.
 
         This supports DXT and traditional MCP deployments where configuration
-        can include variables like ${user_config.postgres_connection_string}.
+        can include variables like ${user_config.*}.
         """
         processed = {}
         user_config_pattern = re.compile(r"\$\{user_config\.([^}]+)\}")
@@ -268,47 +216,12 @@ class MCPExcelConfig(BaseSettings):
     def _validate_configuration(self) -> None:
         """Validate the complete configuration."""
         try:
-            # Validate database configuration only if it's properly resolved
-            if (
-                self.postgres_connection_string
-                and not self.postgres_connection_string.startswith("${")
-            ):
-                db_config = DatabaseConfig(  # noqa: F841
-                    connection_string=self.postgres_connection_string
-                )
-                logger.info("Database configuration validated successfully")
-            elif (
-                self.postgres_connection_string
-                and self.postgres_connection_string.startswith("${")
-            ):
-                logger.warning(
-                    f"Database configuration contains unresolved variable: {self.postgres_connection_string}"
-                )
-                logger.info(
-                    "Database tools will be unavailable due to unresolved configuration"
-                )
-            else:
-                logger.info(
-                    "No database configuration provided - database tools will be unavailable"
-                )
-
             # Validate file configuration
             file_config = FileConfig(directory=self.directory)
             logger.info(f"File operations directory validated: {file_config.directory}")
 
         except Exception as e:
             raise ConfigurationError(f"Configuration validation failed: {e}") from e
-
-    @property
-    def database_config(self) -> DatabaseConfig:
-        """Get validated database configuration."""
-        # Return empty config if connection string is unresolved or None
-        if (
-            not self.postgres_connection_string
-            or self.postgres_connection_string.startswith("${")
-        ):
-            return DatabaseConfig(connection_string=None)
-        return DatabaseConfig(connection_string=self.postgres_connection_string)
 
     @property
     def file_config(self) -> FileConfig:
@@ -318,10 +231,8 @@ class MCPExcelConfig(BaseSettings):
     def get_effective_config(self) -> dict[str, Any]:
         """Get the effective configuration as a dictionary."""
         return {
-            "postgres_connection_string": self.postgres_connection_string,
             "directory": self.directory,
             "log_level": self.log_level,
-            "database_configured": self.database_config.is_configured,
         }
 
 
@@ -369,10 +280,6 @@ class ConfigurationManager:
             raise ConfigurationError("Configuration not loaded")
         return self._config
 
-    def get_postgres_connection_string(self) -> str | None:
-        """Get PostgreSQL connection string with validation."""
-        return self.config.postgres_connection_string
-
     def get_directory(self) -> str:
         """Get base directory for file operations with validation."""
         return self.config.directory
@@ -380,10 +287,6 @@ class ConfigurationManager:
     def get_log_level(self) -> str:
         """Get logging level."""
         return self.config.log_level
-
-    def is_database_configured(self) -> bool:
-        """Check if database is properly configured."""
-        return self.config.database_config.is_configured
 
     def validate_file_path(self, file_path: str) -> str:
         """
@@ -422,7 +325,6 @@ class ConfigurationManager:
 
         summary = [
             "MCP Excel Office Server Configuration:",
-            f"  Database: {'Configured' if config['database_configured'] else 'Not configured'}",
             f"  File Directory: {config['directory']}",
             f"  Log Level: {config['log_level']}",
         ]
@@ -439,19 +341,9 @@ def get_config() -> MCPExcelConfig:
     return config_manager.config
 
 
-def get_postgres_connection_string() -> str | None:
-    """Get PostgreSQL connection string."""
-    return config_manager.get_postgres_connection_string()
-
-
 def get_directory() -> str:
     """Get base directory for file operations."""
     return config_manager.get_directory()
-
-
-def is_database_configured() -> bool:
-    """Check if database is configured."""
-    return config_manager.is_database_configured()
 
 
 def validate_file_path(file_path: str) -> str:
@@ -464,36 +356,6 @@ def reload_configuration(**overrides: Any) -> None:
     config_manager.reload_configuration(**overrides)
 
 
-def test_database_connection() -> tuple[bool, str | None]:
-    """
-    Test database connection with current configuration.
-
-    Returns:
-        tuple[bool, Optional[str]]: (success, error_message)
-    """
-    try:
-        connection_string = get_postgres_connection_string()
-        if not connection_string:
-            return False, "No database connection string configured"
-
-        # Import here to avoid circular imports and optional dependency
-        try:
-            import psycopg2
-        except ImportError:
-            return False, "psycopg2 not installed - database functionality unavailable"
-
-        # Test connection
-        try:
-            conn = psycopg2.connect(connection_string)
-            conn.close()
-            return True, None
-        except psycopg2.Error as e:
-            return False, f"Database connection failed: {e}"
-
-    except Exception as e:
-        return False, f"Database connection test failed: {e}"
-
-
 def validate_configuration() -> list[str]:
     """
     Validate current configuration and return list of issues.
@@ -504,14 +366,6 @@ def validate_configuration() -> list[str]:
     issues = []
 
     try:
-        config = get_config()
-
-        # Validate database configuration
-        if config.postgres_connection_string:
-            success, error = test_database_connection()
-            if not success:
-                issues.append(f"Database configuration issue: {error}")
-
         # Validate file directory
         try:
             directory = get_directory()
@@ -524,9 +378,9 @@ def validate_configuration() -> list[str]:
 
         # Validate log level
         valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-        if config.log_level not in valid_levels:
+        if config_manager.config.log_level not in valid_levels:
             issues.append(
-                f"Invalid log level: {config.log_level}. Must be one of: {', '.join(valid_levels)}"
+                f"Invalid log level: {config_manager.config.log_level}. Must be one of: {', '.join(valid_levels)}"
             )
 
     except Exception as e:

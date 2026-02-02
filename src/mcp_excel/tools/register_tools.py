@@ -20,7 +20,6 @@ from mcp.server.fastmcp import FastMCP
 
 from mcp_excel.tools import (
     content_tools,
-    db_tools,
     excel_tools,
     format_tools,
     formulas_excel_tools,
@@ -29,36 +28,6 @@ from mcp_excel.tools import (
 
 
 logger = logging.getLogger(__name__)
-
-
-def register_database_tools(mcp: FastMCP) -> list[str]:
-    """
-    Register database integration tools with the MCP server.
-
-    Args:
-        mcp: FastMCP server instance
-
-    Returns:
-        List[str]: Names of successfully registered database tools
-
-    Raises:
-        RuntimeError: If tool registration fails
-    """
-    tools = []
-    try:
-        # Database tools for PostgreSQL integration
-        mcp.tool()(db_tools.fetch_and_insert_db_to_excel)
-        tools.append("fetch_and_insert_db_to_excel")
-
-        mcp.tool()(db_tools.insert_calculated_data_to_db)
-        tools.append("insert_calculated_data_to_db")
-
-        logger.info(f"Registered {len(tools)} database tools")
-        return tools
-
-    except Exception as e:
-        logger.error(f"Failed to register database tools: {e}")
-        raise RuntimeError(f"Database tool registration failed: {e}") from e
 
 
 def register_content_tools(mcp: FastMCP) -> list[str]:
@@ -256,7 +225,6 @@ def register_all_tools(mcp: FastMCP) -> None:
 
     registered_tools = []
     registration_functions = [
-        ("Database", register_database_tools),
         ("Content", register_content_tools),
         ("Excel", register_excel_tools),
         ("Format", register_format_tools),

@@ -109,6 +109,15 @@ class FormulaError(CoreError):
     pass
 
 
+# * --- Pivot Table Exceptions ---
+class PivotError(CoreError):
+    """Raised when pivot table operations fail.
+    Used in core/pivot.py
+    """
+
+    pass
+
+
 # * --- Validation Exceptions ---
 class ValidationError(CoreError):
     """Raised when validation fails.

@@ -9,7 +9,6 @@ This document provides detailed information about all available tools in the Exc
 - [Data Operations](#data-operations)
 - [Formatting Operations](#formatting-operations)
 - [Formula Operations](#formula-operations)
-- [Database Operations](#database-operations)
 - [Chart and Pivot Table Operations](#chart-and-pivot-table-operations)
 
 ## Workbook Operations
@@ -284,46 +283,6 @@ validate_formula_syntax(filename: str, sheet_name: str, cell: str, formula: str)
 - `cell`: Target cell reference
 - `formula`: Excel formula to validate
 - Returns: Dictionary with validation result and details
-
-## Database Operations
-
-### fetch_and_insert_db_to_excel
-
-Fetch data from a database and insert it into an Excel worksheet.
-
-```python
-fetch_and_insert_db_to_excel(
-    query: str,
-    filename: str,
-    sheet_name: str,
-    connection_string: str | None = None
-) -> dict[str, Any]
-```
-
-- `query`: SQL SELECT query to fetch data
-- `filename`: Path to Excel file
-- `sheet_name`: Target worksheet name
-- `connection_string`: Database connection string (optional, uses environment variable if not provided)
-- Returns: Dictionary with operation status
-
-### insert_calculated_data_to_db
-
-Insert calculated data into a database table.
-
-```python
-insert_calculated_data_to_db(
-    table: str,
-    columns: list[str],
-    rows: list[tuple],
-    connection_string: str | None = None
-) -> dict[str, Any]
-```
-
-- `table`: Target database table name
-- `columns`: List of column names
-- `rows`: List of tuples containing row data
-- `connection_string`: Database connection string (optional, uses environment variable if not provided)
-- Returns: Dictionary with operation status
 
 ## Chart and Pivot Table Operations
 

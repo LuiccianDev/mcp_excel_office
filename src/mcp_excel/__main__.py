@@ -12,7 +12,6 @@ The module supports multiple execution modes:
 - Default behavior: Start MCP server when no command is specified
 """
 
-import asyncio
 import logging
 import os
 import sys
@@ -38,9 +37,7 @@ app = typer.Typer(
 )
 
 
-def validate_and_apply_configuration(
-    postgres: str | None = None, path: str | None = None
-) -> None:
+def validate_and_apply_configuration(path: str | None = None) -> None:
     """
     Validate and apply configuration from command-line arguments and environment variables.
 
@@ -49,7 +46,6 @@ def validate_and_apply_configuration(
     error handling and user feedback.
 
     Args:
-        postgres: PostgreSQL connection string override
         path: Directory path override
 
     Raises:
@@ -58,9 +54,6 @@ def validate_and_apply_configuration(
     try:
         # Prepare configuration overrides
         overrides = {}
-
-        if postgres is not None:
-            overrides["postgres_connection_string"] = postgres
 
         if path is not None:
             overrides["directory"] = path
@@ -72,8 +65,6 @@ def validate_and_apply_configuration(
         config = config_manager.config
 
         # Set environment variables for backward compatibility
-        if config.postgres_connection_string:
-            os.environ["POSTGRES_CONNECTION_STRING"] = config.postgres_connection_string
         if config.directory:
             os.environ["DIRECTORY"] = config.directory
 
@@ -91,13 +82,6 @@ def validate_and_apply_configuration(
 
 @app.command("server")  # type: ignore[misc]
 def run_mcp_server(
-    postgres: Annotated[
-        str | None,
-        typer.Option(
-            "--postgres",
-            help="PostgreSQL connection string (overrides POSTGRES_CONNECTION_STRING env var)",
-        ),
-    ] = None,
     path: Annotated[
         str | None,
         typer.Option(
@@ -114,19 +98,17 @@ def run_mcp_server(
     Command-line arguments take precedence over environment variables.
 
     Environment Variables:
-        POSTGRES_CONNECTION_STRING: PostgreSQL connection string for database operations
         DIRECTORY: Base directory for file operations (defaults to ./documents)
 
     Examples:
         python -m mcp_excel server
-        python -m mcp_excel server --postgres "postgresql://user:pass@localhost/db"
         python -m mcp_excel server --path "/path/to/excel/files"
     """
     try:
         logger.info("Initializing MCP Excel Office Server...")
 
         # Validate and apply configuration
-        validate_and_apply_configuration(postgres, path)
+        validate_and_apply_configuration(path)
 
         # Get validated configuration
         config = config_manager.config
@@ -134,14 +116,6 @@ def run_mcp_server(
         # Provide user feedback about configuration
         typer.echo("Starting MCP Excel Office Server...")
         typer.echo("Server Name: MCP Excel Office Server")
-
-        if config.database_config.is_configured:
-            typer.echo("Database: Configured (PostgreSQL)")
-            logger.info("PostgreSQL database configured")
-        else:
-            typer.echo("Database: Not configured (database tools will be unavailable)")
-            logger.info("No database configuration - database tools disabled")
-
         typer.echo(f"File operations directory: {config.file_config.directory}")
         logger.info(f"File operations directory: {config.file_config.directory}")
 
@@ -151,7 +125,7 @@ def run_mcp_server(
         # Start the MCP server with proper error handling
         try:
             server = run_server()
-            asyncio.run(server.run(transport="stdio"))
+            server.run(transport="stdio")
         except ConfigurationError as config_error:
             typer.echo(f"Configuration error: {config_error}", err=True)
             logger.error(f"MCP server configuration failed: {config_error}")

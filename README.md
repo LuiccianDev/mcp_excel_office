@@ -13,7 +13,7 @@
 
 ## 📖 Description
 
-A comprehensive MCP (Model Context Protocol) server that provides AI assistants with powerful Excel manipulation capabilities. This server enables programmatic creation, modification, and management of Excel files through standardized MCP tools, supporting data operations, formatting, formulas, charts, and PostgreSQL database integration.
+A comprehensive MCP (Model Context Protocol) server that provides AI assistants with powerful Excel manipulation capabilities. This server enables programmatic creation, modification, and management of Excel files through standardized MCP tools, supporting data operations, formatting, formulas, and charts.
 
 ## 📋 Table of Contents
 
@@ -36,7 +36,6 @@ A comprehensive MCP (Model Context Protocol) server that provides AI assistants 
 - **📊 Comprehensive Excel Operations**: Create, read, modify workbooks and worksheets with full data manipulation support
 - **🎨 Advanced Formatting**: Apply styles, fonts, colors, borders, and cell formatting with precision
 - **📈 Data Visualization**: Generate charts, pivot tables, and graphics programmatically
-- **🗄️ Database Integration**: Direct PostgreSQL integration for seamless data import/export
 - **⚡ Formula Support**: Apply and validate Excel formulas with error handling
 - **🔒 Security First**: File path validation, access control, and robust error handling
 - **🚀 Multiple Deployment Modes**: DXT package, traditional MCP server, or standalone CLI
@@ -107,7 +106,6 @@ The MCP Excel Office Server supports three deployment modes to fit different wor
 
 2. **Configuration**: The DXT package automatically handles dependencies and provides user-friendly configuration through the manifest.json:
    - `directory`: Base directory for file operations
-   - `postgres_connection_string`: PostgreSQL database connection (marked as sensitive)
 
 3. **Usage**: Once packaged, the tool integrates directly with DXT-compatible clients with automatic user configuration variable substitution.
 
@@ -137,8 +135,7 @@ The next steps is configuractiosn en mcp
       "command": "uv",
       "args": ["run", "mcp_excel"],
       "env": {
-        "DIRECTORY": "user/to/path/directory",
-        "POSTGRES_CONNECTION_STRING": "postgres_connection_string"
+        "DIRECTORY": "user/to/path/directory"
       }
     }
   }
@@ -154,8 +151,7 @@ The next steps is configuractiosn en mcp
       "command": "uv",
       "args": [
         "run", "-m", "mcp_excel",
-        "--path", "user/to/path/directory",
-        "--postgres", "postgres_connection_string"
+        "--path", "user/to/path/directory"
       ]
     }
   }
@@ -169,11 +165,10 @@ The next steps is configuractiosn en mcp
 ```bash
 # Run with environment variables
 export DIRECTORY="/path/to/your/files"
-export POSTGRES_CONNECTION_STRING="postgresql://user:pass@localhost/db"
 python -m mcp_excel
 
 # Or run with command-line arguments
-python -m mcp_excel --path "/path/to/files" --postgres "postgresql://user:pass@localhost/db"
+python -m mcp_excel --path "/path/to/files"
 
 # Using UV
 uv run mcp_excel_office --help
@@ -191,7 +186,6 @@ Para más detalles y opciones avanzadas de configuración con Docker, consulta e
 ### Environment Variables
 
 - **`DIRECTORY`**: Base directory for file operations (required for security)
-- **`POSTGRES_CONNECTION_STRING`**: PostgreSQL connection string for database operations (optional)
 
 ### Configuration Validation
 
@@ -199,12 +193,11 @@ The server validates all configuration on startup and provides clear error messa
 
 - Missing required environment variables
 - Invalid directory paths
-- Malformed database connection strings
 - File access permissions
 
 ## 📚 Available Tools
 
-Todas las herramientas disponibles para manipulación de Excel, operaciones de datos, formato, fórmulas, gráficos y base de datos están documentadas en detalle en el archivo [`TOOLS.md`](TOOLS.md). Consulta ese archivo para ver la lista completa de herramientas, sus parámetros y ejemplos de uso.
+Todas las herramientas disponibles para manipulación de Excel, operaciones de datos, formato, fórmulas y gráficos están documentadas en detalle en el archivo [`TOOLS.md`](TOOLS.md). Consulta ese archivo para ver la lista completa de herramientas, sus parámetros y ejemplos de uso.
 
 ## 🧩 Project Structure
 
@@ -220,8 +213,7 @@ mcp_excel_office/
 │   │   ├── excel_tools.py     # Basic workbook operations
 │   │   ├── format_tools.py    # Cell formatting and styling
 │   │   ├── formulas_excel_tools.py  # Formula operations
-│   │   ├── graphics_tools.py  # Charts and visualizations
-│   │   └── db_tools.py        # Database integration
+│   │   └── graphics_tools.py  # Charts and visualizations
 │   ├── core/                  # Core functionality
 │   └── utils/                 # Utility functions
 ├── tests/                     # Test suite
@@ -229,8 +221,7 @@ mcp_excel_office/
 │   ├── test_excel_tools.py    # Basic operations tests
 │   ├── test_format_tools.py   # Formatting tests
 │   ├── test_formulas_excel_tools.py  # Formula tests
-│   ├── test_graphics_tools.py # Graphics tests
-│   └── test_db_tools.py       # Database tests
+│   └── test_graphics_tools.py # Graphics tests
 ├── pyproject.toml             # Project configuration
 ├── manifest.json              # DXT package configuration
 ├── TOOLS.md                   # Detailed tool documentation

@@ -12,6 +12,7 @@ from mcp_excel.tools.exceptions import (
 )
 from mcp_excel.utils.file_utils import ensure_xlsx_extension
 from mcp_excel.utils.sheet_utils import (
+    copy_range_operation,
     copy_sheet,
     delete_range_operation,
     delete_sheet,
@@ -299,8 +300,6 @@ async def copy_range(
     filename = ensure_xlsx_extension(filename)
 
     try:
-        from src.mcp_excel.utils.sheet_utils import copy_range_operation
-
         result: dict[str, Any] = copy_range_operation(
             filename, sheet_name, source_start, source_end, target_start, target_sheet
         )

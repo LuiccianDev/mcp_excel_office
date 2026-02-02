@@ -24,7 +24,7 @@ class SheetError(ExcelMCPError):
 
 class DataError(ExcelMCPError):
     """Raised when data operations fail.
-    Used in tools/content_tools.py, tools/db_tools.py
+    Used in tools/content_tools.py
     """
 
     pass

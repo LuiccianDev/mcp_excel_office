@@ -4,6 +4,8 @@ This module provides functions to create, modify, and inspect Excel workbooks
 following the Model Context Protocol (MCP) standards.
 """
 
+from collections.abc import Generator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, TypedDict
 
@@ -13,6 +15,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from mcp_excel.core.exceptions import (
     SheetExistsError,
+    SheetNotFoundError,
     ValidationError,
     WorkbookError,
     WorksheetError,
@@ -355,3 +358,85 @@ def _get_worksheet_range(worksheet: Any) -> str | None:
     if worksheet.max_row > 0 and worksheet.max_column > 0:
         return f"A1:{get_column_letter(worksheet.max_column)}{worksheet.max_row}"
     return None
+
+
+# Context managers for resource management
+@contextmanager
+def managed_workbook(
+    filename: str | Path, read_only: bool = False, auto_save: bool = True
+) -> Generator[Workbook, None, None]:
+    """Context manager for workbooks with automatic resource management.
+
+    This context manager automatically handles opening, saving, and closing
+    workbooks, ensuring resources are always properly released even if
+    exceptions occur.
+
+    Args:
+        filename: Path to the Excel file
+        read_only: If True, opens in read-only mode
+        auto_save: If True (and not read_only), saves automatically on exit
+
+    Yields:
+        Workbook: openpyxl Workbook instance
+
+    Example:
+        with managed_workbook('file.xlsx') as wb:
+            ws = wb['Sheet1']
+            ws['A1'] = 'Data'
+        # File saved and closed automatically
+    """
+    wb = None
+    path = Path(filename).resolve()
+
+    try:
+        wb = get_or_create_workbook(path, read_only)
+        yield wb
+
+        if auto_save and not read_only:
+            wb.save(str(path))
+
+    except Exception:
+        # Re-raise exception after cleanup
+        raise
+    finally:
+        if wb:
+            wb.close()
+
+
+@contextmanager
+def managed_worksheet(
+    filename: str | Path, sheet_name: str, create_if_missing: bool = True
+) -> Generator[Worksheet, None, None]:
+    """Context manager for specific worksheets.
+
+    Provides automatic management of both the workbook and a specific
+    worksheet within it.
+
+    Args:
+        filename: Path to the Excel file
+        sheet_name: Name of the worksheet to access
+        create_if_missing: If True, creates sheet if it doesn't exist
+
+    Yields:
+        Worksheet: The requested worksheet
+
+    Raises:
+        SheetNotFoundError: If sheet doesn't exist and create_if_missing is False
+
+    Example:
+        with managed_worksheet('file.xlsx', 'Data') as ws:
+            ws['A1'] = 'Value'
+        # Changes saved automatically
+    """
+    with managed_workbook(filename, auto_save=True) as wb:
+        if sheet_name not in wb.sheetnames:
+            if create_if_missing:
+                ws = wb.create_sheet(sheet_name)
+            else:
+                raise SheetNotFoundError(
+                    f"Sheet '{sheet_name}' not found in {filename}"
+                )
+        else:
+            ws = wb[sheet_name]
+
+        yield ws

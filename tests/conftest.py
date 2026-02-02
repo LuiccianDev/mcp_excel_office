@@ -24,10 +24,7 @@ def test_config(tmp_path) -> Generator[ConfigurationManager, None, None]:
 
     try:
         # Set up test configuration using tmp_path
-        manager.reload_configuration(
-            directory=str(tmp_path),
-            log_level="INFO"
-        )
+        manager.reload_configuration(directory=str(tmp_path), log_level="INFO")
         yield manager
     finally:
         # Restore original configuration
@@ -53,7 +50,7 @@ def test_excel_file(tmp_path) -> str:
         ["Name", "Age", "City"],
         ["Alice", 30, "New York"],
         ["Bob", 25, "Los Angeles"],
-        ["Charlie", 35, "Chicago"]
+        ["Charlie", 35, "Chicago"],
     ]
 
     for row_idx, row_data in enumerate(test_data, 1):
@@ -86,7 +83,7 @@ def test_workbook_file(tmp_path) -> str:
         ["Product", "Sales", "Region"],
         ["Widget A", 100, "North"],
         ["Widget B", 150, "South"],
-        ["Widget C", 200, "East"]
+        ["Widget C", 200, "East"],
     ]
 
     for row_idx, row_data in enumerate(data, 1):

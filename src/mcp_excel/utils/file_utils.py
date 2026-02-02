@@ -23,30 +23,47 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 # Get allowed directories from configuration system
 def _get_allowed_directories() -> list[str]:
-    """Get the list of allowed directories from configuration system."""
+    """Get the list of allowed directories from configuration system.
+
+    Uses Path.resolve() to properly resolve symlinks and normalize paths
+    for enhanced security against path traversal attacks.
+    """
     try:
         directory = get_directory()
-        return [os.path.abspath(directory)]
+        # Use resolve() instead of abspath() to resolve symlinks
+        return [str(Path(directory).resolve())]
     except Exception:
         # Fallback to environment variable for backward compatibility
         allowed_dirs_str = os.environ.get("DIRECTORY", "./documents")
         allowed_dirs = [dir.strip() for dir in allowed_dirs_str.split(",")]
-        return [os.path.abspath(dir) for dir in allowed_dirs]
+        # Use resolve() instead of abspath() to resolve symlinks
+        return [str(Path(dir).resolve()) for dir in allowed_dirs]
 
 
 # Check if the given file path is within allowed directories
 def _is_path_in_allowed_directories(file_path: str) -> tuple[bool, str | None]:
-    """Check if the given file path is within allowed directories."""
+    """Check if the given file path is within allowed directories.
+
+    Uses Path.resolve() to properly resolve symlinks before validation,
+    preventing symlink-based path traversal attacks.
+    """
     allowed_dirs = _get_allowed_directories()
-    abs_path = os.path.abspath(file_path)
+    # Use resolve() instead of abspath() to resolve symlinks and normalize path
+    resolved_path = Path(file_path).resolve()
 
     for allowed_dir in allowed_dirs:
-        if os.path.commonpath([allowed_dir, abs_path]) == allowed_dir:
+        allowed_path = Path(allowed_dir).resolve()
+        try:
+            # Check if resolved path is relative to allowed directory
+            resolved_path.relative_to(allowed_path)
             return True, None
+        except ValueError:
+            # Path is not within this allowed directory
+            continue
 
     return (
         False,
-        f"Path '{file_path}' is not in allowed directories: {', '.join(allowed_dirs)}",
+        f"Path '{file_path}' (resolved: '{resolved_path}') is not in allowed directories: {', '.join(allowed_dirs)}",
     )
 
 
@@ -90,6 +107,7 @@ def _check_file_writeable(filename: str) -> tuple[bool, str | None]:
     - File doesn't exist: checks if parent directory is writeable
     - File exists: checks if file is writeable
     - Handles permission and I/O errors gracefully
+    - Uses Path.resolve() to properly handle symlinks
 
     Args:
         filename: Absolute or relative path to the file
@@ -100,31 +118,31 @@ def _check_file_writeable(filename: str) -> tuple[bool, str | None]:
             - error_message: Empty string if successful, otherwise contains error details
     """
     try:
-        # Normalize and get absolute path
-        abs_path = os.path.abspath(filename)
-        parent_dir = os.path.dirname(abs_path) or "."
+        # Normalize and get resolved path (resolves symlinks)
+        resolved_path = Path(filename).resolve()
+        parent_dir = resolved_path.parent
 
         # Check if path is in allowed directories
-        is_allowed, error = _is_path_in_allowed_directories(abs_path)
+        is_allowed, error = _is_path_in_allowed_directories(str(resolved_path))
         if not is_allowed:
             return False, error
 
         # If file exists, check write permissions
-        if os.path.exists(abs_path):
-            if os.path.isdir(abs_path):
-                return False, f"Path is a directory: {abs_path}"
-            if not os.access(abs_path, os.W_OK):
-                return False, f"Permission denied: {abs_path}"
+        if resolved_path.exists():
+            if resolved_path.is_dir():
+                return False, f"Path is a directory: {resolved_path}"
+            if not os.access(resolved_path, os.W_OK):
+                return False, f"Permission denied: {resolved_path}"
         # If file doesn't exist, check parent directory
         else:
-            if not os.path.exists(parent_dir):
+            if not parent_dir.exists():
                 return False, f"Directory does not exist: {parent_dir}"
             if not os.access(parent_dir, os.W_OK):
                 return False, f"Directory not writeable: {parent_dir}"
 
         # Test actual write operation
         try:
-            with open(abs_path, "a"):
+            with open(resolved_path, "a"):
                 pass
             return True, ""
         except OSError as e:
@@ -268,7 +286,8 @@ def validate_file_access(param: str = "filename") -> Callable[[F], F]:
                         "message": f"'{param}' parameter not found in function arguments",
                     }
 
-                file_path: str = os.path.abspath(bound.arguments[param])
+                # Use resolve() instead of abspath() to resolve symlinks and normalize path
+                file_path: str = str(Path(bound.arguments[param]).resolve())
 
                 # Validate allowed directory
                 is_allowed, dir_error = _is_path_in_allowed_directories(file_path)
