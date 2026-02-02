@@ -171,7 +171,7 @@ See [Docker.md](./Docker.md) for details and advanced configuration options.
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `DIRECTORY` | Base directory for file operations | Yes |
-| `LOG_LEVEL` | Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL) | No (default: INFO) | 
+| `LOG_LEVEL` | Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL) | No (default: INFO) |
 
 ### Configuration Validation
 
