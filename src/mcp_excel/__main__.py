@@ -80,7 +80,7 @@ def validate_and_apply_configuration(path: str | None = None) -> None:
         raise typer.Exit(1) from e
 
 
-@app.command("server")  # type: ignore[misc]
+@app.command("server")
 def run_mcp_server(
     path: Annotated[
         str | None,
@@ -148,7 +148,7 @@ def run_mcp_server(
         sys.exit(1)
 
 
-@app.command("list")  # type: ignore[misc]
+@app.command("list")
 def list_excel_files(
     path: Annotated[
         str | None,

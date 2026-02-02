@@ -1,6 +1,6 @@
 from typing import Any
 
-from mcp_excel.core.formatting import format_range
+from mcp_excel.core.formatting import BorderStyle, format_range
 from mcp_excel.core.workbook import get_workbook_info
 
 # Import exceptions
@@ -33,7 +33,7 @@ async def format_range_excel(
     font_size: int | None = None,
     font_color: str | None = None,
     bg_color: str | None = None,
-    border_style: str | None = None,
+    border_style: BorderStyle = None,
     border_color: str | None = None,
     number_format: str | None = None,
     alignment: str | None = None,

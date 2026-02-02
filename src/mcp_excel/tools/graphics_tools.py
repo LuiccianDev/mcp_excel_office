@@ -8,8 +8,7 @@ from mcp_excel.exceptions.exception_tools import ChartError, PivotError, Validat
 from mcp_excel.utils.file_utils import ensure_xlsx_extension, validate_file_access
 
 
-# NOTE: Do not remove the type: ignore[misc] comment on the next line, otherwise remove disallow_untyped_decorators = true from pyproject.toml
-@validate_file_access("filename")  # type: ignore[misc]
+@validate_file_access("filename")
 async def create_chart(
     filename: str,
     sheet_name: str,
@@ -58,8 +57,7 @@ async def create_chart(
         return {"error": f"Failed to create chart: {str(e)}"}
 
 
-# NOTE: Do not remove the type: ignore[misc] comment on the next line, otherwise remove disallow_untyped_decorators = true from pyproject.toml
-@validate_file_access("filename")  # type: ignore[misc]
+@validate_file_access("filename")
 async def create_pivot_table(
     filename: str,
     sheet_name: str,

@@ -78,11 +78,9 @@ if __name__ == "__main__":
     This allows the server to be started with: python -m mcp_excel.server
     """
     try:
-        import asyncio
-
         logger.info("Starting MCP Excel Office Server...")
         server = run_server()
-        asyncio.run(server.run(transport="stdio"))
+        server.run(transport="stdio")
 
     except KeyboardInterrupt:
         logger.info("Server stopped by user")

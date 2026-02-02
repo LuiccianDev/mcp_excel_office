@@ -50,7 +50,7 @@ class FileConfig(BaseModel):
         default=[".xlsx"], description="Allowed file extensions"
     )
 
-    @field_validator("directory")  # type: ignore[misc]
+    @field_validator("directory")
     @classmethod
     def validate_directory(cls: type[FileConfig], v: str) -> str:
         """Validate and normalize directory path."""
@@ -98,7 +98,7 @@ class FileConfig(BaseModel):
 
         return str(path)
 
-    @field_validator("allowed_extensions")  # type: ignore[misc]
+    @field_validator("allowed_extensions")
     @classmethod
     def validate_extensions(cls: type[FileConfig], v: list[str]) -> list[str]:
         """Validate file extensions."""
@@ -128,14 +128,12 @@ class MCPExcelConfig(BaseSettings):
     # File operations configuration
     directory: str = Field(
         default="./documents",
-        env="DIRECTORY",
         description="Base directory for file operations",
     )
 
     # Logging configuration
     log_level: str = Field(
         default="INFO",
-        env="LOG_LEVEL",
         pattern="^(DEBUG|INFO|WARNING|ERROR|CRITICAL)$",
         description="Logging level",
     )
@@ -201,11 +199,11 @@ class MCPExcelConfig(BaseSettings):
                             f"Could not resolve user_config.{config_key}, using fallback: {fallback_dir}"
                         )
                     else:
-                        # Set to None if no environment variable found
-                        processed[key] = None  # type: ignore[assignment]
+                        # Skip this key to let Pydantic use its default value
                         logger.warning(
-                            f"Could not resolve user_config.{config_key}, setting to None"
+                            f"Could not resolve user_config.{config_key}, using default value"
                         )
+                        continue
                 else:
                     processed[key] = value
             else:

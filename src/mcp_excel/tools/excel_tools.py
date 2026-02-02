@@ -32,7 +32,7 @@ async def create_excel_workbook(filename: str) -> dict[str, Any]:
         On failure, returns an error dictionary with a descriptive message.
     """
     try:
-        filename = resolve_safe_path(filename)
+        filename = str(resolve_safe_path(filename))
         result: dict[str, Any] = create_workbook(filename)
         return result
     except WorkbookError as e:
@@ -42,8 +42,7 @@ async def create_excel_workbook(filename: str) -> dict[str, Any]:
 
 
 # * Create new worksheet in workbook
-# NOTE: Do not remove the type: ignore[misc] comment on the next line, otherwise remove disallow_untyped_decorators = true from pyproject.toml
-@validate_file_access("filename")  # type: ignore[misc]
+@validate_file_access("filename")
 async def create_excel_worksheet(filename: str, sheet_name: str) -> dict[str, Any]:
     """
     Add a new worksheet to an existing Excel workbook.
