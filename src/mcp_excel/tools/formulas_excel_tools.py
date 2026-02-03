@@ -2,7 +2,7 @@
 from typing import Any
 
 from mcp_excel.core.calculations import apply_formula
-from mcp_excel.tools.exceptions import CalculationError, ValidationError
+from mcp_excel.exceptions.exception_tools import CalculationError, ValidationError
 from mcp_excel.utils.file_utils import ensure_xlsx_extension, validate_file_access
 
 # Import core/tools/utils with new structure
@@ -41,8 +41,7 @@ async def validate_formula_syntax(
         return {"status": "error", "message": f"Failed to validate formula: {str(e)}"}
 
 
-# NOTE: Do not remove the type: ignore[misc] comment on the next line, otherwise remove disallow_untyped_decorators = true from pyproject.toml
-@validate_file_access("filename")  # type: ignore[misc]
+@validate_file_access("filename")
 async def apply_formula_excel(
     filename: str,
     sheet_name: str,

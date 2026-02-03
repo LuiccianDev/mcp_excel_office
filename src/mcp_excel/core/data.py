@@ -14,7 +14,7 @@ from openpyxl.worksheet._read_only import ReadOnlyWorksheet
 from openpyxl.worksheet._write_only import WriteOnlyWorksheet
 from openpyxl.worksheet.worksheet import Worksheet
 
-from mcp_excel.core.exceptions import (
+from mcp_excel.exceptions.exception_core import (
     DataError,
     InvalidCellReferenceError,
     InvalidDataError,
@@ -280,6 +280,12 @@ def write_data(
                     ws = wb.create_sheet(sheet_name)
         except Exception as e:
             raise SheetError(f"Failed to access worksheet: {str(e)}") from e
+
+        # Validate worksheet type
+        if ws is None:
+            raise SheetError("No active worksheet available")
+        if not isinstance(ws, Worksheet):
+            raise SheetError(f"Expected Worksheet, got {type(ws).__name__}")
 
         # Parse start cell
         try:

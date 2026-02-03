@@ -1,5 +1,5 @@
 {
-  "dxt_version": "0.1",
+  "manifest_version": "0.2",
   "name": "mcp_excel",
   "version": "1.0.0",
   "description": "Excel server for processing Excel files",
@@ -26,8 +26,7 @@
         "src/mcp_excel/server.py"
       ],
       "env": {
-        "DIRECTORY": "${user_config.directory}",
-        "POSTGRES_CONNECTION_STRING": "${user_config.postgres_connection_string}"
+        "DIRECTORY": "${user_config.directory}"
       }
     }
   },
@@ -39,13 +38,6 @@
       "description": "Directory for files",
       "required": true,
       "sensitive": false
-    },
-    "postgres_connection_string": {
-      "type": "string",
-      "title": "PostgreSQL Connection String",
-      "description": "Connection string for PostgreSQL database",
-      "required": false,
-      "sensitive": true
     }
   },
   "keywords": [

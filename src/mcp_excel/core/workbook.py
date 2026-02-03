@@ -4,47 +4,27 @@ This module provides functions to create, modify, and inspect Excel workbooks
 following the Model Context Protocol (MCP) standards.
 """
 
+from collections.abc import Generator
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import Any
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
-from mcp_excel.core.exceptions import (
+from mcp_excel.exceptions.exception_core import (
     SheetExistsError,
+    SheetNotFoundError,
     ValidationError,
     WorkbookError,
     WorksheetError,
 )
 
 
-# Type aliases
-WorkbookResult = dict[str, Any]  # Type alias for workbook operation results
-SheetName = str  # Type alias for Excel sheet names
-
-
-class WorkbookInfo(TypedDict, total=False):
-    """Type definition for workbook information dictionary.
-
-    Attributes:
-        filename: Name of the Excel file.
-        sheets: List of sheet names in the workbook.
-        size: Size of the file in bytes.
-        modified: Timestamp of last modification (seconds since epoch).
-        used_ranges: Optional dictionary mapping sheet names to their used ranges.
-    """
-
-    filename: str
-    sheets: list[SheetName]
-    size: int
-    modified: float
-    used_ranges: dict[SheetName, str] | None
-
-
 def create_workbook(
     filename: str | Path, sheet_name: str = "Sheet1", data_only: bool = False
-) -> WorkbookResult:
+) -> dict[str, Any]:
     """Create a new Excel workbook with an optional custom sheet name.
 
     Args:
@@ -91,7 +71,9 @@ def create_workbook(
 
 
 # * Get or create workbook
-def get_or_create_workbook(filename: str | Path, read_only: bool = False) -> Workbook:
+def get_or_create_workbook(
+    filename: str | Path, read_only: bool = False, data_only: bool = False
+) -> Workbook:
     """Get an existing workbook or create a new one if it doesn't exist.
 
     This is a convenience function that combines loading an existing workbook
@@ -102,6 +84,9 @@ def get_or_create_workbook(filename: str | Path, read_only: bool = False) -> Wor
         read_only: If True, opens the workbook in read-only mode.
             If the file doesn't exist and read_only is True, raises FileNotFoundError.
             Defaults to False.
+        data_only: If True, loads only data values without formulas.
+            Use False when you need to preserve or modify formulas.
+            Defaults to False.
 
     Returns:
         Workbook: An openpyxl Workbook object.
@@ -110,7 +95,7 @@ def get_or_create_workbook(filename: str | Path, read_only: bool = False) -> Wor
 
     # If file exists, load it
     if path.exists():
-        return _load_existing_workbook(path, read_only)
+        return _load_existing_workbook(path, read_only, data_only)
 
     # If file doesn't exist and read_only is True, raise error
     if read_only:
@@ -152,7 +137,7 @@ def _create_new_sheet(workbook: Workbook, sheet_name: str) -> None:
 
 
 # * Create sheet
-def create_sheet(filename: str | Path, sheet_name: str) -> WorkbookResult:
+def create_sheet(filename: str | Path, sheet_name: str) -> dict[str, Any]:
     """Create a new sheet in the specified Excel workbook.
 
     If the specified file doesn't exist, a new workbook will be created with the sheet.
@@ -210,7 +195,7 @@ def create_sheet(filename: str | Path, sheet_name: str) -> WorkbookResult:
 # * Get workbook info
 def get_workbook_info(
     filename: str | Path, include_ranges: bool = False
-) -> WorkbookInfo:
+) -> dict[str, Any]:
     """Get metadata about an Excel workbook including sheets, file info, and ranges.
 
     This function provides comprehensive information about an Excel workbook,
@@ -243,7 +228,7 @@ def get_workbook_info(
         wb = load_workbook(str(path), read_only=True, data_only=True)
 
         # Basic file information
-        info: WorkbookInfo = {
+        info: dict[str, Any] = {
             "filename": path.name,
             "sheets": wb.sheetnames,
             "size": path.stat().st_size,
@@ -320,7 +305,9 @@ def _create_initial_worksheet(workbook: Workbook, sheet_name: str) -> None:
         raise WorksheetError(f"Failed to create initial worksheet: {e}") from e
 
 
-def _load_existing_workbook(filepath: Path, read_only: bool = False) -> Workbook:
+def _load_existing_workbook(
+    filepath: Path, read_only: bool = False, data_only: bool = False
+) -> Workbook:
     """Load an existing Excel workbook from the specified path.
 
     This is a helper function that wraps openpyxl's load_workbook with
@@ -330,12 +317,15 @@ def _load_existing_workbook(filepath: Path, read_only: bool = False) -> Workbook
         filepath: Path to the Excel file to load.
         read_only: Whether to open the workbook in read-only mode.
             This is more memory-efficient for large files. Defaults to False.
+        data_only: Whether to load only data values, not formulas.
+            When True, formulas are discarded and only calculated values are loaded.
+            When False, formulas are preserved. Defaults to False.
 
     Returns:
         Workbook: An openpyxl Workbook object.
     """
     try:
-        return load_workbook(str(filepath), read_only=read_only, data_only=True)
+        return load_workbook(str(filepath), read_only=read_only, data_only=data_only)
     except PermissionError as e:
         raise PermissionError(f"Cannot access {filepath}: {e}") from e
     except Exception as e:
@@ -355,3 +345,85 @@ def _get_worksheet_range(worksheet: Any) -> str | None:
     if worksheet.max_row > 0 and worksheet.max_column > 0:
         return f"A1:{get_column_letter(worksheet.max_column)}{worksheet.max_row}"
     return None
+
+
+# Context managers for resource management
+@contextmanager
+def managed_workbook(
+    filename: str | Path, read_only: bool = False, auto_save: bool = True
+) -> Generator[Workbook, None, None]:
+    """Context manager for workbooks with automatic resource management.
+
+    This context manager automatically handles opening, saving, and closing
+    workbooks, ensuring resources are always properly released even if
+    exceptions occur.
+
+    Args:
+        filename: Path to the Excel file
+        read_only: If True, opens in read-only mode
+        auto_save: If True (and not read_only), saves automatically on exit
+
+    Yields:
+        Workbook: openpyxl Workbook instance
+
+    Example:
+        with managed_workbook('file.xlsx') as wb:
+            ws = wb['Sheet1']
+            ws['A1'] = 'Data'
+        # File saved and closed automatically
+    """
+    wb = None
+    path = Path(filename).resolve()
+
+    try:
+        wb = get_or_create_workbook(path, read_only)
+        yield wb
+
+        if auto_save and not read_only:
+            wb.save(str(path))
+
+    except Exception:
+        # Re-raise exception after cleanup
+        raise
+    finally:
+        if wb:
+            wb.close()
+
+
+@contextmanager
+def managed_worksheet(
+    filename: str | Path, sheet_name: str, create_if_missing: bool = True
+) -> Generator[Worksheet, None, None]:
+    """Context manager for specific worksheets.
+
+    Provides automatic management of both the workbook and a specific
+    worksheet within it.
+
+    Args:
+        filename: Path to the Excel file
+        sheet_name: Name of the worksheet to access
+        create_if_missing: If True, creates sheet if it doesn't exist
+
+    Yields:
+        Worksheet: The requested worksheet
+
+    Raises:
+        SheetNotFoundError: If sheet doesn't exist and create_if_missing is False
+
+    Example:
+        with managed_worksheet('file.xlsx', 'Data') as ws:
+            ws['A1'] = 'Value'
+        # Changes saved automatically
+    """
+    with managed_workbook(filename, auto_save=True) as wb:
+        if sheet_name not in wb.sheetnames:
+            if create_if_missing:
+                ws = wb.create_sheet(sheet_name)
+            else:
+                raise SheetNotFoundError(
+                    f"Sheet '{sheet_name}' not found in {filename}"
+                )
+        else:
+            ws = wb[sheet_name]
+
+        yield ws

@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
-from mcp_excel.tools.exceptions import ValidationError, WorkbookError
+from mcp_excel.exceptions.exception_tools import ValidationError, WorkbookError
 from mcp_excel.tools import excel_tools
 from mcp_excel.config import ConfigurationManager
 
@@ -85,9 +85,7 @@ async def test_create_excel_worksheet_validation_error(tmp_path) -> None:
     ):
         mock_create_sheet.side_effect = ValidationError("Invalid sheet name")
 
-        result = await excel_tools.create_excel_worksheet(
-            test_file, "Invalid/Sheet"
-        )
+        result = await excel_tools.create_excel_worksheet(test_file, "Invalid/Sheet")
 
         assert result["status"] == "error"
         assert "Invalid sheet name" in result["message"]
@@ -101,7 +99,9 @@ async def test_list_excel_documents_success() -> None:
         {"name": "test2.xlsx", "size": 2048, "modified": "2023-01-02"},
     ]
 
-    with patch("mcp_excel.tools.excel_tools.list_excel_files_in_directory") as mock_list:
+    with patch(
+        "mcp_excel.tools.excel_tools.list_excel_files_in_directory"
+    ) as mock_list:
         mock_list.return_value = test_files
 
         result = await excel_tools.list_excel_documents()
@@ -114,7 +114,9 @@ async def test_list_excel_documents_success() -> None:
 @pytest.mark.asyncio  # type: ignore[misc]
 async def test_list_excel_documents_error() -> None:
     """Test error handling when listing documents."""
-    with patch("mcp_excel.tools.excel_tools.list_excel_files_in_directory") as mock_list:
+    with patch(
+        "mcp_excel.tools.excel_tools.list_excel_files_in_directory"
+    ) as mock_list:
         mock_list.side_effect = Exception("Access denied")
 
         result = await excel_tools.list_excel_documents()

@@ -1,10 +1,10 @@
 from typing import Any
 
-from mcp_excel.core.formatting import format_range
+from mcp_excel.core.formatting import BorderStyle, format_range
 from mcp_excel.core.workbook import get_workbook_info
 
 # Import exceptions
-from mcp_excel.tools.exceptions import (
+from mcp_excel.exceptions.exception_tools import (
     FormattingError,
     SheetError,
     ValidationError,
@@ -12,6 +12,7 @@ from mcp_excel.tools.exceptions import (
 )
 from mcp_excel.utils.file_utils import ensure_xlsx_extension
 from mcp_excel.utils.sheet_utils import (
+    copy_range_operation,
     copy_sheet,
     delete_range_operation,
     delete_sheet,
@@ -32,7 +33,7 @@ async def format_range_excel(
     font_size: int | None = None,
     font_color: str | None = None,
     bg_color: str | None = None,
-    border_style: str | None = None,
+    border_style: BorderStyle = None,
     border_color: str | None = None,
     number_format: str | None = None,
     alignment: str | None = None,
@@ -299,8 +300,6 @@ async def copy_range(
     filename = ensure_xlsx_extension(filename)
 
     try:
-        from src.mcp_excel.utils.sheet_utils import copy_range_operation
-
         result: dict[str, Any] = copy_range_operation(
             filename, sheet_name, source_start, source_end, target_start, target_sheet
         )

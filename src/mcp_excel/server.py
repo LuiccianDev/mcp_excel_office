@@ -43,9 +43,6 @@ def run_server() -> FastMCP:
 
         # Log configuration summary
         logger.info("Server configuration:")
-        logger.info(
-            f"  Database: {'Configured' if config.database_config.is_configured else 'Not configured'}"
-        )
         logger.info(f"  File Directory: {config.file_config.directory}")
         logger.info(f"  Log Level: {config.log_level}")
 
@@ -81,11 +78,9 @@ if __name__ == "__main__":
     This allows the server to be started with: python -m mcp_excel.server
     """
     try:
-        import asyncio
-
         logger.info("Starting MCP Excel Office Server...")
         server = run_server()
-        asyncio.run(server.run(transport="stdio"))
+        server.run(transport="stdio")
 
     except KeyboardInterrupt:
         logger.info("Server stopped by user")

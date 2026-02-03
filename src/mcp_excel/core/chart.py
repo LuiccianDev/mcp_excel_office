@@ -88,6 +88,15 @@ def create_chart_in_sheet(
             start_row, start_col, end_row, end_col = parse_cell_range(
                 start_cell, end_cell
             )
+            if None in (start_row, start_col, end_row, end_col):
+                return {
+                    "status": "error",
+                    "message": "Failed to parse cell range",
+                }
+            assert start_row is not None
+            assert start_col is not None
+            assert end_row is not None
+            assert end_col is not None
         except ValueError as e:
             return {
                 "status": "error",

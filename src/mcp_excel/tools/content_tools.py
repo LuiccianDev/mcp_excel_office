@@ -1,12 +1,11 @@
 from typing import Any
 
 from mcp_excel.core.data import read_excel_range
-from mcp_excel.tools.exceptions import DataError, ValidationError
+from mcp_excel.exceptions.exception_tools import DataError, ValidationError
 from mcp_excel.utils.file_utils import ensure_xlsx_extension, validate_file_access
 
 
-# NOTE: Do not remove the type: ignore[misc] comment on the next line, otherwise remove disallow_untyped_decorators = true from pyproject.toml
-@validate_file_access("filename")  # type: ignore[misc]
+@validate_file_access("filename")
 async def read_data_from_excel(
     filename: str,
     sheet_name: str,
@@ -88,8 +87,7 @@ async def read_data_from_excel(
         }
 
 
-# NOTE: Do not remove the type: ignore[misc] comment on the next line, otherwise remove disallow_untyped_decorators = true from pyproject.toml
-@validate_file_access("filename")  # type: ignore[misc]
+@validate_file_access("filename")
 async def write_data_to_excel(
     filename: str,
     sheet_name: str,

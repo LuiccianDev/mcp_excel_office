@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
-from mcp_excel.tools.exceptions import ChartError, PivotError, ValidationError
+from mcp_excel.exceptions.exception_tools import ChartError, PivotError, ValidationError
 from mcp_excel.tools import graphics_tools
 from mcp_excel.config import ConfigurationManager
 

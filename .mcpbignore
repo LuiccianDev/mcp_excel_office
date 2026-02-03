@@ -120,7 +120,6 @@ coverage.xml
 .ruff_cache/
 dmypy.json
 htmlcov/
-manifest.json
 
 # Virtual Environment
 .env
@@ -139,6 +138,11 @@ venv/
 
 # Windows shortcuts
 *.lnk
+opencode.json
+Dockerfile
+.dockerignore
+Docker.md
+
 
 # Project specific (add any project-specific patterns below)
 # Project specific (add any project-specific patterns below)

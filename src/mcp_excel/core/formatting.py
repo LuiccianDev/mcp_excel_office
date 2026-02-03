@@ -83,7 +83,8 @@ def format_range(
     if end_cell and not validate_cell_reference(end_cell):
         return {"status": "error", "message": f"Invalid end cell reference: {end_cell}"}
     try:
-        wb = get_or_create_workbook(filename)
+        # Use data_only=False to preserve existing formulas when applying formatting
+        wb = get_or_create_workbook(filename, data_only=False)
         if sheet_name not in wb.sheetnames:
             return {"status": "error", "message": f"Sheet '{sheet_name}' not found"}
         sheet = wb[sheet_name]

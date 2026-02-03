@@ -28,14 +28,12 @@ To launch the container and allow communication via standard input/output (`stdi
 docker run --rm -i \
   -v /path/to/your/documents:/documents \
   -e MCP_ALLOWED_DIRECTORIES="/documents" \
-  -e POSTGRES_CONNECTION_STRING"="postgresql://username:password@localhost:5432/database" \
   mcp-excel-server
 ```
 
 - `-i`: Allows the container to accept communication via stdio.
 - `-v`: Mounts the folder with Excel documents. **Change `/path/to/your/documents` to the path where your files are located**.
 - `-e MCP_ALLOWED_DIRECTORIES`: Restricts access to the mounted folder for greater security.
-- `-e POSTGRES_CONNECTION_STRING`: Restricts access to the PostgreSQL database for greater security.
 
 ---
 
@@ -45,14 +43,13 @@ For Claude Desktop (or any MCP-compatible client via stdio) to automatically lau
 
 ```json
 {
-  "mcp-word": {
+  "mcp-excel": {
     "command": "docker",
     "args": [
       "run", "--rm", "-i",
       "-v", "/path/to/your/documents:/documents",
       "--name", "mcp-excel",
       "-e", "MCP_ALLOWED_DIRECTORIES=/documents",
-      "-e", "POSTGRES_CONNECTION_STRING=postgresql://username:password@localhost:5432/database",
       "mcp-excel-server"
     ],
     "type": "stdio"
@@ -77,7 +74,6 @@ For Claude Desktop (or any MCP-compatible client via stdio) to automatically lau
 ## 5. **Recommendations and Security**
 
 - Use the environment variable `MCP_ALLOWED_DIRECTORIES` to restrict access only to the necessary folder.
-- Use the environment variable `POSTGRES_CONNECTION_STRING` to restrict access to the PostgreSQL database.
 - Share only the required volumes.
 - Check the permissions of shared files.
 - There is no need to open firewall ports or configure networks.
